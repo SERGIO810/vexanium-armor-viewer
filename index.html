@@ -250,6 +250,15 @@
         .controls-section::-webkit-scrollbar-thumb:hover {
             background: #00d9ff;
         }
+
+        footer {
+            background: rgba(15, 10, 26, 0.9);
+            border-top: 1px solid #6b21a8;
+            padding: 15px;
+            text-align: center;
+            font-size: 11px;
+            color: #6b21a8;
+        }
     </style>
 </head>
 <body>
@@ -325,6 +334,10 @@
         </div>
     </div>
 
+    <footer>
+        <p>Vexanium Armor Viewer v1.0 | Powered by Three.js & skinview3d | © 2026</p>
+    </footer>
+
     <script>
         // Initialize skinview3d
         const canvas = document.getElementById('skinViewer');
@@ -347,7 +360,7 @@
                 reader.onload = function(event) {
                     layer1Texture = event.target.result;
                     applyTextures();
-                    updateStatus('Camada 1 carregada com sucesso!', 'success');
+                    updateStatus('✓ Layer 1 carregada', 'success');
                 };
                 reader.readAsDataURL(file);
             }
@@ -360,81 +373,63 @@
                 reader.onload = function(event) {
                     layer2Texture = event.target.result;
                     applyTextures();
-                    updateStatus('Camada 2 carregada com sucesso!', 'success');
+                    updateStatus('✓ Layer 2 carregada', 'success');
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        // Apply textures to viewer
         function applyTextures() {
             if (layer1Texture) {
-                const img = new Image();
-                img.onload = function() {
-                    const canvas = document.createElement('canvas');
-                    canvas.width = 64;
-                    canvas.height = 32;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, 64, 32);
-                    skinViewer.loadSkin(canvas.toDataURL());
-                };
-                img.src = layer1Texture;
+                skinViewer.loadSkin(layer1Texture);
+            }
+            if (layer2Texture) {
+                skinViewer.loadCape(layer2Texture);
             }
         }
 
-        // Auto-rotate control
+        // Auto rotate
         document.getElementById('autoRotate').addEventListener('change', function(e) {
-            skinViewer.autoRotate = e.target.checked;
+            skinViewer.controls.autoRotate = e.target.checked;
         });
 
-        // Rotation speed control
-        document.getElementById('rotationSpeed').addEventListener('input', function(e) {
-            skinViewer.autoRotateSpeed = parseFloat(e.target.value);
+        // Rotation speed
+        document.getElementById('rotationSpeed').addEventListener('change', function(e) {
+            skinViewer.controls.autoRotateSpeed = parseFloat(e.target.value);
         });
 
         // Zoom control
-        document.getElementById('zoomControl').addEventListener('input', function(e) {
-            skinViewer.camera.position.z = 10 / parseFloat(e.target.value);
+        document.getElementById('zoomControl').addEventListener('change', function(e) {
+            const zoom = parseFloat(e.target.value);
+            skinViewer.camera.position.z = 60 / zoom;
         });
 
-        // Set view angle
+        // View presets
         function setView(angle) {
-            const radians = (angle * Math.PI) / 180;
-            skinViewer.camera.position.x = Math.sin(radians) * 10;
-            skinViewer.camera.position.z = Math.cos(radians) * 10;
-            skinViewer.camera.lookAt(0, 0, 0);
+            skinViewer.playerObject.rotation.y = (angle * Math.PI) / 180;
         }
 
         // Reset viewer
         function resetViewer() {
-            skinViewer.autoRotate = true;
-            skinViewer.autoRotateSpeed = 3;
+            skinViewer.playerObject.rotation.y = 0;
+            skinViewer.camera.position.z = 60;
             document.getElementById('autoRotate').checked = true;
             document.getElementById('rotationSpeed').value = 3;
             document.getElementById('zoomControl').value = 1;
-            skinViewer.camera.position.set(0, 0, 10);
+            skinViewer.controls.autoRotate = true;
             updateStatus('Visualizador resetado', 'success');
         }
 
-        // Update status message
+        // Update status
         function updateStatus(message, type = 'info') {
             const statusEl = document.getElementById('status');
             statusEl.textContent = message;
             statusEl.className = 'status ' + type;
         }
 
-        // Handle window resize
-        window.addEventListener('resize', function() {
-            const width = canvas.offsetWidth;
-            const height = canvas.offsetHeight;
-            skinViewer.width = width;
-            skinViewer.height = height;
-        });
-
-        // Initial setup
-        skinViewer.autoRotate = true;
-        skinViewer.autoRotateSpeed = 3;
-        updateStatus('✓ Visualizador pronto! Carregue as texturas acima.', 'success');
+        // Initialize
+        skinViewer.controls.autoRotate = true;
+        skinViewer.controls.autoRotateSpeed = 3;
     </script>
 </body>
 </html>
