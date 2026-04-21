@@ -267,7 +267,7 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAL IA LORE CORRIGIDA -->
+    <!-- MODAL IA LORE -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
@@ -343,7 +343,7 @@ STATUS DA ARMADURA (VEXANIUM):
                     📐 Exibir Molde UV
                 </label>
 
-                <!-- TEXTO DO AVISO COM ID RESTAURADO -->
+                <!-- TEXTO DO AVISO COM ID PARA A FUNÇÃO showModal() ACESSAR SEGURO -->
                 <div style="margin-top:auto; font-size:10px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
                     <p><b>Aviso:</b> Está a editar a <span id="hint-layer-name" style="color:var(--calib-accent); font-weight:bold;">Camada 1</span>. Preencha apenas os quadrados correspondentes.</p>
                 </div>
@@ -488,7 +488,6 @@ STATUS DA ARMADURA (VEXANIUM):
     let nextPieceId = 1;
     let manualSelection = null; 
 
-    // BUG 1 & 2 RESOLVIDOS AQUI: Função de abertura segura
     function abrirFatiadorLivre() {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         
@@ -511,6 +510,7 @@ STATUS DA ARMADURA (VEXANIUM):
         showModal('slicer-modal');
         
         originalImageObj.onload = () => {
+            // PROPORÇÃO 2:1 DO MINECRAFT
             wsCanvas.width = 1024;
             wsCanvas.height = 512;
             offscreenCanvas.width = 1024;
@@ -978,12 +978,12 @@ STATUS DA ARMADURA (VEXANIUM):
             renderFatiador();
         } 
         else if (currentTool === 'slice') {
-            let rectW = pos.x - startX;
-            let rectH = pos.y - startY;
-            let rx = Math.floor(rectW < 0 ? startX + rectW : startX);
-            let ry = Math.floor(rectH < 0 ? startY + rectH : startY);
-            let rw = Math.floor(Math.abs(rectW));
-            let rh = Math.floor(Math.abs(rectH));
+            currentRectW = pos.x - startX;
+            currentRectH = pos.y - startY;
+            let rx = Math.floor(currentRectW < 0 ? startX + currentRectW : startX);
+            let ry = Math.floor(currentRectH < 0 ? startY + currentRectH : startY);
+            let rw = Math.floor(Math.abs(currentRectW));
+            let rh = Math.floor(Math.abs(currentRectH));
             
             manualSelection = {x: rx, y: ry, w: rw, h: rh};
             renderFatiador();
@@ -1024,7 +1024,6 @@ STATUS DA ARMADURA (VEXANIUM):
         }
     });
 
-    // BUG 3 RESOLVIDO AQUI: L1 e L2 agora combinam-se sempre num canvas final!
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
@@ -1045,9 +1044,11 @@ STATUS DA ARMADURA (VEXANIUM):
         
         if (currentEditingLayer === 1) {
             finalImageL1 = finalArmaduraBase64;
+            skinViewer.loadSkin(finalImageL1);
             statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!";
         } else {
             finalImageL2 = finalArmaduraBase64;
+            skinViewer.loadCape(finalImageL2); 
             statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) ATUALIZADA!";
         }
         
@@ -1055,7 +1056,7 @@ STATUS DA ARMADURA (VEXANIUM):
         closeModal('slicer-modal');
     }
 
-    // Sistema que combina inteligentemente as camadas para formar uma única Skin de Armadura 64x32 nativa
+    // SISTEMA DE PREVIEW INTELIGENTE (Combina a Layer 1 e Layer 2 para exibir no 3D)
     function atualizarPreview3D() {
         const previewCanvas = document.createElement('canvas');
         previewCanvas.width = 1024;
@@ -1100,22 +1101,20 @@ STATUS DA ARMADURA (VEXANIUM):
     }
 
     // ============================================================================
-    // CONTROLES DE INTERFACE E UPLOADS (A Função de Modal Seguro)
+    // CONTROLES DE INTERFACE E UPLOADS (A Função de Modal Seguro Atualizada)
     // ============================================================================
-    function showModal(modalId, title, initialText) {
+    // A SUA FUNÇÃO CORRIGIDA ESTÁ AQUI - FLEXBOX PROTEGIDO E DYNAMIC SELECTORS
+    function showModal(modalId, title, message) {
         const modal = document.getElementById(modalId);
         if (!modal) return;
         
-        modal.style.display = 'block';
+        const titleEl = modal.querySelector('h3');
+        const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
         
-        if (title) {
-            let titleEl = document.querySelector(`#${modalId} h3`);
-            if (titleEl) titleEl.innerHTML = title;
-        }
-        if (initialText) {
-            let textEl = document.getElementById('ai-response-text');
-            if (textEl) textEl.innerText = initialText;
-        }
+        if (titleEl && title) titleEl.innerText = title;
+        if (textEl && message) textEl.innerText = message;
+        
+        modal.style.display = 'flex';
     }
 
     function closeModal(modalId) { 
