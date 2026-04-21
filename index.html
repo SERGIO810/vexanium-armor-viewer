@@ -27,6 +27,7 @@
             --calib-accent: #ffaa00;
             --warning: #ff3333;
             --success: #00ffaa;
+            --uplink-accent: #00e5ff;
         }
 
         body, html { 
@@ -97,6 +98,8 @@
         .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
         .btn-recon { border-color: var(--ai-accent); color: var(--ai-accent); border-bottom-color: var(--ai-accent); }
         .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
+        .btn-uplink { border-color: var(--uplink-accent); color: var(--uplink-accent); border-bottom-color: var(--uplink-accent); background: rgba(0, 229, 255, 0.05); }
+        .btn-uplink:hover { border-color: #fff; color: #fff; background: rgba(0, 229, 255, 0.2); }
         
         .btn-save { border-color: var(--success); color: var(--success); border-bottom-color: var(--success); background: rgba(0, 255, 170, 0.05); }
         .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 255, 170, 0.2); }
@@ -228,6 +231,18 @@
         .slice-status { font-size: 10px; opacity: 0.5; }
         .slice-status.done { color: #00ff00; opacity: 1; font-weight: 800; }
 
+        /* UPLINK IN-GAME MODAL */
+        #ingame-modal { width: 85%; max-width: 600px; border-color: var(--uplink-accent); }
+        #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
+
+        #jarvis-telemetry-input {
+            width: 100%; height: 180px; background: #050505; color: var(--uplink-accent);
+            border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px;
+            resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+        #jarvis-telemetry-input:focus { outline: none; border-color: var(--uplink-accent); }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
@@ -258,6 +273,24 @@
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
+    </div>
+
+    <!-- MODAL UPLINK IN-GAME -->
+    <div id="ingame-modal" class="modal" style="display: none;">
+        <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole abaixo o Relatório Tático gerado pelo <b>JarvisBrain.java</b> no seu mod para que a IA processe a telemetria real da sua partida atual.</p>
+        
+        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR:
+- Integridade Física: 20/20
+- Nível Nutricional: 20/20
+STATUS DA ARMADURA (VEXANIUM):
+- Biomassa Disponível: 85/100
+..."></textarea>
+
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="close-modal" style="background: transparent;" onclick="closeModal('ingame-modal')">Cancelar Conexão</button>
+            <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
+        </div>
     </div>
 
     <!-- ESTÚDIO DE ARRASTAR E SOLTAR -->
@@ -339,8 +372,10 @@
 
         <div class="divider"></div>
 
-        <!-- MÓDULOS DE EDIÇÃO E SALVAMENTO DUPLOS -->
+        <!-- MÓDULOS DE EDIÇÃO, IA E SALVAMENTO -->
         <div class="btn-group">
+            <button class="btn btn-uplink" onclick="document.getElementById('ingame-modal').style.display='flex'" title="Importar dados do Minecraft">📡 UPLINK IN-GAME</button>
+            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Narrativa">✨ LORE</button>
             <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Abre o Estúdio para recortar a camada ativa.">✂️ ESTÚDIO DE MONTAGEM</button>
             
             <div class="divider" id="div-export"></div>
@@ -575,7 +610,6 @@
         };
 
         if (currentEditingLayer === 1) {
-            // Cabeça
             drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
             drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
             drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
@@ -583,7 +617,6 @@
             drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
             drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
 
-            // Peito
             drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
             drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
             drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
@@ -591,7 +624,6 @@
             drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
             drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
 
-            // Braços
             drawBox(44, 16, 4, 4, "#32cd32", "TOP");
             drawBox(48, 16, 4, 4, "#32cd32", "BOT");
             drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
@@ -606,14 +638,12 @@
             drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
             drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
 
-            // Botas
             drawBox(4, 26, 4, 6, "#ff4500", "BOTA");
             drawBox(12, 26, 4, 6, "#ff4500", "B.COST");
             drawBox(20, 58, 4, 6, "#ff4500", "BOTA");
             drawBox(28, 58, 4, 6, "#ff4500", "B.COST");
         } 
         else if (currentEditingLayer === 2) {
-            // Cintura
             drawBox(20, 16, 8, 4, "#00ffaa", "C.TOP");
             drawBox(28, 16, 8, 4, "#00ffaa", "C.BOT");
             drawBox(16, 20, 4, 12, "#00ffaa", "L.DIR");
@@ -621,7 +651,6 @@
             drawBox(28, 20, 4, 12, "#00ffaa", "L.ESQ");
             drawBox(32, 20, 8, 12, "#00ffaa", "COSTAS");
 
-            // Pernas
             drawBox(4, 16, 4, 4, "#ffd700", "TOP");
             drawBox(8, 16, 4, 4, "#ffd700", "BOT");
             drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
@@ -968,7 +997,6 @@
         gltfCanvas.style.display = mode === 'model' ? 'block' : 'none';
         
         const isArmor = mode === 'armor';
-        document.getElementById('btn-align').style.opacity = isArmor ? "1" : "0.3";
         document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
         
         document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
@@ -1035,7 +1063,7 @@
     setTimeout(resize, 200);
 
     // ============================================================================
-    // API GEMINI (LORE / ANÁLISE)
+    // API GEMINI (UPLINK J.A.V.I.S.)
     // ============================================================================
     async function callGemini(payload) {
         loader.style.display = 'block';
@@ -1072,19 +1100,24 @@
         aiText.innerText = lore;
     }
 
-    async function analyzeTexture() {
-        if (!lastUploadedBase64 || currentMode !== 'armor') { alert("Carregue uma imagem base primeiro."); return; }
-        showModal("ai-modal", "🧠 PROTOCOLO DE ANÁLISE", "A investigar falhas na malha orgânica...");
-        const analysis = await callGemini({
-            contents: [{ 
-                parts: [
-                    { text: "Analise esta textura. Aconselhe o Operador a usar o ESTÚDIO DE MONTAGEM para extrair peças com a Varinha Mágica e arrastar para o Molde UV." },
-                    { inlineData: { mimeType: "image/png", data: lastUploadedBase64.split(',')[1] } }
-                ] 
-            }],
-            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. Seja técnico." }] }
+    async function processarTelemetriaInGame() {
+        const telemetria = document.getElementById('jarvis-telemetry-input').value;
+        if (!telemetria || telemetria.trim() === '') {
+            alert("Operador, por favor insira os dados de telemetria do jogo (gerados pelo JarvisBrain.java) na caixa de texto primeiro.");
+            return;
+        }
+        
+        closeModal('ingame-modal');
+        showModal("ai-modal", "📡 PROCESSANDO TELEMETRIA DO JOGO", "A estabelecer conexão com a MekaSuit...");
+        
+        const prompt = `Aqui está o relatório de telemetria atual do mundo do jogador no Minecraft:\n\n${telemetria}\n\nCom base nestes dados exatos, aja como a IA J.A.V.I.S., faça um diagnóstico da situação, avise o jogador sobre o estado da armadura, ameaças no radar e condições ambientais. Seja imersivo, tático e aja como se estivesse a falar diretamente para o visor da armadura do Operador.`;
+        
+        const analise = await callGemini({
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] }
         });
-        aiText.innerText = analysis;
+        
+        aiText.innerText = analise;
     }
 </script>
 
