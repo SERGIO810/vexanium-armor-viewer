@@ -26,7 +26,6 @@
             --ai-accent: #ff00ff;
             --calib-accent: #ffaa00;
             --warning: #ff3333;
-            --success: #00ffaa;
             --uplink-accent: #00e5ff;
         }
 
@@ -69,15 +68,18 @@
             100% { top: 100%; opacity: 0; }
         }
 
+        /* ========================================================= */
+        /* BARRA TÁTICA INFERIOR - DESIGN COMPACTO E INTUITIVO       */
+        /* ========================================================= */
         .control-bar {
-            background: rgba(10, 17, 23, 0.95);
-            border-top: 1px solid var(--warden-bone-dim);
-            padding: 10px 15px;
+            background: rgba(6, 10, 14, 0.98);
+            border-top: 1px solid #1a2a3a;
+            padding: 8px 12px;
             display: flex; justify-content: space-between; align-items: center;
-            gap: 12px; z-index: 10;
+            gap: 10px; z-index: 10;
         }
 
-        .btn-group { display: flex; gap: 8px; align-items: center; }
+        .btn-group { display: flex; gap: 6px; align-items: center; }
 
         .btn {
             background: var(--sculk-surface);
@@ -85,36 +87,39 @@
             border: 1px solid var(--warden-bone-dim);
             border-bottom-width: 3px; 
             border-radius: 4px;
-            padding: 8px 14px;
-            font-size: 12px;
+            padding: 8px 12px;
+            font-size: 11px;
             font-weight: 800; cursor: pointer;
             text-transform: uppercase; transition: 0.2s;
             display: flex; align-items: center; gap: 6px;
             letter-spacing: 1px;
+            white-space: nowrap;
         }
 
-        .btn:hover { background: #1f3447; border-color: var(--warden-bone); transform: translateY(-1px); }
+        .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
         .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
         
+        /* Paleta rigorosa do Warden/Deep Dark */
         .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
         .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
         .btn-uplink { border-color: var(--uplink-accent); color: var(--uplink-accent); border-bottom-color: var(--uplink-accent); background: rgba(0, 229, 255, 0.05); }
         .btn-uplink:hover { border-color: #fff; color: #fff; background: rgba(0, 229, 255, 0.2); }
         
-        .btn-save { border-color: var(--success); color: var(--success); border-bottom-color: var(--success); background: rgba(0, 255, 170, 0.05); }
-        .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 255, 170, 0.2); }
-
-        .divider { width: 1px; height: 26px; background: var(--warden-bone-dim); opacity: 0.5; margin: 0 5px; }
+        .divider { width: 1px; height: 20px; background: #1a2a3a; margin: 0 4px; }
 
         #javis-branding {
-            font-size: 11px; color: var(--warden-bone-dim);
+            font-size: 10px; color: var(--warden-bone-dim);
             text-decoration: none; display: flex; align-items: center; gap: 5px;
             letter-spacing: 1px; text-transform: uppercase;
         }
-        #javis-branding b { color: var(--sculk-core); font-size: 12px; }
+        #javis-branding b { color: var(--sculk-core); font-size: 11px; letter-spacing: 2px; }
 
-        #file-input, #file-input-preset { display: none; }
+        /* ========================================================= */
+        /* FIM DA BARRA TÁTICA                                       */
+        /* ========================================================= */
+
+        #file-input, #file-input-preset, #file-input-add { display: none; }
 
         #status-overlay {
             position: absolute; top: 15px; left: 15px;
@@ -327,7 +332,7 @@ STATUS DA ARMADURA (VEXANIUM):
                 </div>
 
                 <div class="slice-category">PREPARAÇÃO MULTI-IMAGEM</div>
-                <button class="tool-btn" style="justify-content: center; background: rgba(0, 255, 170, 0.1); border-color: var(--success); color: var(--success); margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">
+                <button class="tool-btn" style="justify-content: center; background: rgba(0, 255, 170, 0.1); border-color: var(--sculk-core); color: var(--sculk-core); margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">
                     📥 1. Adicionar Nova Imagem
                 </button>
                 <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
@@ -393,8 +398,11 @@ STATUS DA ARMADURA (VEXANIUM):
         </div>
     </div>
 
-    <!-- BARRA TÁTICA INFERIOR -->
+    <!-- ========================================================= -->
+    <!-- BARRA TÁTICA INFERIOR - DESIGN MINIMALISTA (SÓ ÍCONES E TEXTO BREVE) -->
+    <!-- ========================================================= -->
     <div class="control-bar">
+        
         <div class="btn-group">
             <button class="btn active" id="btn-armor" onclick="switchMode('armor')">🛡️ Armadura</button>
             <button class="btn" id="btn-model" onclick="switchMode('model')">👾 Entidade</button>
@@ -402,25 +410,23 @@ STATUS DA ARMADURA (VEXANIUM):
 
         <div class="divider"></div>
 
-        <!-- BOTÕES DE UPLOAD DUPLOS -->
         <div class="btn-group" id="upload-group">
-            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Carregar Arte Base para Capacete, Peito e Botas">📥 BASE L1 (C/P/B)</button>
-            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Carregar Arte Base para Calças/Pernas">📥 BASE L2 (CALÇAS)</button>
-            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)">📥 IMPORTAR MALHA (.GLTF)</button>
+            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Arte Base L1 (C/P/B)">📥 Base L1</button>
+            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Arte Base L2 (Calças)">📥 Base L2</button>
+            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)" title="Importar Malha 3D">📥 Modelo 3D</button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- MÓDULOS DE EDIÇÃO, IA E SALVAMENTO -->
         <div class="btn-group">
-            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Importar dados do Minecraft">📡 UPLINK IN-GAME</button>
-            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Narrativa">✨ LORE</button>
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Abre o Estúdio para recortar a camada ativa.">✂️ ESTÚDIO DE MONTAGEM</button>
+            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Uplink Neural">📡 Uplink</button>
+            <button class="btn btn-ai" onclick="generateLore()" title="Análise Lore">✨ Lore</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Estúdio de Montagem">✂️ Estúdio</button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" title="Salvar a malha L1 montada como PNG">💾 EXPORTAR L1</button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" title="Salvar a malha L2 montada como PNG">💾 EXPORTAR L2</button>
+            <button class="btn" id="btn-save-l1" onclick="baixarTextura(1)" title="Salvar PNG L1">💾 Exportar L1</button>
+            <button class="btn" id="btn-save-l2" onclick="baixarTextura(2)" title="Salvar PNG L2">💾 Exportar L2</button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
@@ -428,7 +434,7 @@ STATUS DA ARMADURA (VEXANIUM):
         <div style="flex: 1;"></div>
 
         <a id="javis-branding" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
-            Powered by <b>J.A.V.I.S.</b>
+            <span>Powered by <b>J.A.V.I.S.</b></span>
         </a>
     </div>
 </div>
@@ -503,7 +509,6 @@ STATUS DA ARMADURA (VEXANIUM):
         const _0xPR0T = ["sergio810.github.io", "localhost", "127.0.0.1"];
         const _0xLINK = "https://sergio810.github.io/vexanium-armor-viewer/";
         function _0xV3RIFY() {
-            // Verificação alinhada com o ID específico do Widget
             const b = document.getElementById('javis-branding');
             if (!b || b.getAttribute('href') !== _0xLINK || !b.innerText.includes('J.A.V.I.S.')) _0xKILL();
         }
