@@ -4,8 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vexanium Armor Viewer - Painel J.A.V.I.S.</title>
-    <!-- Rota de servidor alterada para contornar o bloqueio do GitHub -->
+    
+    <!-- 1. Motor 3D Base -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    
+    <!-- 2. CORREÇÃO CRÍTICA: A biblioteca SkinView3D que desenha o boneco -->
+    <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.min.js"></script>
     
     <style>
         * {
@@ -80,6 +84,12 @@
             border-radius: 4px;
             border: 1px solid #00d9ff;
             box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.1);
+            /* Opcional: Cursor para indicar que é interativo */
+            cursor: grab;
+        }
+        
+        #skinViewer:active {
+            cursor: grabbing;
         }
 
         .controls-section {
@@ -233,7 +243,6 @@
             color: #00d9ff;
         }
 
-        /* Scrollbar styling */
         .controls-section::-webkit-scrollbar {
             width: 8px;
         }
@@ -277,9 +286,8 @@
         <div class="controls-section">
             <h2>⚙️ Controles</h2>
 
-            <!-- Upload Section -->
             <div class="control-group">
-                <label>📤 Camada 1 (Capacete, Armadura, Botas)</label>
+                <label>📤 Camada 1 (Capacete, Peito, Botas)</label>
                 <input type="file" id="layer1Upload" accept="image/png" />
             </div>
 
@@ -288,7 +296,6 @@
                 <input type="file" id="layer2Upload" accept="image/png" />
             </div>
 
-            <!-- Rotation Control -->
             <div class="control-group">
                 <label>🔄 Rotação Automática</label>
                 <input type="checkbox" id="autoRotate" checked />
@@ -299,48 +306,35 @@
                 <input type="range" id="rotationSpeed" min="0" max="10" value="3" />
             </div>
 
-            <!-- View Presets -->
-            <div class="control-group">
-                <label>👁️ Ângulos Predefinidos</label>
-                <div class="preset-buttons">
-                    <button onclick="setView(0)">Frente</button>
-                    <button onclick="setView(90)">Lado</button>
-                    <button onclick="setView(180)">Costas</button>
-                    <button onclick="setView(270)">Outro Lado</button>
-                </div>
+            <div class="preset-buttons">
+                <button onclick="setView(0)">Frente</button>
+                <button onclick="setView(90)">Lado</button>
+                <button onclick="setView(180)">Costas</button>
+                <button onclick="setView(270)">Outro Lado</button>
             </div>
 
-            <!-- Zoom Control -->
             <div class="control-group">
                 <label>🔍 Zoom</label>
                 <input type="range" id="zoomControl" min="0.5" max="3" step="0.1" value="1" />
             </div>
 
-            <!-- Reset Button -->
             <button onclick="resetViewer()">🔄 Resetar Visualizador</button>
 
-            <!-- Status -->
-            <div class="status" id="status">Pronto para carregar texturas</div>
+            <div class="status" id="status">Sistemas Online. Aguardando input.</div>
 
-            <!-- Info Box -->
             <div class="info-box">
-                <strong>💡 Como usar:</strong><br>
-                1. Selecione as imagens PNG das camadas 1 e 2<br>
-                2. Use os controles para rotacionar e fazer zoom<br>
-                3. Clique em "Resetar" para voltar ao padrão<br>
-                <br>
-                <strong>📏 Formato esperado:</strong><br>
-                1024x512 pixels (proporção 2:1)
+                <strong>💡 Nota Técnica J.A.V.I.S:</strong><br>
+                Este motor nativo foi desenhado para skins de jogadores. Armaduras carregadas no corpo podem apresentar distorções de mapeamento, mas as texturas serão lidas com sucesso.
             </div>
         </div>
     </div>
 
     <footer>
-        <p>Vexanium Armor Viewer v1.0 | Powered by Three.js & skinview3d | © 2026</p>
+        <p>Vexanium Armor Viewer v1.1 | Powered by Three.js & skinview3d | © 2026</p>
     </footer>
 
     <script>
-        // Initialize skinview3d
+        // 1. Inicializa o visualizador com a skin padrão do Steve
         const canvas = document.getElementById('skinViewer');
         const skinViewer = new skinview3d.SkinViewer({
             canvas: canvas,
@@ -349,11 +343,14 @@
             skin: 'https://crafatar.com/skins/MHF_Steve'
         });
 
-        // Add armor layers
+        // Configurações Iniciais
+        skinViewer.controls.autoRotate = true;
+        skinViewer.controls.autoRotateSpeed = 3;
+
+        // 2. Leitura de ficheiros do seu computador (Upload)
         let layer1Texture = null;
         let layer2Texture = null;
 
-        // File upload handlers
         document.getElementById('layer1Upload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
@@ -361,7 +358,7 @@
                 reader.onload = function(event) {
                     layer1Texture = event.target.result;
                     applyTextures();
-                    updateStatus('✓ Layer 1 carregada', 'success');
+                    updateStatus('✓ Camada 1 carregada com sucesso', 'success');
                 };
                 reader.readAsDataURL(file);
             }
@@ -374,13 +371,14 @@
                 reader.onload = function(event) {
                     layer2Texture = event.target.result;
                     applyTextures();
-                    updateStatus('✓ Layer 2 carregada', 'success');
+                    updateStatus('✓ Camada 2 carregada com sucesso', 'success');
                 };
                 reader.readAsDataURL(file);
             }
         });
 
         function applyTextures() {
+            // Nota: O skinview3d vai forçar a textura da armadura a cobrir a "pele" e a "capa"
             if (layer1Texture) {
                 skinViewer.loadSkin(layer1Texture);
             }
@@ -389,28 +387,25 @@
             }
         }
 
-        // Auto rotate
+        // 3. Controlos de Interface
         document.getElementById('autoRotate').addEventListener('change', function(e) {
             skinViewer.controls.autoRotate = e.target.checked;
         });
 
-        // Rotation speed
         document.getElementById('rotationSpeed').addEventListener('change', function(e) {
             skinViewer.controls.autoRotateSpeed = parseFloat(e.target.value);
         });
 
-        // Zoom control
         document.getElementById('zoomControl').addEventListener('change', function(e) {
             const zoom = parseFloat(e.target.value);
+            // Ajusta a distância da câmera baseada no zoom
             skinViewer.camera.position.z = 60 / zoom;
         });
 
-        // View presets
         function setView(angle) {
             skinViewer.playerObject.rotation.y = (angle * Math.PI) / 180;
         }
 
-        // Reset viewer
         function resetViewer() {
             skinViewer.playerObject.rotation.y = 0;
             skinViewer.camera.position.z = 60;
@@ -418,20 +413,20 @@
             document.getElementById('rotationSpeed').value = 3;
             document.getElementById('zoomControl').value = 1;
             skinViewer.controls.autoRotate = true;
-            updateStatus('Visualizador resetado', 'success');
+            updateStatus('Sistemas reiniciados.', 'success');
         }
 
-        // Update status
         function updateStatus(message, type = 'info') {
             const statusEl = document.getElementById('status');
             statusEl.textContent = message;
             statusEl.className = 'status ' + type;
         }
 
-        // Initialize
-        skinViewer.controls.autoRotate = true;
-        skinViewer.controls.autoRotateSpeed = 3;
+        // Responsividade do Canvas
+        window.addEventListener('resize', () => {
+            skinViewer.width = canvas.parentElement.offsetWidth;
+            skinViewer.height = canvas.parentElement.offsetHeight;
+        });
     </script>
 </body>
 </html>
-
