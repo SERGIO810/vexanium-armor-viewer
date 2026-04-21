@@ -141,7 +141,7 @@
             max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* NOVO ESTÚDIO DE FATIAMENTO INTELIGENTE */
+        /* ESTÚDIO DE FATIAMENTO INTELIGENTE */
         #slicer-modal { 
             width: 95vw; height: 95vh; max-width: 1600px; 
             border-color: var(--calib-accent); 
@@ -232,14 +232,19 @@
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <!-- NOVO: ESTÚDIO DE FATIAMENTO INTELIGENTE (SMART SLICER) -->
+    <!-- ESTÚDIO DE FATIAMENTO INTELIGENTE (SMART SLICER V2 - SELEÇÃO MÁGICA) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: FATIADOR NEURAL AUTOMÁTICO</h3>
         
         <div class="editor-layout">
             <div class="editor-toolbar">
+                <div style="font-size:10px; color:var(--calib-accent); margin-bottom:5px; font-weight: bold;">PREPARAÇÃO</div>
+                <button class="slice-btn" style="margin-bottom: 10px; justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent);" onclick="removerFundoBranco()">
+                    ✨ 0. Remover Fundo Branco
+                </button>
+
                 <div style="font-size:10px; color:var(--warden-bone-dim); margin-bottom:5px;">PASSOS DE EXTRAÇÃO</div>
-                <p style="font-size:11px; color:#aaa; margin-top:0;">Selecione a peça abaixo e desenhe um quadrado sobre a arte gerada pela IA. O sistema montará o molde UV.</p>
+                <p style="font-size:11px; color:#aaa; margin-top:0;">Selecione a peça abaixo e <b>clique</b> sobre a arte na grelha para seleção mágica automática.</p>
 
                 <button class="slice-btn active" data-part="helmet" onclick="setActiveSlice('helmet')">
                     1. Rosto / Capacete <span class="slice-status" id="status-helmet">[ ]</span>
@@ -258,7 +263,8 @@
                 </button>
                 
                 <div style="margin-top:auto; font-size:10px; color:var(--calib-accent); border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
-                    <p><b>Dica:</b> O J.A.V.I.S. vai espelhar e replicar os seus cortes inteligentemente para preencher o modelo 3D inteiro (Frente, Costas e Lados).</p>
+                    <p><b>Dica 1:</b> A Seleção Mágica isola automaticamente peças conectadas se o fundo for transparente.</p>
+                    <p><b>Dica 2:</b> O J.A.V.I.S. espelha os recortes preenchendo o molde 3D em 360°.</p>
                 </div>
             </div>
 
@@ -364,10 +370,14 @@
     animate();
 
     // ============================================================================
-    // MÓDULO DE FATIAMENTO INTELIGENTE (SMART SLICER)
+    // MÓDULO DE FATIAMENTO INTELIGENTE V2 (COM SELEÇÃO MÁGICA)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
+    
+    // Canvas Oculto para armazenar a imagem pura e aplicar algoritmos como Remoção de Fundo
+    let offscreenCanvas = document.createElement('canvas');
+    let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
     let activePart = 'helmet';
     let isDragging = false;
@@ -390,8 +400,15 @@
         document.getElementById('slicer-modal').style.display = 'flex';
         
         originalImageObj.onload = () => {
+            // Inicializa a imagem no canvas oculto para processos de IA
+            offscreenCanvas.width = originalImageObj.width;
+            offscreenCanvas.height = originalImageObj.height;
+            offscreenCtx.drawImage(originalImageObj, 0, 0);
+
+            // Ajusta o workspace de visualização
             wsCanvas.width = originalImageObj.width;
             wsCanvas.height = originalImageObj.height;
+            
             // Resetar slices se a imagem mudar
             for (let k in slices) { slices[k].w = 0; slices[k].h = 0; document.getElementById('status-'+k).innerText = "[ ]"; document.getElementById('status-'+k).classList.remove('done');}
             setActiveSlice('helmet');
@@ -406,10 +423,28 @@
         document.querySelector(`.slice-btn[data-part="${part}"]`).classList.add('active');
     }
 
+    function removerFundoBranco() {
+        const w = offscreenCanvas.width;
+        const h = offscreenCanvas.height;
+        const imgData = offscreenCtx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+
+        // Algoritmo: Pixeis mais claros que (230, 230, 230) ficam transparentes
+        for (let i = 0; i < data.length; i += 4) {
+            if (data[i] > 230 && data[i+1] > 230 && data[i+2] > 230) {
+                data[i+3] = 0; // Alpha = 0 (Transparente)
+            }
+        }
+        
+        offscreenCtx.putImageData(imgData, 0, 0);
+        renderFatiador();
+        document.getElementById('status-overlay').innerText = "✨ FUNDO BRANCO ELIMINADO";
+    }
+
     function renderFatiador() {
-        // Limpa e desenha a imagem original
+        // Limpa e desenha a imagem processada (offscreen)
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
-        wsCtx.drawImage(originalImageObj, 0, 0);
+        wsCtx.drawImage(offscreenCanvas, 0, 0);
 
         // Cria uma camada escura para focar nos cortes
         wsCtx.fillStyle = "rgba(0, 0, 0, 0.6)";
@@ -420,7 +455,7 @@
             if (sl.w > 0 && sl.h > 0) {
                 // Limpa a escuridão na área selecionada
                 wsCtx.clearRect(sl.x, sl.y, sl.w, sl.h);
-                wsCtx.drawImage(originalImageObj, sl.x, sl.y, sl.w, sl.h, sl.x, sl.y, sl.w, sl.h);
+                wsCtx.drawImage(offscreenCanvas, sl.x, sl.y, sl.w, sl.h, sl.x, sl.y, sl.w, sl.h);
                 
                 // Desenha a borda
                 wsCtx.strokeStyle = sl.color;
@@ -441,6 +476,71 @@
         
         // Desenha a seleção ativa por cima
         drawCutout(slices[activePart], isDragging);
+    }
+
+    // ALGORITMO NEURAL: Seleção Mágica Baseada em Flood Fill
+    function selecaoMagica(sx, sy) {
+        const w = offscreenCanvas.width;
+        const h = offscreenCanvas.height;
+        const imgData = offscreenCtx.getImageData(0, 0, w, h);
+        const data = imgData.data;
+
+        // Verifica se clicou numa área transparente
+        const startAlpha = data[(sy * w + sx) * 4 + 3];
+        if (startAlpha === 0) return null; 
+
+        // Otimização Extrema para Grandes Resoluções usando Arrays Tipados
+        const visited = new Uint8Array(w * h);
+        const queueX = new Int32Array(w * h);
+        const queueY = new Int32Array(w * h);
+
+        let head = 0, tail = 0;
+        queueX[tail] = sx; queueY[tail] = sy; tail++;
+        visited[sy * w + sx] = 1;
+
+        let minX = sx, maxX = sx, minY = sy, maxY = sy;
+
+        // Breadth-First Search (Pesquisa em Largura)
+        while (head < tail) {
+            const cx = queueX[head];
+            const cy = queueY[head];
+            head++;
+
+            if (cx < minX) minX = cx;
+            if (cx > maxX) maxX = cx;
+            if (cy < minY) minY = cy;
+            if (cy > maxY) maxY = cy;
+
+            // Analisa as 8 direções à volta do pixel para garantir captura total
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = cx + dx;
+                    const ny = cy + dy;
+
+                    if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                        const idx = ny * w + nx;
+                        if (visited[idx] === 0) {
+                            visited[idx] = 1;
+                            if (data[idx * 4 + 3] > 0) { // Se não for transparente, é parte da peça
+                                queueX[tail] = nx;
+                                queueY[tail] = ny;
+                                tail++;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Adiciona uma margem de segurança de 2 pixels para não cortar a linha da arte
+        const p = 2; 
+        return {
+            x: Math.max(0, minX - p),
+            y: Math.max(0, minY - p),
+            w: Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2)),
+            h: Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2))
+        };
     }
 
     function getMousePos(evt) {
@@ -475,10 +575,25 @@
         if (!isDragging) return;
         isDragging = false;
         
-        // Normaliza quadrados negativos (desenhados da direita para a esquerda)
-        if (slices[activePart].w < 0) { slices[activePart].x += slices[activePart].w; slices[activePart].w = Math.abs(slices[activePart].w); }
-        if (slices[activePart].h < 0) { slices[activePart].y += slices[activePart].h; slices[activePart].h = Math.abs(slices[activePart].h); }
+        const pos = getMousePos(e);
+        const dragDist = Math.hypot(pos.x - startX, pos.y - startY);
 
+        // Se o utilizador mexeu o rato menos de 5 pixels, consideramos um "Clique de Seleção Mágica"
+        if (dragDist < 5) {
+            const magiBox = selecaoMagica(Math.floor(startX), Math.floor(startY));
+            if (magiBox) {
+                slices[activePart].x = magiBox.x;
+                slices[activePart].y = magiBox.y;
+                slices[activePart].w = magiBox.w;
+                slices[activePart].h = magiBox.h;
+            }
+        } else {
+            // Caso contrário, é um Desenho Manual Retangular
+            if (slices[activePart].w < 0) { slices[activePart].x += slices[activePart].w; slices[activePart].w = Math.abs(slices[activePart].w); }
+            if (slices[activePart].h < 0) { slices[activePart].y += slices[activePart].h; slices[activePart].h = Math.abs(slices[activePart].h); }
+        }
+
+        // Validação da seleção
         if (slices[activePart].w > 10 && slices[activePart].h > 10) {
             let st = document.getElementById('status-' + activePart);
             st.innerText = "[✓]"; st.classList.add('done');
@@ -494,25 +609,20 @@
     // O ALQUIMISTA: FUNDE OS CORTES PARA O MAPA UV 64x32 HD (Minecraft Padrão)
     // ============================================================================
     function aplicarMontagemUV() {
-        // Cria um canvas alvo em HD (1024x512) respeitando o molde 64x32
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
         outCanvas.height = 512;
         const outCtx = outCanvas.getContext('2d');
-        const f = 16; // Fator de escala (1024 / 64)
+        const f = 16; 
 
-        // Função mágica que pega um corte e estica/esmaga para encaixar num destino UV
         function mapSliceToUV(sliceKey, destinations) {
             const sl = slices[sliceKey];
             if (!sl || sl.w < 10) return;
             destinations.forEach(dest => {
-                // dest = [x, y, w, h] na grade 64x32
-                outCtx.drawImage(originalImageObj, sl.x, sl.y, sl.w, sl.h, dest[0]*f, dest[1]*f, dest[2]*f, dest[3]*f);
+                // Aqui usamos a imagem já tratada (sem o fundo branco)
+                outCtx.drawImage(offscreenCanvas, sl.x, sl.y, sl.w, sl.h, dest[0]*f, dest[1]*f, dest[2]*f, dest[3]*f);
             });
         }
-
-        // --- MAPA TOPOLÓGICO DO MINECRAFT (X, Y, W, H) ---
-        // A IA J.A.V.I.S mapeia frontal, traseira e laterais espelhando o corte inteligentemente!
 
         // CAPACETE (Face cortada vai para Frente e Costas. Topo recebe uma tira).
         mapSliceToUV('helmet', [ [8,8,8,8], [24,8,8,8] ]); 
@@ -523,9 +633,7 @@
         mapSliceToUV('chest', [ [20,20,8,12], [32,20,8,12] ]);
 
         // BRAÇOS E OMBROS (Replicados para Braço Direito e Esquerdo)
-        // Braço Direito (Minecraft padrão Layer 1)
         mapSliceToUV('arm', [ [44,20,4,12], [52,20,4,12], [40,20,4,12], [48,20,4,12] ]); 
-        // Braço Esquerdo (Nova layer do MC moderno, espelha)
         mapSliceToUV('arm', [ [36,52,4,12], [44,52,4,12], [32,52,4,12], [40,52,4,12] ]); 
 
         // PERNAS
@@ -540,10 +648,9 @@
 
         const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
         
-        // Aplica ao modelo 3D vivo!
         skinViewer.loadSkin(finalArmaduraBase64);
         statusOverlay.innerText = "✓ SIMBIOSE NEURAL: ARMADURA HD MONTADA!";
-        lastUploadedBase64 = finalArmaduraBase64; // Atualiza a base global com o recorte final
+        lastUploadedBase64 = finalArmaduraBase64; 
         
         closeModal('slicer-modal');
     }
