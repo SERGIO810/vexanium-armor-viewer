@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Interface do Abismo</title>
+    <title>Vexanium Viewer - Laboratório J.A.V.I.S.</title>
     
-    <!-- Importando uma fonte mais "alienígena/antiga" para os títulos -->
-    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Fonte técnica limpa e profissional para um terminal tático -->
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
 
     <!-- 1. Motor 3D Base -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -19,186 +19,199 @@
     <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.min.js"></script>
     
     <style>
-        /* --- PALETA DE CORES DEEP DARK / WARDEN --- */
+        /* --- NOVA PALETA DE CORES PROFISSIONAL (WARDEN / SHRIEKER) --- */
         :root {
-            --void-bg: #050a0f;        /* Fundo preto azulado profundo */
-            --sculk-stone: #1a2a3a;    /* Cor de pedra escura */
-            --sculk-accent: #00ffa2;   /* O Ciano brilhante das almas/sensores */
-            --sculk-dim: #008f5b;      /* Ciano mais escuro para estados inativos */
-            --text-glow: 0 0 10px rgba(0, 255, 162, 0.7); /* Brilho do texto */
-            --box-glow: 0 0 20px rgba(0, 255, 162, 0.3);  /* Brilho das caixas */
+            --void-bg: #030508;           /* Preto profundo (Fundo absoluto) */
+            --sculk-base: #0a1117;        /* Pedra sculk muito escura (Fundos de caixa) */
+            --sculk-surface: #121e29;     /* Superfície do sculk (Botões e painéis) */
+            --sculk-glow: #0c8a8c;        /* Aqua bioluminescente (Brilho suave) */
+            --sculk-core: #13c9c9;        /* Ciano brilhante (Apenas para pequenos alertas/luzes) */
+            --warden-bone: #d1d5b4;       /* Marfim/Osso do Warden (Destaques e Títulos principais) */
+            --warden-bone-dim: #8b9172;   /* Osso envelhecido/sombrio (Textos secundários e bordas) */
+            --text-main: #e0e4d4;         /* Branco levemente creme para leitura confortável */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
-            font-family: 'JetBrains Mono', monospace; /* Fonte técnica para o corpo */
-            background: radial-gradient(circle at center bottom, #0a1520 0%, #000000 100%); /* Gradiente tipo abismo */
-            color: var(--sculk-accent);
+            font-family: 'JetBrains Mono', monospace;
+            background: radial-gradient(circle at center bottom, #0d161f 0%, var(--void-bg) 100%);
+            color: var(--text-main);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             overflow-x: hidden;
         }
 
-        /* Efeito de partículas de fundo sutil (opcional) */
+        /* Fundo limpo e sutil (pontos do abismo) */
         body::before {
             content: "";
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2300ffa2' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            background-image: radial-gradient(var(--sculk-glow) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.03;
             pointer-events: none;
             z-index: -1;
         }
 
         header {
-            background: rgba(10, 20, 30, 0.95);
-            border-bottom: 3px solid var(--sculk-dim);
+            background: rgba(10, 17, 23, 0.95);
+            border-bottom: 2px solid var(--warden-bone-dim);
             padding: 25px;
             text-align: center;
-            box-shadow: var(--box-glow);
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* Efeito de "som" do Shrieker no header */
+        /* Linha de pulso agora usa a cor do núcleo para ser elegante, não agressiva */
         header::after {
             content: '';
-            position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
-            background: var(--sculk-accent);
-            box-shadow: 0 0 20px var(--sculk-accent), 0 0 40px var(--sculk-accent);
-            animation: pulseSensor 4s infinite ease-in-out;
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
+            background: var(--sculk-core);
+            box-shadow: 0 0 15px var(--sculk-core);
+            animation: pulseSensor 5s infinite ease-in-out;
+            opacity: 0.5;
         }
 
         header h1 {
-            font-family: 'Creepster', cursive; /* Fonte de monstro */
-            font-size: 36px;
+            font-weight: 800;
+            font-size: 32px;
             margin-bottom: 5px;
-            color: var(--sculk-accent);
-            text-shadow: var(--text-glow);
-            letter-spacing: 3px;
+            color: var(--warden-bone);
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
         }
-        header p { font-size: 12px; color: var(--sculk-dim); text-transform: uppercase; letter-spacing: 4px; font-weight: bold; }
+        
+        header p { 
+            font-size: 12px; 
+            color: var(--warden-bone-dim); 
+            text-transform: uppercase; 
+            letter-spacing: 4px; 
+            font-weight: 600; 
+        }
 
         .container {
             display: flex; flex: 1; gap: 25px; padding: 30px;
             max-width: 1400px; margin: 0 auto; width: 100%;
         }
 
-        /* Estilo de Pedra Esculpida para os Painéis */
+        /* Paineis de Vidro Fumê Escuro */
         .viewer-section, .controls-section {
-            background: rgba(26, 42, 58, 0.8); /* Pedra escura translúcida */
-            border: 3px solid var(--sculk-dim);
-            border-radius: 12px;
+            background: rgba(15, 25, 34, 0.7);
+            border: 1px solid var(--warden-bone-dim);
+            border-top: 3px solid var(--warden-bone-dim);
+            border-radius: 8px;
             padding: 25px;
-            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), var(--box-glow);
-            backdrop-filter: blur(5px);
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), 0 10px 20px rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px);
         }
 
         .viewer-section { flex: 1; display: flex; flex-direction: column; }
         .controls-section { flex: 0 0 380px; display: flex; flex-direction: column; gap: 20px; max-height: 700px; overflow-y: auto; }
 
         h2 {
-            font-family: 'Creepster', cursive;
-            font-size: 22px; margin-bottom: 20px; color: var(--sculk-accent);
-            text-transform: uppercase; letter-spacing: 2px;
-            text-shadow: var(--text-glow);
-            border-bottom: 1px solid var(--sculk-dim); padding-bottom: 10px;
+            font-weight: 800;
+            font-size: 18px; margin-bottom: 20px; 
+            color: var(--warden-bone);
+            text-transform: uppercase; letter-spacing: 1px;
+            border-bottom: 1px solid rgba(139, 145, 114, 0.3); /* Border dim com opacidade */
+            padding-bottom: 10px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Badge de modo */
+        /* Badge de modo elegante */
         #mode-badge {
-            font-family: 'JetBrains Mono', monospace;
-            background: var(--sculk-dim); color: var(--void-bg);
-            padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;
-            box-shadow: 0 0 10px var(--sculk-dim);
+            background: var(--warden-bone-dim); 
+            color: var(--void-bg);
+            padding: 4px 10px; border-radius: 3px; 
+            font-size: 10px; font-weight: 800;
+            letter-spacing: 1px;
         }
 
-        /* Container dos Canvases - O Vazio */
+        /* Container 3D - O Vazio do Sculk */
         .canvas-container {
             width: 100%; height: 550px; position: relative;
-            background: radial-gradient(circle at center, #0a1520 0%, #000000 80%); /* Fundo de abismo */
-            border-radius: 8px; border: 3px solid var(--sculk-accent);
-            box-shadow: inset 0 0 50px rgba(0, 255, 162, 0.2); /* Brilho interno */
+            background: radial-gradient(circle at center, #0a1117 0%, #030508 100%);
+            border-radius: 6px; 
+            border: 1px solid var(--sculk-surface);
+            box-shadow: inset 0 0 60px rgba(12, 138, 140, 0.08); /* Brilho de alma sutil */
             overflow: hidden;
         }
 
         #skinViewer, #gltfViewer { width: 100%; height: 100%; cursor: grab; position: absolute; top: 0; left: 0; }
         #skinViewer:active, #gltfViewer:active { cursor: grabbing; }
 
-        /* --- BOTÕES ESTILO WARDEN/SCULK --- */
-        /* Estes estilos simulam botões de imagem esculpidos */
+        /* --- BOTÕES ESTILO OSSO/SCULK --- */
         .tab-btn, button.action-btn, .file-upload-btn {
             font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
-            
-            background: linear-gradient(180deg, #2a4a5a 0%, #1a2a3a 100%); /* Gradiente de pedra */
-            color: var(--sculk-accent);
-            border: 2px solid var(--sculk-accent);
-            border-bottom-width: 4px; /* Efeito 3D de bloco */
-            border-radius: 6px;
+            text-transform: uppercase; font-weight: 600; letter-spacing: 1px;
+            background: var(--sculk-surface);
+            color: var(--warden-bone);
+            border: 1px solid var(--warden-bone-dim);
+            border-bottom-width: 3px; 
+            border-radius: 4px;
             padding: 12px 15px;
             cursor: pointer;
-            transition: all 0.2s ease-in-out;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
-            box-shadow: 0 4px 0 var(--sculk-dim), 0 0 10px rgba(0, 255, 162, 0.1); /* Sombra 3D + brilho */
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
         }
 
-        /* Efeito de brilho ao passar o mouse */
         .tab-btn:hover, button.action-btn:hover, .file-upload-btn:hover {
-            background: linear-gradient(180deg, #3a5a6a 0%, #2a3a4a 100%);
+            background: #1f3447;
             color: #ffffff;
-            border-color: #ffffff;
-            text-shadow: var(--text-glow);
-            box-shadow: 0 4px 0 var(--sculk-accent), 0 0 20px var(--sculk-accent);
+            border-color: var(--warden-bone);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.4), 0 0 15px rgba(12, 138, 140, 0.2);
             transform: translateY(-1px);
         }
         
-        /* Efeito de clique (afundar o botão) */
         .tab-btn:active, button.action-btn:active, .file-upload-btn:active {
-            transform: translateY(3px);
-            box-shadow: 0 1px 0 var(--sculk-dim), inset 0 2px 5px rgba(0,0,0,0.5);
-            border-bottom-width: 2px;
+            transform: translateY(2px);
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);
+            border-bottom-width: 1px;
+            margin-bottom: 2px;
         }
 
-        /* Estilo específico para abas ativas */
-        .tabs { display: flex; gap: 15px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; font-size: 11px; opacity: 0.7; }
+        .tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; font-size: 11px; color: var(--warden-bone-dim); border-color: rgba(139, 145, 114, 0.5); }
         .tab-btn.active {
-            opacity: 1;
-            background: linear-gradient(180deg, var(--sculk-dim) 0%, #1a2a3a 100%);
-            border-color: var(--sculk-accent);
-            box-shadow: 0 4px 0 var(--sculk-accent), inset 0 0 15px var(--sculk-accent);
-            color: #fff;
-            text-shadow: var(--text-glow);
+            background: linear-gradient(180deg, var(--sculk-surface) 0%, var(--sculk-base) 100%);
+            border-color: var(--warden-bone);
+            color: var(--warden-bone);
+            border-bottom-width: 3px;
         }
 
         /* Inputs e Controles */
-        .control-group { display: flex; flex-direction: column; gap: 10px; }
-        .control-group label { font-size: 11px; color: var(--sculk-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        .control-group { display: flex; flex-direction: column; gap: 8px; }
+        .control-group label { font-size: 11px; color: var(--warden-bone-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
         input[type="range"], .custom-file-input-wrapper {
-            background: rgba(0, 0, 0, 0.5);
-            border: 2px solid var(--sculk-dim);
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 145, 114, 0.3);
             padding: 5px; border-radius: 4px;
             height: 30px;
         }
         
-        /* Estilizando o slider (range) para parecer energia */
         input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type="range"]::-webkit-slider-runnable-track {
-            width: 100%; height: 8px; background: var(--sculk-stone); border-radius: 4px; border: 1px solid var(--sculk-dim);
+            width: 100%; height: 6px; background: var(--sculk-base); border-radius: 3px; border: 1px solid rgba(139, 145, 114, 0.2);
         }
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
-            background: var(--sculk-accent); box-shadow: var(--text-glow);
-            margin-top: -5px; cursor: pointer;
+            background: var(--warden-bone); 
+            box-shadow: 0 0 5px rgba(0,0,0,0.8);
+            margin-top: -6px; cursor: pointer;
+            transition: 0.2s;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            background: #ffffff;
+            transform: scale(1.1);
+            box-shadow: 0 0 8px var(--sculk-glow);
         }
 
-        /* Input de Arquivo Customizado (para parecer botão) */
         .custom-file-input-wrapper {
             position: relative; padding: 0; border: none; background: none; height: auto;
         }
@@ -209,65 +222,62 @@
             display: block; text-align: center; font-size: 11px; padding: 10px; width: 100%;
         }
 
-        /* Status e Informações */
+        /* Status e Informações - Elegantes */
         .status {
-            background: rgba(0, 20, 30, 0.8); border: 2px solid var(--sculk-dim);
-            padding: 12px; border-radius: 6px; font-size: 12px;
-            color: var(--sculk-accent); text-align: center; font-weight: bold;
-            text-shadow: 0 0 5px var(--sculk-dim);
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
+            background: rgba(10, 17, 23, 0.8); 
+            border: 1px solid var(--warden-bone-dim);
+            padding: 12px; border-radius: 4px; font-size: 11px;
+            color: var(--warden-bone); text-align: center; font-weight: 600;
+            transition: all 0.3s ease;
         }
-        .status.success { border-color: var(--sculk-accent); background: rgba(0, 255, 162, 0.1); }
-        .status.error { border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1); text-shadow: 0 0 5px #ff3333; }
+        .status.success { border-color: var(--sculk-glow); color: var(--sculk-core); background: rgba(12, 138, 140, 0.05); }
+        .status.error { border-color: #d64545; color: #d64545; background: rgba(214, 69, 69, 0.05); }
 
         .info-box {
-            background: rgba(26, 42, 58, 0.9);
-            border: 2px solid var(--sculk-dim);
-            border-left: 5px solid var(--sculk-accent);
-            padding: 15px; border-radius: 6px; font-size: 11px;
-            line-height: 1.8; color: #a0c0d0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            background: rgba(10, 17, 23, 0.6);
+            border: 1px solid rgba(139, 145, 114, 0.2);
+            border-left: 3px solid var(--warden-bone-dim);
+            padding: 15px; border-radius: 4px; font-size: 11px;
+            line-height: 1.6; color: #a5abb0;
         }
-        .info-box strong { color: var(--sculk-accent); font-size: 13px; text-shadow: var(--text-glow); }
+        .info-box strong { color: var(--warden-bone); font-size: 12px; }
 
         footer {
-            background: rgba(5, 10, 15, 0.95); border-top: 3px solid var(--sculk-dim);
-            padding: 20px; text-align: center; font-size: 11px; color: var(--sculk-dim);
-            box-shadow: 0 -10px 20px rgba(0, 255, 162, 0.05);
+            background: rgba(10, 17, 23, 0.95); border-top: 1px solid var(--sculk-surface);
+            padding: 20px; text-align: center; font-size: 11px; color: var(--warden-bone-dim);
         }
 
-        /* Animações */
         @keyframes pulseSensor {
-            0%, 100% { opacity: 0.5; transform: scaleX(1); }
-            50% { opacity: 1; transform: scaleX(1.05); }
+            0%, 100% { opacity: 0.2; }
+            50% { opacity: 0.6; }
         }
 
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
 
-        /* Scrollbar Personalizada */
-        .controls-section::-webkit-scrollbar { width: 10px; background: var(--void-bg); }
-        .controls-section::-webkit-scrollbar-thumb { background: var(--sculk-dim); border-radius: 5px; border: 2px solid var(--void-bg); }
-        .controls-section::-webkit-scrollbar-thumb:hover { background: var(--sculk-accent); }
+        /* Scrollbar Discreta */
+        .controls-section::-webkit-scrollbar { width: 6px; background: transparent; }
+        .controls-section::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 3px; }
+        .controls-section::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
 
         @media (max-width: 1024px) {
             .container { flex-direction: column; padding: 15px; }
             .controls-section { flex: none; max-height: none; }
             .canvas-container { height: 400px; }
-            header h1 { font-size: 28px; }
+            header h1 { font-size: 24px; }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>⟁ VEXANIUM VIEWER ⟁</h1>
-        <p>INTERFACE DEEP DARK // PROTOCOLO WARDEN</p>
+        <h1>VEXANIUM VIEWER</h1>
+        <p>LABORATÓRIO DE SIMBIOSE // PROTOCOLO WARDEN</p>
     </header>
 
     <div class="container">
         <div class="viewer-section">
             <h2>
-                <span>👁‍🗨 CÂMARA DE ESCANEAMENTO</span>
+                <span>CÂMARA DE ESCANEAMENTO</span>
                 <span id="mode-badge">MODO: ARMADURA</span>
             </h2>
             <div class="canvas-container">
@@ -278,82 +288,89 @@
 
         <div class="controls-section">
             <div class="tabs">
-                <button class="tab-btn active" onclick="switchTab('armor')">🛡️ Armaduras</button>
-                <button class="tab-btn" onclick="switchTab('models')">👾 Entidades</button>
+                <button class="tab-btn active" onclick="switchTab('armor')">Armaduras</button>
+                <button class="tab-btn" onclick="switchTab('models')">Entidades</button>
             </div>
 
             <!-- MODO ARMADURA (SKINVIEW3D) -->
             <div id="tab-armor" class="tab-content active">
                 <div class="control-group">
-                    <label>📤 Camada 1 (Capacete, Peito, Botas)</label>
+                    <label>Camada 1 (Capacete, Peito, Botas)</label>
                     <div class="custom-file-input-wrapper">
                         <button class="file-upload-btn">Selecionar Arquivo PNG</button>
                         <input type="file" id="layer1Upload" accept="image/png" onchange="updateFileName(this)" />
                     </div>
                 </div>
                 <div class="control-group">
-                    <label>📤 Camada 2 (Calças)</label>
+                    <label>Camada 2 (Calças)</label>
                     <div class="custom-file-input-wrapper">
                         <button class="file-upload-btn">Selecionar Arquivo PNG</button>
                         <input type="file" id="layer2Upload" accept="image/png" onchange="updateFileName(this)" />
                     </div>
                 </div>
                 <div class="info-box">
-                    <strong>💡 Protocolo de Armadura:</strong><br>
-                    Carregue texturas PNG (padrão 64x32 ou HD 2:1) para projetar sobre o hospedeiro padrão.
+                    <strong>Protocolo de Armadura:</strong><br>
+                    Carregue texturas PNG (padrão 64x32 ou HD 2:1) para projetar sobre o manequim de testes.
                 </div>
             </div>
 
             <!-- MODO MODELOS 3D (GLTF/GLB) -->
             <div id="tab-models" class="tab-content">
                 <div class="control-group">
-                    <label>📤 Carregar Modelo (GLTF / GLB)</label>
+                    <label>Carregar Modelo (GLTF / GLB)</label>
                     <div class="custom-file-input-wrapper">
                         <button class="file-upload-btn">Selecionar Arquivo 3D</button>
                         <input type="file" id="modelUpload" accept=".gltf,.glb" onchange="updateFileName(this)" />
                     </div>
                 </div>
                 <div class="info-box">
-                    <strong>💡 Protocolo de Entidade:</strong><br>
-                    Visualize modelos complexos exportados do Blockbench. O sistema centralizará a anomalia automaticamente.
+                    <strong>Protocolo de Entidade:</strong><br>
+                    Visualize modelos complexos (como o Cérebro Metálico). O sistema de estabilização centralizará a anomalia automaticamente.
                 </div>
             </div>
 
             <!-- CONTROLES GLOBAIS -->
-            <div class="control-group" style="flex-direction: row; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
-                <label style="margin: 0;">🔄 Rotação Automática</label>
-                <input type="checkbox" id="autoRotate" checked style="accent-color: var(--sculk-accent); transform: scale(1.2);" />
+            <div class="control-group" style="flex-direction: row; align-items: center; justify-content: space-between; padding: 5px 0;">
+                <label style="margin: 0;">Rotação Automática</label>
+                <input type="checkbox" id="autoRotate" checked style="accent-color: var(--warden-bone); transform: scale(1.2);" />
             </div>
 
             <div class="control-group">
-                <label>🔍 Zoom / Intensidade</label>
+                <label>Foco Analítico (Zoom)</label>
                 <input type="range" id="zoomControl" min="0.5" max="3" step="0.1" value="1" />
             </div>
 
-            <button class="action-btn" onclick="resetViewer()">⚠️ REINICIAR SISTEMAS ⚠️</button>
+            <button class="action-btn" onclick="resetViewer()">Reiniciar Sensores</button>
 
-            <div class="status" id="status">Sensores Sculk Ativos. Aguardando vibração.</div>
+            <div class="status" id="status">Sistemas em Standby. Aguardando dados.</div>
         </div>
     </div>
 
     <footer>
-        <p>Vexanium Deep Dark Interface v2.1 | Powered by Three.js & skinview3d | © 2026</p>
+        <p>Vexanium Deep Dark Interface v2.3 | Powered by Three.js & skinview3d</p>
     </footer>
 
     <script>
-        // Pequena função para atualizar o texto do botão de arquivo
+        // Função auxiliar para UI
         function updateFileName(input) {
             const btn = input.previousElementSibling;
             if (input.files.length > 0) {
-                btn.textContent = "✅ " + input.files[0].name;
-                btn.style.color = "var(--sculk-accent)";
-                btn.style.borderColor = "#fff";
+                btn.textContent = input.files[0].name;
+                btn.style.color = "var(--sculk-core)";
+                btn.style.borderColor = "var(--sculk-core)";
             } else {
                 btn.textContent = btn.getAttribute('data-default-text');
+                btn.style.color = ""; btn.style.borderColor = "";
             }
         }
-        // Salva o texto original dos botões
+        
         document.querySelectorAll('.file-upload-btn').forEach(btn => btn.setAttribute('data-default-text', btn.textContent));
+
+        function updateStatus(message, type = 'info') {
+            const statusEl = document.getElementById('status');
+            statusEl.textContent = message;
+            statusEl.className = 'status ' + type;
+        }
 
         // ==========================================
         // SISTEMA 1: SKINVIEW3D (Armaduras)
@@ -362,11 +379,17 @@
         const skinViewer = new skinview3d.SkinViewer({
             canvas: skinCanvas,
             width: skinCanvas.parentElement.offsetWidth,
-            height: skinCanvas.parentElement.offsetHeight,
-            skin: 'https://crafatar.com/skins/MHF_Steve'
+            height: skinCanvas.parentElement.offsetHeight
         });
+        
+        // CATCH 1: Tenta carregar a skin base. Se o servidor cair, o catch previne o UNHANDLEDREJECTION.
+        skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(err => {
+            console.warn("[J.A.V.I.S] O servidor base de texturas está inativo. O manequim será carregado invisível.");
+            updateStatus('Manequim base inativo (falha de rede). Aguardando textura local.', 'error');
+        });
+
         skinViewer.controls.autoRotate = true;
-        skinViewer.controls.autoRotateSpeed = 2; // Um pouco mais lento e ameaçador
+        skinViewer.controls.autoRotateSpeed = 1.5; 
 
         let layer1Texture = null;
         let layer2Texture = null;
@@ -376,8 +399,13 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     layer1Texture = evt.target.result;
-                    skinViewer.loadSkin(layer1Texture);
-                    updateStatus('✓ Assinatura de Armadura (Camada 1) assimilada.', 'success');
+                    // CATCH 2: Previne travamento se a imagem local for inválida
+                    skinViewer.loadSkin(layer1Texture).then(() => {
+                        updateStatus('Assinatura biológica (Camada 1) carregada.', 'success');
+                    }).catch(err => {
+                        console.error(err);
+                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido ou formato inválido.', 'error');
+                    });
                 };
                 reader.readAsDataURL(e.target.files[0]);
             }
@@ -388,15 +416,20 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     layer2Texture = evt.target.result;
-                    skinViewer.loadCape(layer2Texture); // Usa a capa como "hack" para a segunda camada
-                    updateStatus('✓ Assinatura de Calças (Camada 2) assimilada.', 'success');
+                    // CATCH 3: Previne travamento se a imagem local for inválida
+                    skinViewer.loadCape(layer2Texture).then(() => {
+                        updateStatus('Assinatura biológica (Camada 2) carregada.', 'success');
+                    }).catch(err => {
+                        console.error(err);
+                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido ou formato inválido.', 'error');
+                    });
                 };
                 reader.readAsDataURL(e.target.files[0]);
             }
         });
 
         // ==========================================
-        // SISTEMA 2: THREE.JS GENÉRICO (Entidades/Armas)
+        // SISTEMA 2: THREE.JS GENÉRICO (Entidades)
         // ==========================================
         const gltfCanvas = document.getElementById('gltfViewer');
         const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true });
@@ -407,15 +440,14 @@
         const camera = new THREE.PerspectiveCamera(45, gltfCanvas.parentElement.offsetWidth / gltfCanvas.parentElement.offsetHeight, 0.1, 1000);
         camera.position.set(0, 0, 5);
 
-        // Iluminação Dramática do Deep Dark
-        const ambientLight = new THREE.AmbientLight(0x00ffa2, 0.4); // Luz ambiente ciano fraca
+        const ambientLight = new THREE.AmbientLight(0x0c8a8c, 0.6);
         scene.add(ambientLight);
         
-        const mainLight = new THREE.PointLight(0xffffff, 1, 100);
-        mainLight.position.set(5, 5, 5);
+        const mainLight = new THREE.PointLight(0xd1d5b4, 1.2, 100);
+        mainLight.position.set(5, 8, 5);
         scene.add(mainLight);
         
-        const rimLight = new THREE.PointLight(0x00ffa2, 2, 50); // Luz de borda ciano forte
+        const rimLight = new THREE.PointLight(0x13c9c9, 2, 50);
         rimLight.position.set(-5, 2, -5);
         scene.add(rimLight);
 
@@ -429,7 +461,7 @@
         function animateGltf() {
             requestAnimationFrame(animateGltf);
             if (isAutoRotating && currentModel) {
-                currentModel.rotation.y += 0.005; // Rotação lenta e pesada
+                currentModel.rotation.y += 0.005;
             }
             gltfControls.update();
             renderer.render(scene, camera);
@@ -440,7 +472,7 @@
         document.getElementById('modelUpload').addEventListener('change', function(e) {
             const file = e.target.files[0];
             if (file) {
-                updateStatus('⏳ Analisando estrutura molecular...', 'info');
+                updateStatus('Processando malha 3D...', 'info');
                 const url = URL.createObjectURL(file);
                 
                 loader.load(url, function(gltf) {
@@ -460,10 +492,10 @@
                     currentModel = group;
                     
                     scene.add(currentModel);
-                    updateStatus('✓ Entidade manifestada com sucesso.', 'success');
+                    updateStatus('Entidade materializada com sucesso.', 'success');
                 }, undefined, function(error) {
                     console.error(error);
-                    updateStatus('❌ Falha na materialização. Arquivo corrompido ou incompatível.', 'error');
+                    updateStatus('Falha na descompressão. Arquivo inválido ou corrompido.', 'error');
                 });
             }
         });
@@ -509,20 +541,13 @@
             isAutoRotating = true;
             document.getElementById('zoomControl').value = 1;
             
-            // Resetar botões de arquivo
             document.querySelectorAll('.file-upload-btn').forEach(btn => {
                 btn.textContent = btn.getAttribute('data-default-text');
                 btn.style.color = ""; btn.style.borderColor = "";
             });
             document.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
 
-            updateStatus('Sistemas reiniciados. Aguardando novo input.', 'success');
-        }
-
-        function updateStatus(message, type = 'info') {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            statusEl.className = 'status ' + type;
+            updateStatus('Sensores reiniciados e estabilizados.', 'success');
         }
 
         window.addEventListener('resize', () => {
