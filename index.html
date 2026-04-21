@@ -141,7 +141,7 @@
             max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* ESTÚDIO DE FATIAMENTO INTELIGENTE AVANÇADO */
+        /* ESTÚDIO DE CIRURGIA UV (DRAG AND DROP) */
         #slicer-modal { 
             width: 95vw; height: 95vh; max-width: 1600px; 
             border-color: var(--calib-accent); 
@@ -176,30 +176,26 @@
             font-size: 11px; color: var(--warden-bone-dim); font-weight: 800; 
             margin-top: 10px; border-bottom: 1px solid #222; padding-bottom: 3px;
             display: flex; justify-content: space-between; align-items: center;
+            text-transform: uppercase;
         }
 
-        .slice-btn {
+        .tool-btn {
             background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim);
-            padding: 8px 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
-            text-align: left; display: flex; align-items: center; justify-content: space-between; transition: 0.2s;
+            padding: 10px 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px;
+            text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s;
         }
-        .slice-btn:hover { background: #1f3447; }
+        .tool-btn:hover { background: #1f3447; }
+        .tool-btn.active { background: rgba(255, 170, 0, 0.2); border-color: var(--calib-accent); color: var(--calib-accent); }
+
+        .action-btn {
+            background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim);
+            padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
+            text-align: center; transition: 0.2s;
+        }
+        .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
         
-        .slice-btn.restore-btn {
-            background: rgba(255, 0, 0, 0.1); color: #ff5555; border-color: #ff5555;
-            justify-content: center; margin-bottom: 5px;
-        }
-        .slice-btn.restore-btn:hover { background: #ff5555; color: #fff; }
-
-        /* Cores de Identificação das Peças Específicas */
-        .slice-btn[data-part^="helmet"].active { background: rgba(186, 85, 211, 0.2); border-color: #ba55d3; color: #ba55d3; }
-        .slice-btn[data-part^="chest"].active { background: rgba(0, 255, 255, 0.2); border-color: #00ffff; color: #00ffff; }
-        .slice-btn[data-part^="arm"].active { background: rgba(50, 205, 50, 0.2); border-color: #32cd32; color: #32cd32; }
-        .slice-btn[data-part^="leg"].active { background: rgba(255, 215, 0, 0.2); border-color: #ffd700; color: #ffd700; }
-        .slice-btn[data-part^="boot"].active { background: rgba(255, 69, 0, 0.2); border-color: #ff4500; color: #ff4500; }
-
-        .slice-status { font-size: 10px; opacity: 0.5; }
-        .slice-status.done { color: #00ff00; opacity: 1; font-weight: 800; }
+        .delete-btn { border-color: #ff5555; color: #ff5555; }
+        .delete-btn:hover { background: #ff5555; color: #fff; }
 
         .editor-footer {
             flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;
@@ -244,51 +240,47 @@
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <!-- ESTÚDIO DE EXTRAÇÃO DESTRUTIVA -->
+    <!-- ESTÚDIO DE ARRASTAR E SOLTAR (DRAG AND DROP) -->
     <div id="slicer-modal" class="modal" style="display: none;">
-        <h3>✂️ BLOCO OPERATÓRIO: FATIADOR COM EXTRAÇÃO FÍSICA</h3>
+        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE</h3>
         
         <div class="editor-layout">
             <div class="editor-toolbar">
-                <div style="font-size:10px; color:var(--calib-accent); margin-bottom:5px; font-weight: bold;">PREPARAÇÃO E RECUPERAÇÃO</div>
-                <button class="slice-btn" style="margin-bottom: 5px; justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent);" onclick="removerFundoBranco()">
+                <div class="slice-category">PREPARAÇÃO</div>
+                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent);" onclick="removerFundoBranco()">
                     ✨ 0. Remover Fundo
                 </button>
-                <button class="slice-btn restore-btn" onclick="restaurarCorteAtivo()" title="Cola a peça atual de volta na imagem original.">
-                    ↺ Restaurar Peça Ativa
+
+                <div class="slice-category">FERRAMENTAS</div>
+                <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')">
+                    ✂️ Varinha Mágica (Extrair)
+                </button>
+                <button class="tool-btn" id="tool-move" onclick="setTool('move')">
+                    🖐️ Mover / Selecionar
                 </button>
 
-                <p style="font-size:10px; color:#aaa; margin:5px 0;"><b>Instruções:</b> Ao clicar na arte, a peça é <b>arrancada</b> do fundo. Pode arrastar a peça cortada livremente para libertar espaço para o próximo corte!</p>
+                <div class="slice-category">AÇÕES DA PEÇA SELECIONADA</div>
+                <button class="action-btn" onclick="duplicarPecaAtiva()">
+                    🖨️ Duplicar Peça
+                </button>
+                <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">
+                    🗑️ Apagar Peça
+                </button>
 
-                <!-- 1. CAPACETE -->
-                <div class="slice-category">1. CAPACETE / CABEÇA</div>
-                <button class="slice-btn active" data-part="helmet_front" onclick="setActiveSlice('helmet_front')">↳ Frente <span class="slice-status" id="status-helmet_front">[ ]</span></button>
-                <button class="slice-btn" data-part="helmet_side" onclick="setActiveSlice('helmet_side')">↳ Lados <span class="slice-status" id="status-helmet_side">[ ]</span></button>
-                <button class="slice-btn" data-part="helmet_back" onclick="setActiveSlice('helmet_back')">↳ Costas <span class="slice-status" id="status-helmet_back">[ ]</span></button>
-                <button class="slice-btn" data-part="helmet_top" onclick="setActiveSlice('helmet_top')">↳ Topo <span class="slice-status" id="status-helmet_top">[ ]</span></button>
+                <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; margin-bottom:5px;">
+                    <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);">
+                    🧲 Snap Magnético
+                </label>
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff;">
+                    <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);">
+                    📐 Exibir Molde UV
+                </label>
 
-                <!-- 2. TRONCO -->
-                <div class="slice-category">2. PEITORAL / TRONCO</div>
-                <button class="slice-btn" data-part="chest_front" onclick="setActiveSlice('chest_front')">↳ Frente <span class="slice-status" id="status-chest_front">[ ]</span></button>
-                <button class="slice-btn" data-part="chest_back" onclick="setActiveSlice('chest_back')">↳ Costas <span class="slice-status" id="status-chest_back">[ ]</span></button>
-
-                <!-- 3. BRAÇOS -->
-                <div class="slice-category">3. BRAÇOS / OMBROS</div>
-                <button class="slice-btn" data-part="arm_front" onclick="setActiveSlice('arm_front')">↳ Frente <span class="slice-status" id="status-arm_front">[ ]</span></button>
-                <button class="slice-btn" data-part="arm_side" onclick="setActiveSlice('arm_side')">↳ Lados <span class="slice-status" id="status-arm_side">[ ]</span></button>
-                <button class="slice-btn" data-part="arm_back" onclick="setActiveSlice('arm_back')">↳ Costas <span class="slice-status" id="status-arm_back">[ ]</span></button>
-
-                <!-- 4. PERNAS -->
-                <div class="slice-category">4. PERNAS / COXAS</div>
-                <button class="slice-btn" data-part="leg_front" onclick="setActiveSlice('leg_front')">↳ Frente <span class="slice-status" id="status-leg_front">[ ]</span></button>
-                <button class="slice-btn" data-part="leg_side" onclick="setActiveSlice('leg_side')">↳ Lados <span class="slice-status" id="status-leg_side">[ ]</span></button>
-                <button class="slice-btn" data-part="leg_back" onclick="setActiveSlice('leg_back')">↳ Costas <span class="slice-status" id="status-leg_back">[ ]</span></button>
-
-                <!-- 5. BOTAS -->
-                <div class="slice-category">5. BOTAS / PÉS</div>
-                <button class="slice-btn" data-part="boot_front" onclick="setActiveSlice('boot_front')">↳ Frente <span class="slice-status" id="status-boot_front">[ ]</span></button>
-                <button class="slice-btn" data-part="boot_side" onclick="setActiveSlice('boot_side')">↳ Lados <span class="slice-status" id="status-boot_side">[ ]</span></button>
-                <button class="slice-btn" data-part="boot_back" onclick="setActiveSlice('boot_back')">↳ Costas <span class="slice-status" id="status-boot_back">[ ]</span></button>
+                <div style="margin-top:auto; font-size:10px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
+                    <p><b>1.</b> Use a Varinha Mágica para extrair peças da arte.</p>
+                    <p><b>2.</b> Arraste a peça extraída para as caixas do Molde UV no fundo!</p>
+                </div>
             </div>
 
             <div class="editor-workspace">
@@ -298,7 +290,7 @@
 
         <div class="editor-footer">
             <button class="close-modal" style="background: transparent;" onclick="closeModal('slicer-modal')">Abortar Extração</button>
-            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="aplicarMontagemUV()">✅ Fundir e Atualizar Modelo 3D</button>
+            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="aplicarMontagemUVLivre()">✅ Fundir Textura Final ao 3D</button>
         </div>
     </div>
 
@@ -321,7 +313,7 @@
         <div class="btn-group">
             <button class="btn btn-ai" onclick="generateLore()">✨ LORE</button>
             <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()">🧠 ANALISAR</button>
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiador()">✂️ FATIADOR INDEPENDENTE</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()">✂️ ESTÚDIO DE MONTAGEM</button>
             <div class="loader" id="ai-loader"></div>
         </div>
 
@@ -393,91 +385,57 @@
     animate();
 
     // ============================================================================
-    // MÓDULO DE FATIAMENTO COM EXTRAÇÃO DESTRUTIVA (CORTA E MOVE)
+    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP PARA O MOLDE)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
     
-    // Este canvas guarda a imagem "Base" que vai sendo esburacada à medida que cortamos
+    // Canvas que guarda a imagem original sendo esburacada
     let offscreenCanvas = document.createElement('canvas');
     let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
-    let activePart = 'helmet_front';
+    let currentTool = 'magic'; // 'magic' ou 'move'
     let isDragging = false;
-    let dragTargetKey = null; // Guarda a chave da peça flutuante sendo arrastada
     let startX = 0, startY = 0;
-    let rectW = 0, rectH = 0;
     
-    // O Novo Dicionário Cirúrgico J.A.V.I.S.
-    // ox, oy = Posição original no fundo (para restaurar). dx, dy = Posição flutuante atual
-    let slices = {
-        helmet_front: { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ba55d3', uv: [[8,8,8,8]] },
-        helmet_side:  { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ba55d3', uv: [[0,8,8,8], [16,8,8,8]] }, 
-        helmet_top:   { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ba55d3', uv: [[8,0,8,8]] },
-        helmet_back:  { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ba55d3', uv: [[24,8,8,8]] },
+    // As peças que o utilizador cortou
+    // Formato: { id, imgData, x, y, w, h }
+    let extractedPieces = [];
+    let activePieceIndex = -1;
+    let nextPieceId = 1;
 
-        chest_front:  { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#00ffff', uv: [[20,20,8,12]] },
-        chest_back:   { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#00ffff', uv: [[32,20,8,12]] },
-
-        arm_front:    { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#32cd32', uv: [[44,20,4,12], [36,52,4,12]] }, 
-        arm_side:     { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#32cd32', uv: [[40,20,4,12], [48,20,4,12], [32,52,4,12], [40,52,4,12]] },
-        arm_back:     { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#32cd32', uv: [[52,20,4,12], [44,52,4,12]] },
-
-        leg_front:    { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ffd700', uv: [[4,20,4,12], [20,52,4,12]] },
-        leg_side:     { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ffd700', uv: [[0,20,4,12], [8,20,4,12], [16,52,4,12], [24,52,4,12]] },
-        leg_back:     { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ffd700', uv: [[12,20,4,12], [28,52,4,12]] },
-
-        boot_front:   { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ff4500', uv: [[4,26,4,6], [20,58,4,6]] },
-        boot_side:    { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ff4500', uv: [[0,26,4,6], [8,26,4,6], [16,58,4,6], [24,58,4,6]] },
-        boot_back:    { ox:0, oy:0, dx:0, dy:0, w:0, h:0, imgData:null, color:'#ff4500', uv: [[12,26,4,6], [28,58,4,6]] }
-    };
-
-    function abrirFatiador() {
+    function abrirFatiadorLivre() {
         if (!lastUploadedBase64 || currentMode !== 'armor') { 
-            alert("Aviso Operador: Carregue uma imagem base de Armadura gerada por IA primeiro."); 
+            alert("Aviso Operador: Carregue uma imagem base gerada por IA primeiro."); 
             return; 
         }
         document.getElementById('slicer-modal').style.display = 'flex';
         
         originalImageObj.onload = () => {
-            offscreenCanvas.width = originalImageObj.width;
-            offscreenCanvas.height = originalImageObj.height;
+            // O Workspace agora é SEMPRE 1024x1024 (HD Minecraft Formato 64x64)
+            wsCanvas.width = 1024;
+            wsCanvas.height = 1024;
+            
+            offscreenCanvas.width = 1024;
+            offscreenCanvas.height = 1024;
+            offscreenCtx.clearRect(0, 0, 1024, 1024);
+            
+            // Desenha a imagem da IA no topo esquerdo (ou centrada, consoante o tamanho)
             offscreenCtx.drawImage(originalImageObj, 0, 0);
 
-            wsCanvas.width = originalImageObj.width;
-            wsCanvas.height = originalImageObj.height;
-            
-            // Resetar
-            for (let k in slices) { 
-                slices[k].w = 0; slices[k].h = 0; slices[k].imgData = null;
-                let st = document.getElementById('status-'+k);
-                if(st) { st.innerText = "[ ]"; st.classList.remove('done'); }
-            }
-            setActiveSlice('helmet_front');
+            extractedPieces = [];
+            activePieceIndex = -1;
+            setTool('magic');
             renderFatiador();
         };
         originalImageObj.src = lastUploadedBase64;
     }
 
-    function setActiveSlice(part) {
-        activePart = part;
-        document.querySelectorAll('.slice-btn').forEach(b => b.classList.remove('active'));
-        document.querySelector(`.slice-btn[data-part="${part}"]`).classList.add('active');
-        wsCanvas.style.cursor = slices[part].imgData ? 'grab' : 'crosshair';
-    }
-
-    function restaurarCorteAtivo() {
-        let sl = slices[activePart];
-        if (sl.imgData) {
-            // Cola os píxeis de volta no canvas base nas coordenadas originais
-            offscreenCtx.putImageData(sl.imgData, sl.ox, sl.oy);
-            sl.imgData = null;
-            sl.w = 0; sl.h = 0;
-            let st = document.getElementById('status-' + activePart);
-            if(st) { st.innerText = "[ ]"; st.classList.remove('done'); }
-            renderFatiador();
-            wsCanvas.style.cursor = 'crosshair';
-        }
+    function setTool(tool) {
+        currentTool = tool;
+        document.getElementById('tool-magic').classList.toggle('active', tool === 'magic');
+        document.getElementById('tool-move').classList.toggle('active', tool === 'move');
+        wsCanvas.style.cursor = tool === 'magic' ? 'crosshair' : 'grab';
     }
 
     function removerFundoBranco() {
@@ -497,55 +455,123 @@
         document.getElementById('status-overlay').innerText = "✨ FUNDO BRANCO ELIMINADO";
     }
 
+    function duplicarPecaAtiva() {
+        if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
+            const p = extractedPieces[activePieceIndex];
+            extractedPieces.push({
+                id: nextPieceId++,
+                imgData: p.imgData,
+                x: p.x + 20, // Copia um pouco ao lado
+                y: p.y + 20,
+                w: p.w,
+                h: p.h
+            });
+            activePieceIndex = extractedPieces.length - 1;
+            setTool('move');
+            renderFatiador();
+        }
+    }
+
+    function apagarPecaAtiva() {
+        if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
+            extractedPieces.splice(activePieceIndex, 1);
+            activePieceIndex = -1;
+            renderFatiador();
+        }
+    }
+
+    // Desenha o Guia Visual do Minecraft no fundo
+    function desenharMoldeUV() {
+        if (!document.getElementById('show-grid').checked) return;
+        const f = 16; // Fator de escala (1024 / 64)
+        wsCtx.lineWidth = 1;
+        wsCtx.font = "bold 12px JetBrains Mono";
+        wsCtx.textAlign = "center";
+
+        const drawBox = (x, y, w, h, color, label) => {
+            wsCtx.strokeStyle = color;
+            wsCtx.fillStyle = color + "22"; // 13% opacity
+            wsCtx.strokeRect(x*f, y*f, w*f, h*f);
+            wsCtx.fillRect(x*f, y*f, w*f, h*f);
+            wsCtx.fillStyle = color;
+            wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + 16);
+        };
+
+        // Cabeça (Magenta)
+        drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
+        drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
+        drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
+        drawBox(8, 8, 8, 8, "#ba55d3", "ROSTO");
+        drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
+        drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
+
+        // Peito (Ciano)
+        drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
+        drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
+        drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
+        drawBox(20, 20, 8, 12, "#00ffff", "PEITO");
+        drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
+        drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
+
+        // Braço Direito (Verde)
+        drawBox(44, 16, 4, 4, "#32cd32", "TOP");
+        drawBox(48, 16, 4, 4, "#32cd32", "BOT");
+        drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
+        drawBox(44, 20, 4, 12, "#32cd32", "BR.DIR");
+        drawBox(48, 20, 4, 12, "#32cd32", "L.ESQ");
+        drawBox(52, 20, 4, 12, "#32cd32", "COSTAS");
+
+        // Braço Esquerdo (Verde)
+        drawBox(36, 48, 4, 4, "#32cd32", "TOP");
+        drawBox(40, 48, 4, 4, "#32cd32", "BOT");
+        drawBox(32, 52, 4, 12, "#32cd32", "L.DIR");
+        drawBox(36, 52, 4, 12, "#32cd32", "BR.ESQ");
+        drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
+        drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
+
+        // Perna Direita (Amarelo)
+        drawBox(4, 16, 4, 4, "#ffd700", "TOP");
+        drawBox(8, 16, 4, 4, "#ffd700", "BOT");
+        drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
+        drawBox(4, 20, 4, 12, "#ffd700", "PE.DIR");
+        drawBox(8, 20, 4, 12, "#ffd700", "L.ESQ");
+        drawBox(12, 20, 4, 12, "#ffd700", "COSTAS");
+
+        // Perna Esquerda (Amarelo)
+        drawBox(20, 48, 4, 4, "#ffd700", "TOP");
+        drawBox(24, 48, 4, 4, "#ffd700", "BOT");
+        drawBox(16, 52, 4, 12, "#ffd700", "L.DIR");
+        drawBox(20, 52, 4, 12, "#ffd700", "PE.ESQ");
+        drawBox(24, 52, 4, 12, "#ffd700", "L.ESQ");
+        drawBox(28, 52, 4, 12, "#ffd700", "COSTAS");
+    }
+
     function renderFatiador() {
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
         
-        // 1. Desenha a imagem base (que agora tem "buracos" onde cortámos as peças)
+        // 1. Desenha o Molde Oficial por baixo
+        desenharMoldeUV();
+
+        // 2. Desenha a Imagem Raw (Que tem buracos de onde as peças foram tiradas)
         wsCtx.drawImage(offscreenCanvas, 0, 0);
 
-        // 2. Sobreposição escura para focar nas peças ativas
-        wsCtx.fillStyle = "rgba(0, 0, 0, 0.7)";
-        wsCtx.fillRect(0, 0, wsCanvas.width, wsCanvas.height);
-
-        // 3. Desenha as peças que já foram extraídas (Autocolantes flutuantes)
-        for (let key in slices) {
-            let sl = slices[key];
-            if (sl.imgData) {
-                // Cria um canvas temporário para desenhar o imgData e o renderizar flutuando
-                let tempC = document.createElement('canvas');
-                tempC.width = sl.w; tempC.height = sl.h;
-                tempC.getContext('2d').putImageData(sl.imgData, 0, 0);
-                
-                wsCtx.drawImage(tempC, sl.dx, sl.dy);
-                
-                // Borda de identificação da peça cortada
-                wsCtx.strokeStyle = sl.color;
-                wsCtx.lineWidth = (key === activePart || key === dragTargetKey) ? 3 : 1;
-                if (key === activePart) wsCtx.setLineDash([5, 5]); else wsCtx.setLineDash([]);
-                wsCtx.strokeRect(sl.dx, sl.dy, sl.w, sl.h);
-                
-                wsCtx.fillStyle = sl.color + "33"; 
-                wsCtx.fillRect(sl.dx, sl.dy, sl.w, sl.h);
+        // 3. Desenha os autocolantes/peças extraídas
+        extractedPieces.forEach((p, i) => {
+            let tempC = document.createElement('canvas');
+            tempC.width = p.w; tempC.height = p.h;
+            tempC.getContext('2d').putImageData(p.imgData, 0, 0);
+            
+            wsCtx.drawImage(tempC, p.x, p.y);
+            
+            // Borda se estiver selecionada
+            if (i === activePieceIndex) {
+                wsCtx.strokeStyle = "var(--calib-accent)";
+                wsCtx.lineWidth = 2;
+                wsCtx.setLineDash([5, 5]);
+                wsCtx.strokeRect(p.x, p.y, p.w, p.h);
+                wsCtx.setLineDash([]);
             }
-        }
-
-        // 4. Desenha a caixa de seleção se estiver a arrastar uma NOVA seleção manual
-        if (isDragging && !dragTargetKey && rectW !== 0) {
-            let rx = rectW < 0 ? startX + rectW : startX;
-            let ry = rectH < 0 ? startY + rectH : startY;
-            let rw = Math.abs(rectW);
-            let rh = Math.abs(rectH);
-            
-            // Limpa a escuridão apenas na área de preview
-            wsCtx.clearRect(rx, ry, rw, rh);
-            wsCtx.drawImage(offscreenCanvas, rx, ry, rw, rh, rx, ry, rw, rh);
-            
-            wsCtx.strokeStyle = slices[activePart].color;
-            wsCtx.lineWidth = 2;
-            wsCtx.setLineDash([5, 5]);
-            wsCtx.strokeRect(rx, ry, rw, rh);
-            wsCtx.setLineDash([]);
-        }
+        });
     }
 
     // Seleção Mágica Baseada em Flood Fill
@@ -597,7 +623,7 @@
             }
         }
 
-        const p = 2; // Margem de segurança de corte
+        const p = 2; 
         return {
             x: Math.max(0, minX - p),
             y: Math.max(0, minY - p),
@@ -619,123 +645,101 @@
     wsCanvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(e);
         startX = pos.x; startY = pos.y;
-        isDragging = true;
-        dragTargetKey = null;
-        rectW = 0; rectH = 0;
 
-        // Verifica se clicou num autocolante que já foi cortado (procura de trás para frente para pegar a de cima)
-        let keys = Object.keys(slices).reverse();
-        for (let k of keys) {
-            let sl = slices[k];
-            if (sl.imgData && pos.x >= sl.dx && pos.x <= sl.dx + sl.w && pos.y >= sl.dy && pos.y <= sl.dy + sl.h) {
-                dragTargetKey = k;
-                setActiveSlice(k);
-                wsCanvas.style.cursor = 'grabbing';
-                break;
+        if (currentTool === 'move') {
+            activePieceIndex = -1;
+            // Procura de cima para baixo
+            for (let i = extractedPieces.length - 1; i >= 0; i--) {
+                let p = extractedPieces[i];
+                if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) {
+                    activePieceIndex = i;
+                    isDragging = true;
+                    wsCanvas.style.cursor = 'grabbing';
+                    
+                    // Traz para a frente
+                    let target = extractedPieces.splice(i, 1)[0];
+                    extractedPieces.push(target);
+                    activePieceIndex = extractedPieces.length - 1;
+                    break;
+                }
+            }
+            renderFatiador();
+        } 
+        else if (currentTool === 'magic') {
+            // Executa a extração
+            const box = selecaoMagica(Math.floor(pos.x), Math.floor(pos.y));
+            if (box && box.w > 5 && box.h > 5) {
+                // Copia
+                let imgD = offscreenCtx.getImageData(box.x, box.y, box.w, box.h);
+                // Apaga do fundo
+                offscreenCtx.clearRect(box.x, box.y, box.w, box.h);
+                
+                extractedPieces.push({
+                    id: nextPieceId++,
+                    imgData: imgD,
+                    x: box.x,
+                    y: box.y,
+                    w: box.w,
+                    h: box.h
+                });
+                
+                activePieceIndex = extractedPieces.length - 1;
+                setTool('move'); // Muda para a ferramenta de mover automaticamente!
+                renderFatiador();
             }
         }
     });
 
     wsCanvas.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
+        if (!isDragging || currentTool !== 'move' || activePieceIndex === -1) return;
         const pos = getMousePos(e);
-
-        if (dragTargetKey) {
-            // Está a arrastar uma peça já cortada pelo ecrã
-            let sl = slices[dragTargetKey];
-            sl.dx += pos.x - startX;
-            sl.dy += pos.y - startY;
-            startX = pos.x; startY = pos.y;
-        } else {
-            // Está a desenhar um retângulo novo
-            rectW = pos.x - startX;
-            rectH = pos.y - startY;
-        }
+        
+        let p = extractedPieces[activePieceIndex];
+        p.x += pos.x - startX;
+        p.y += pos.y - startY;
+        
+        startX = pos.x; startY = pos.y;
         renderFatiador();
     });
 
     wsCanvas.addEventListener('mouseup', (e) => {
-        if (!isDragging) return;
-        isDragging = false;
-        wsCanvas.style.cursor = slices[activePart].imgData ? 'grab' : 'crosshair';
-        
-        // Se largou uma peça flutuante, a ação termina aqui.
-        if (dragTargetKey) {
-            dragTargetKey = null;
+        if (isDragging && currentTool === 'move' && activePieceIndex !== -1) {
+            isDragging = false;
+            wsCanvas.style.cursor = 'grab';
+            
+            // Snap Magnético ao Molde (Alinha à grelha de 16 pixels)
+            if (document.getElementById('snap-grid').checked) {
+                let p = extractedPieces[activePieceIndex];
+                p.x = Math.round(p.x / 16) * 16;
+                p.y = Math.round(p.y / 16) * 16;
+            }
             renderFatiador();
-            return;
         }
-
-        // Se a peça ativa já tiver sido cortada, impede novo corte
-        let sl = slices[activePart];
-        if (sl.imgData) {
-            renderFatiador();
-            return;
-        }
-
-        const pos = getMousePos(e);
-        const dragDist = Math.hypot(pos.x - startX, pos.y - startY);
-        let finalBox = null;
-
-        if (dragDist < 5) {
-            finalBox = selecaoMagica(Math.floor(startX), Math.floor(startY));
-        } else {
-            let rx = rectW < 0 ? startX + rectW : startX;
-            let ry = rectH < 0 ? startY + rectH : startY;
-            finalBox = { x: rx, y: ry, w: Math.abs(rectW), h: Math.abs(rectH) };
-        }
-
-        // A MÁGICA DA EXTRAÇÃO DESTRUTIVA
-        if (finalBox && finalBox.w > 5 && finalBox.h > 5) {
-            sl.ox = finalBox.x; sl.oy = finalBox.y;
-            sl.dx = finalBox.x; sl.dy = finalBox.y;
-            sl.w = finalBox.w; sl.h = finalBox.h;
-            
-            // Copia os píxeis para a peça (o autocolante)
-            sl.imgData = offscreenCtx.getImageData(sl.ox, sl.oy, sl.w, sl.h);
-            
-            // APAGA os píxeis do fundo (destrutivo, assim as peças não se sobrepõem mais!)
-            offscreenCtx.clearRect(sl.ox, sl.oy, sl.w, sl.h);
-
-            let st = document.getElementById('status-' + activePart);
-            if(st) { st.innerText = "[✓]"; st.classList.add('done'); }
-            
-            wsCanvas.style.cursor = 'grab'; // Como extraiu, o mouse vira "Mão"
-        }
-        rectW = 0; rectH = 0;
-        renderFatiador();
     });
 
     // ============================================================================
-    // O ALQUIMISTA V3: FUSÃO MATEMÁTICA DAS PEÇAS EXTRAÍDAS
+    // A FUSÃO FINAL: O ECRÃ INTEIRO VIRA A TEXTURA
     // ============================================================================
-    function aplicarMontagemUV() {
+    function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
         outCanvas.height = 1024;
         const outCtx = outCanvas.getContext('2d');
-        const f = 16; 
 
-        Object.keys(slices).forEach(key => {
-            const sl = slices[key];
-            if (sl && sl.imgData) {
-                // Cria um canvas temporário para mapear a peça extraída
-                const tempCanvas = document.createElement('canvas');
-                tempCanvas.width = sl.w;
-                tempCanvas.height = sl.h;
-                tempCanvas.getContext('2d').putImageData(sl.imgData, 0, 0);
-
-                sl.uv.forEach(dest => {
-                    // Mapeia para a grelha final Minecraft [x, y, w, h]
-                    outCtx.drawImage(tempCanvas, 0, 0, sl.w, sl.h, dest[0]*f, dest[1]*f, dest[2]*f, dest[3]*f);
-                });
-            }
+        // Pega exatamente o que o utilizador arrastou e colou na tela
+        extractedPieces.forEach(p => {
+            const temp = document.createElement('canvas');
+            temp.width = p.w;
+            temp.height = p.h;
+            temp.getContext('2d').putImageData(p.imgData, 0, 0);
+            
+            outCtx.drawImage(temp, p.x, p.y);
         });
 
         const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
         
         skinViewer.loadSkin(finalArmaduraBase64);
-        statusOverlay.innerText = "✓ SIMBIOSE NEURAL: ARMADURA HD 64x64 MONTADA!";
+        statusOverlay.innerText = "✓ SIMBIOSE NEURAL: TEXTURA PERSONALIZADA MONTADA!";
         lastUploadedBase64 = finalArmaduraBase64; 
         
         closeModal('slicer-modal');
@@ -785,11 +789,11 @@
         const analysis = await callGemini({
             contents: [{ 
                 parts: [
-                    { text: "Analise esta textura. Aconselhe o Operador a usar a ferramenta FATIADOR INDEPENDENTE para recortar as peças da Concept Art com a extração mágica." },
+                    { text: "Analise esta textura. Aconselhe o Operador a usar o ESTÚDIO DE MONTAGEM para extrair peças com a Varinha Mágica e arrastar para o Molde UV." },
                     { inlineData: { mimeType: "image/png", data: lastUploadedBase64.split(',')[1] } }
                 ] 
             }],
-            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. Seja técnico e encorage o uso do Fatiador com extração mágica." }] }
+            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. Seja técnico." }] }
         });
         aiText.innerText = analysis;
     }
@@ -843,7 +847,7 @@
             const reader = new FileReader();
             reader.onload = (evt) => {
                 lastUploadedBase64 = evt.target.result; 
-                statusOverlay.innerText = "✓ ARTE BASE CARREGADA (Aguardando Fatiamento)";
+                statusOverlay.innerText = "✓ ARTE BASE CARREGADA (Aceda ao Estúdio de Montagem)";
             };
             reader.readAsDataURL(file);
         } else if (currentMode === 'model') {
