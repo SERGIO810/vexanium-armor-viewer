@@ -275,9 +275,14 @@
         
         <div class="editor-layout">
             <div class="editor-toolbar">
-                <div class="slice-category">PREPARAÇÃO</div>
+                <div class="slice-category">PREPARAÇÃO MULTI-IMAGEM</div>
+                <button class="tool-btn" style="justify-content: center; background: rgba(0, 255, 170, 0.1); border-color: var(--success); color: var(--success); margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">
+                    📥 1. Adicionar Nova Imagem
+                </button>
+                <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
+                
                 <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent);" onclick="removerFundoBranco()">
-                    ✨ 0. Remover Fundo
+                    ✨ 2. Remover Fundo
                 </button>
 
                 <div class="slice-category">FERRAMENTAS</div>
@@ -371,13 +376,13 @@
     let currentMode = 'armor';
     
     // Variáveis de Estado Duplo para suportar L1 e L2 em simultâneo
-    let baseImageL1 = null; // A arte bruta carregada para a Camada 1
-    let baseImageL2 = null; // A arte bruta carregada para a Camada 2
-    let finalImageL1 = null; // O PNG montado e fundido da Camada 1
-    let finalImageL2 = null; // O PNG montado e fundido da Camada 2
+    let baseImageL1 = null; 
+    let baseImageL2 = null; 
+    let finalImageL1 = null; 
+    let finalImageL2 = null; 
     
     let uploadTarget = 1; 
-    let currentEditingLayer = 1; // Controla qual camada (1 ou 2) o Bloco Operatório está a editar
+    let currentEditingLayer = 1; 
     
     let originalImageObj = new Image();
 
@@ -446,8 +451,6 @@
     let nextPieceId = 1;
 
     function abrirFatiadorLivre() {
-        // O utilizador abre o fatiador para a camada que carregou mais recentemente, 
-        // ou avisamos para carregar uma das duas.
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         
         if (!targetBase || currentMode !== 'armor') { 
@@ -455,7 +458,6 @@
             return; 
         }
 
-        // Atualiza a UI do Modal para indicar a camada
         let badge = document.getElementById('slicer-layer-badge');
         let hint = document.getElementById('hint-layer-name');
         if (currentEditingLayer === 1) {
@@ -473,7 +475,6 @@
         originalImageObj.onload = () => {
             wsCanvas.width = 1024;
             wsCanvas.height = 1024;
-            
             offscreenCanvas.width = 1024;
             offscreenCanvas.height = 1024;
             offscreenCtx.clearRect(0, 0, 1024, 1024);
@@ -486,6 +487,22 @@
         };
         originalImageObj.src = targetBase;
     }
+    
+    // Adicionar Múltiplas Imagens na mesma Sessão
+    document.getElementById('file-input-add').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const url = URL.createObjectURL(file);
+        const img = new Image();
+        img.onload = () => {
+            // Desenha a nova imagem no fundo sem apagar as anteriores!
+            offscreenCtx.drawImage(img, 0, 0);
+            renderFatiador();
+            document.getElementById('status-overlay').innerText = "✓ NOVA IMAGEM ADICIONADA À MESA";
+        };
+        img.src = url;
+        e.target.value = ""; 
+    };
 
     function setTool(tool) {
         currentTool = tool;
@@ -501,8 +518,13 @@
         const data = imgData.data;
 
         for (let i = 0; i < data.length; i += 4) {
-            if (data[i] > 220 && data[i+1] > 220 && data[i+2] > 220) {
+            // Clareza acima de 200 vira transparente
+            if (data[i] > 200 && data[i+1] > 200 && data[i+2] > 200) {
                 data[i+3] = 0; 
+            }
+            // E limpa também artefactos de JPEG quase transparentes (Falsas Paredes)
+            if (data[i+3] < 30) {
+                data[i+3] = 0;
             }
         }
         offscreenCtx.putImageData(imgData, 0, 0);
@@ -541,12 +563,14 @@
         }
     }
 
+    // Molde Limpo e Focado nas Camadas
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
         const f = 16; 
         wsCtx.lineWidth = 1;
         wsCtx.font = "bold 12px JetBrains Mono";
         wsCtx.textAlign = "center";
+        wsCtx.textBaseline = "middle";
 
         const drawBox = (x, y, w, h, color, label) => {
             wsCtx.strokeStyle = color;
@@ -554,54 +578,71 @@
             wsCtx.strokeRect(x*f, y*f, w*f, h*f);
             wsCtx.fillRect(x*f, y*f, w*f, h*f);
             wsCtx.fillStyle = color;
-            wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + 16);
+            wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2);
         };
 
-        // Cabeça
-        drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
-        drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
-        drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
-        drawBox(8, 8, 8, 8, "#ba55d3", "ROSTO");
-        drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
-        drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
+        if (currentEditingLayer === 1) {
+            // Cabeça
+            drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
+            drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
+            drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
+            drawBox(8, 8, 8, 8, "#ba55d3", "ROSTO");
+            drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
+            drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
 
-        // Peito
-        drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
-        drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
-        drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
-        drawBox(20, 20, 8, 12, "#00ffff", "PEITO");
-        drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
-        drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
+            // Peito
+            drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
+            drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
+            drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
+            drawBox(20, 20, 8, 12, "#00ffff", "PEITO");
+            drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
+            drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
 
-        // Braços
-        drawBox(44, 16, 4, 4, "#32cd32", "TOP");
-        drawBox(48, 16, 4, 4, "#32cd32", "BOT");
-        drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
-        drawBox(44, 20, 4, 12, "#32cd32", "BR.DIR");
-        drawBox(48, 20, 4, 12, "#32cd32", "L.ESQ");
-        drawBox(52, 20, 4, 12, "#32cd32", "COSTAS");
+            // Braços
+            drawBox(44, 16, 4, 4, "#32cd32", "TOP");
+            drawBox(48, 16, 4, 4, "#32cd32", "BOT");
+            drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
+            drawBox(44, 20, 4, 12, "#32cd32", "BR.DIR");
+            drawBox(48, 20, 4, 12, "#32cd32", "L.ESQ");
+            drawBox(52, 20, 4, 12, "#32cd32", "COSTAS");
 
-        drawBox(36, 48, 4, 4, "#32cd32", "TOP");
-        drawBox(40, 48, 4, 4, "#32cd32", "BOT");
-        drawBox(32, 52, 4, 12, "#32cd32", "L.DIR");
-        drawBox(36, 52, 4, 12, "#32cd32", "BR.ESQ");
-        drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
-        drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
+            drawBox(36, 48, 4, 4, "#32cd32", "TOP");
+            drawBox(40, 48, 4, 4, "#32cd32", "BOT");
+            drawBox(32, 52, 4, 12, "#32cd32", "L.DIR");
+            drawBox(36, 52, 4, 12, "#32cd32", "BR.ESQ");
+            drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
+            drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
 
-        // Pernas (L2 foca aqui principalmente)
-        drawBox(4, 16, 4, 4, "#ffd700", "TOP");
-        drawBox(8, 16, 4, 4, "#ffd700", "BOT");
-        drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
-        drawBox(4, 20, 4, 12, "#ffd700", "PE.DIR");
-        drawBox(8, 20, 4, 12, "#ffd700", "L.ESQ");
-        drawBox(12, 20, 4, 12, "#ffd700", "COSTAS");
+            // Botas (Metade inferior do mapeamento de pernas)
+            drawBox(4, 26, 4, 6, "#ff4500", "BOTA");
+            drawBox(12, 26, 4, 6, "#ff4500", "B.COST");
+            drawBox(20, 58, 4, 6, "#ff4500", "BOTA");
+            drawBox(28, 58, 4, 6, "#ff4500", "B.COST");
+        } 
+        else if (currentEditingLayer === 2) {
+            // Cintura (O cinto da calça mapeia na área do Peito da L2)
+            drawBox(20, 16, 8, 4, "#00ffaa", "C.TOP");
+            drawBox(28, 16, 8, 4, "#00ffaa", "C.BOT");
+            drawBox(16, 20, 4, 12, "#00ffaa", "L.DIR");
+            drawBox(20, 20, 8, 12, "#00ffaa", "CINTURA");
+            drawBox(28, 20, 4, 12, "#00ffaa", "L.ESQ");
+            drawBox(32, 20, 8, 12, "#00ffaa", "COSTAS");
 
-        drawBox(20, 48, 4, 4, "#ffd700", "TOP");
-        drawBox(24, 48, 4, 4, "#ffd700", "BOT");
-        drawBox(16, 52, 4, 12, "#ffd700", "L.DIR");
-        drawBox(20, 52, 4, 12, "#ffd700", "PE.ESQ");
-        drawBox(24, 52, 4, 12, "#ffd700", "L.ESQ");
-        drawBox(28, 52, 4, 12, "#ffd700", "COSTAS");
+            // Pernas
+            drawBox(4, 16, 4, 4, "#ffd700", "TOP");
+            drawBox(8, 16, 4, 4, "#ffd700", "BOT");
+            drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
+            drawBox(4, 20, 4, 12, "#ffd700", "PE.DIR");
+            drawBox(8, 20, 4, 12, "#ffd700", "L.ESQ");
+            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS");
+
+            drawBox(20, 48, 4, 4, "#ffd700", "TOP");
+            drawBox(24, 48, 4, 4, "#ffd700", "BOT");
+            drawBox(16, 52, 4, 12, "#ffd700", "L.DIR");
+            drawBox(20, 52, 4, 12, "#ffd700", "PE.ESQ");
+            drawBox(24, 52, 4, 12, "#ffd700", "L.ESQ");
+            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS");
+        }
     }
 
     function renderFatiador() {
@@ -665,7 +706,8 @@
                         const idx = ny * w + nx;
                         if (visited[idx] === 0) {
                             visited[idx] = 1;
-                            if (data[idx * 4 + 3] > 0) { 
+                            // Tolerância aumentada para evitar as Linhas Invisíveis de artefactos JPEG
+                            if (data[idx * 4 + 3] > 30) { 
                                 queueX[tail] = nx; queueY[tail] = ny; tail++;
                             }
                         }
@@ -674,7 +716,7 @@
             }
         }
 
-        const p = 2; 
+        const p = 3; // Margem de segurança generosa para cortes perfeitos
         return {
             x: Math.max(0, minX - p),
             y: Math.max(0, minY - p),
@@ -718,6 +760,7 @@
             let sx = Math.floor(pos.x);
             let sy = Math.floor(pos.y);
             
+            // TRAVA DE SEGURANÇA para cliques nas bordas (Evita travamentos do Motor)
             sx = Math.max(0, Math.min(offscreenCanvas.width - 1, sx));
             sy = Math.max(0, Math.min(offscreenCanvas.height - 1, sy));
 
@@ -767,7 +810,6 @@
         }
     });
 
-    // Funde as imagens consoante a camada que estamos a editar
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
@@ -791,8 +833,6 @@
             statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) MONTADA E VESTIDA!";
         } else {
             finalImageL2 = finalArmaduraBase64;
-            // No Skinview3D o 'loadCape' ou pintar partes das calças é usado para simular a L2.
-            // Para manter a estabilidade da visualização base sem conflito com a L1, usamos a capa.
             skinViewer.loadCape(finalImageL2); 
             statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) MONTADA!";
         }
@@ -800,7 +840,6 @@
         closeModal('slicer-modal');
     }
 
-    // Exportação com Nome Automático de Acordo com o Minecraft
     function baixarTextura(layer) {
         let imageData = layer === 1 ? finalImageL1 : finalImageL2;
         let fileName = layer === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
@@ -819,15 +858,8 @@
     }
 
     // ============================================================================
-    // CONTROLES DE INTERFACE & UPLOADS
+    // CONTROLES DE INTERFACE E UPLOADS
     // ============================================================================
-    function showModal(modalId, title, initialText) {
-        document.getElementById(modalId).style.display = 'flex';
-        document.getElementById(modalId).style.flexDirection = 'column';
-        if(title) document.getElementById('modal-title').innerText = title;
-        if(initialText) aiText.innerText = initialText;
-    }
-    
     function closeModal(modalId) { 
         document.getElementById(modalId).style.display = 'none'; 
         scanner.style.display = 'none'; 
@@ -859,12 +891,7 @@
 
     function triggerUpload(targetId) { 
         uploadTarget = targetId; 
-        
-        // Define qual camada será editada com base no botão clicado (L1 ou L2)
-        if (targetId === 1 || targetId === 2) {
-            currentEditingLayer = targetId;
-        }
-
+        if (targetId === 1 || targetId === 2) currentEditingLayer = targetId;
         fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg";
         fileInput.click(); 
     }
