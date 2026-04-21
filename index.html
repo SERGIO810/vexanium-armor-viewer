@@ -111,7 +111,7 @@
 
         #file-input { display: none; }
 
-        /* HUD DE STATUS (Canto Superior Esquerdo) */
+        /* HUD DE STATUS */
         #status-overlay {
             position: absolute; top: 20px; left: 20px;
             font-size: 12px; color: var(--sculk-glow);
@@ -126,12 +126,14 @@
         /* MODAIS GERAIS */
         .modal {
             position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 85%; max-width: 550px; background: rgba(5, 10, 15, 0.95);
-            border: 2px solid var(--sculk-core); padding: 30px; border-radius: 8px;
+            background: rgba(5, 10, 15, 0.98);
+            border: 2px solid var(--sculk-core); padding: 25px; border-radius: 8px;
             box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1);
             z-index: 100; display: none; color: var(--warden-bone);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(15px);
         }
+
+        #ai-modal { width: 85%; max-width: 550px; }
 
         .modal h3 { 
             color: var(--sculk-core); margin-top: 0; font-size: 18px; 
@@ -144,45 +146,67 @@
             max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* MÓDULO DE CALIBRAÇÃO UV */
-        #calib-modal { border-color: var(--calib-accent); max-width: 600px; }
-        #calib-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); }
+        /* O NOVO ESTÚDIO DE CALIBRAÇÃO (FATIADOR UV) */
+        #calib-modal { 
+            width: 95vw; height: 90vh; max-width: 1400px; 
+            border-color: var(--calib-accent); 
+            display: flex; flex-direction: column;
+        }
+        #calib-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; }
         
-        .uv-container {
-            width: 100%; height: 240px; background: #111;
-            border: 1px solid var(--warden-bone-dim); margin: 20px 0;
+        .editor-layout {
+            display: flex; flex: 1; gap: 20px; overflow: hidden;
+        }
+
+        .editor-toolbar {
+            flex: 0 0 220px; background: rgba(0,0,0,0.5); border: 1px solid var(--warden-bone-dim);
+            border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+        }
+
+        .editor-workspace {
+            flex: 1; background: #0a0a0a; border: 1px solid var(--warden-bone-dim); border-radius: 6px;
             position: relative; display: flex; justify-content: center; align-items: center;
-            overflow: hidden;
-            background-image: linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a), 
-                              linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a);
-            background-size: 10px 10px; background-position: 0 0, 5px 5px;
-            box-shadow: inset 0 0 20px rgba(0,0,0,1);
+            overflow: auto;
+            background-image: linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111), 
+                              linear-gradient(45deg, #111 25%, transparent 25%, transparent 75%, #111 75%, #111);
+            background-size: 20px 20px; background-position: 0 0, 10px 10px;
         }
 
-        #uv-canvas-2d {
-            image-rendering: pixelated; transform: scale(3.5); transform-origin: center;
-            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        /* O Canvas onde a magia acontece */
+        #workspace-canvas {
+            image-rendering: pixelated; 
+            box-shadow: 0 0 20px rgba(0,0,0,1);
+            cursor: crosshair; /* Muda baseado na ferramenta */
         }
 
-        .calib-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 140px; margin: 0 auto; }
-        .calib-btn {
-            background: var(--sculk-base); color: var(--calib-accent); border: 1px solid var(--calib-accent);
-            padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 14px;
-            transition: 0.1s;
+        /* Grelha Overlay do Minecraft */
+        #grid-overlay {
+            position: absolute; pointer-events: none;
+            width: 100%; height: 100%; top: 0; left: 0;
+            image-rendering: pixelated;
+            opacity: 0.5;
         }
-        .calib-btn:active { background: var(--calib-accent); color: #000; transform: scale(0.95); }
-        .calib-btn-empty { visibility: hidden; }
+
+        .tool-btn {
+            background: var(--sculk-base); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim);
+            padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px;
+            text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s;
+        }
+        .tool-btn:hover { background: #1f3447; }
+        .tool-btn.active { background: rgba(255, 170, 0, 0.2); border-color: var(--calib-accent); color: var(--calib-accent); }
+
+        .editor-footer {
+            flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px;
+        }
 
         .close-modal {
             background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim);
-            color: #fff; cursor: pointer; width: 100%;
-            padding: 15px; font-size: 13px; border-radius: 4px;
-            font-weight: 800; text-transform: uppercase; margin-top: 15px;
-            transition: 0.2s; letter-spacing: 1px;
+            color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px;
+            font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px;
         }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
 
-        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
 
@@ -199,83 +223,93 @@
 
 <div id="javis-widget-container">
     
-    <!-- HUD SUPERIOR (Aviso de Status) -->
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
-    <!-- ÁREA 3D GIGANTE -->
     <div class="viewer-area">
         <div id="scanning-overlay"></div>
         <canvas id="skinViewer"></canvas>
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAL IA -->
+    <!-- MODAL IA LORE -->
     <div id="ai-modal" class="modal">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <!-- MODAL CALIBRAÇÃO UV -->
-    <div id="calib-modal" class="modal">
-        <h3>✂️ CALIBRAÇÃO DE MALHA UV</h3>
-        <p style="font-size: 12px; color: var(--warden-bone-dim); margin-top: -5px; line-height: 1.5;">Ajuste o offset da imagem gerada pela IA para encaixar no molde 64x32 padrão do Minecraft.</p>
+    <!-- NOVO: ESTÚDIO DE RECONSTRUÇÃO E FATIAMENTO UV -->
+    <div id="calib-modal" class="modal" style="display: none;">
+        <h3>✂️ BLOCO OPERATÓRIO: RECONSTRUÇÃO DE MALHA UV</h3>
         
-        <div class="uv-container">
-            <canvas id="uv-canvas-2d" width="64" height="32"></canvas>
+        <div class="editor-layout">
+            <div class="editor-toolbar">
+                <div style="font-size:10px; color:var(--warden-bone-dim); margin-bottom:5px;">AÇÕES RÁPIDAS</div>
+                <button class="tool-btn" onclick="limparFundoBranco()">✨ Remover Fundo Branco</button>
+                <button class="tool-btn" onclick="limparTudo()">🗑️ Resetar Original</button>
+                
+                <div style="font-size:10px; color:var(--warden-bone-dim); margin:10px 0 5px;">FERRAMENTAS</div>
+                <button class="tool-btn active" id="tool-move" onclick="setEditorTool('move')">🖐️ Mover Peças</button>
+                <button class="tool-btn" id="tool-slice" onclick="setEditorTool('slice')">✂️ Fatiar Seleção</button>
+                
+                <div style="font-size:10px; color:var(--warden-bone-dim); margin:10px 0 5px;">OPÇÕES TÁTICAS</div>
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);">
+                    🧲 Snap Magnético (16px)
+                </label>
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer;">
+                    <input type="checkbox" id="show-grid" checked onchange="toggleGridOverlay()" style="accent-color: var(--calib-accent);">
+                    📐 Exibir Molde UV
+                </label>
+
+                <div style="margin-top:auto; font-size:10px; color:var(--warden-bone-dim);">
+                    <p><b>Dica 1:</b> Selecione "Fatiar" e arraste sobre uma peça para separá-la.</p>
+                    <p><b>Dica 2:</b> Selecione "Mover" para alinhar as peças fatiadas no molde correto.</p>
+                </div>
+            </div>
+
+            <div class="editor-workspace" id="workspace-container">
+                <div style="position: relative;">
+                    <!-- Canvas de desenho -->
+                    <canvas id="workspace-canvas"></canvas>
+                    <!-- Molde de referência overlay -->
+                    <canvas id="grid-overlay"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <div style="font-size: 13px; color: var(--calib-accent); font-weight: bold; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px; border-left: 2px solid var(--calib-accent);">
-                Eixo X: <span id="val-x">0</span>px<br>
-                Eixo Y: <span id="val-y">0</span>px
-            </div>
-            
-            <div class="calib-controls">
-                <div class="calib-btn-empty"></div>
-                <button class="calib-btn" onclick="shiftUV(0, -1)">▲</button>
-                <div class="calib-btn-empty"></div>
-                <button class="calib-btn" onclick="shiftUV(-1, 0)">◀</button>
-                <button class="calib-btn" onclick="shiftUV(0, 1)">▼</button>
-                <button class="calib-btn" onclick="shiftUV(1, 0)">▶</button>
-            </div>
+        <div class="editor-footer">
+            <button class="close-modal" style="background: transparent;" onclick="closeModal('calib-modal')">Abortar</button>
+            <button class="close-modal" style="border-color: var(--sculk-glow); color: var(--sculk-glow);" onclick="exportarTexturaJson()">💾 Baixar (PNG + JSON)</button>
+            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="aplicarAo3D()">✅ Atualizar Modelo 3D</button>
         </div>
-
-        <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent);" onclick="applyCalibration()">Aplicar ao Modelo 3D</button>
-        <button class="close-modal" style="margin-top: 10px; background: transparent;" onclick="closeModal('calib-modal')">Cancelar Operação</button>
     </div>
 
-    <!-- BARRA TÁTICA INFERIOR (Onde toda a magia acontece agora) -->
+    <!-- BARRA TÁTICA INFERIOR -->
     <div class="control-bar">
-        
-        <!-- Bloco Esquerdo: Tipos de Visualização -->
         <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="switchMode('armor')" title="Visualizar Armaduras">🛡️ Armadura</button>
-            <button class="btn" id="btn-model" onclick="switchMode('model')" title="Visualizar Entidades">👾 Entidade</button>
+            <button class="btn active" id="btn-armor" onclick="switchMode('armor')">🛡️ Armadura</button>
+            <button class="btn" id="btn-model" onclick="switchMode('model')">👾 Entidade</button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Bloco Central: Uploads Dinâmicos -->
         <div class="btn-group" id="upload-group">
-            <!-- Aparecem no Modo Armadura -->
-            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Carregar Camada 1 (Capacete/Peito/Botas)">📤 Upload L1 (Corpo)</button>
-            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Carregar Camada 2 (Calças)">📤 Upload L2 (Calças)</button>
-            <!-- Aparece no Modo Modelo 3D -->
-            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)" title="Carregar Entidade 3D">📤 Importar Malha (.gltf)</button>
+            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)">📤 Upload L1 (Corpo)</button>
+            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)">📤 Upload L2 (Calças)</button>
+            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)">📤 Importar Malha (.gltf)</button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- Bloco Direito: Ferramentas e IA -->
         <div class="btn-group">
-            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore da Criatura">✨ LORE</button>
-            <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()" title="Pedir à IA para encontrar erros na textura">🧠 ALINHAR</button>
-            <button class="btn btn-calib" id="btn-calib" onclick="openCalibration()" title="Ajustar coordenadas UV manualmente">✂️ CALIBRAR</button>
+            <button class="btn btn-ai" onclick="generateLore()">✨ LORE</button>
+            <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()">🧠 ALINHAR</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirEstudioReconstrucao()">✂️ ESTÚDIO UV</button>
             <div class="loader" id="ai-loader"></div>
         </div>
 
-        <div style="flex: 1;"></div> <!-- Empurra os créditos para a direita -->
+        <div style="flex: 1;"></div>
 
         <a id="javis-branding-main" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
             Powered by <b>J.A.V.I.S.</b>
@@ -286,15 +320,14 @@
 <input type="file" id="file-input">
 
 <script>
+    // ============================================================================
+    // NÚCLEO J.A.V.I.S. & THREE.JS
+    // ============================================================================
     const apiKey = ""; // Provisionada em runtime
     let currentMode = 'armor';
     let lastUploadedBase64 = null; 
-    let uploadTarget = 1; // 1 = L1, 2 = L2, 3 = GLTF
-    
-    // Variáveis de Calibração UV
-    let uvOffsetX = 0;
-    let uvOffsetY = 0;
-    let sourceImage = new Image();
+    let uploadTarget = 1; // 1=L1, 2=L2, 3=GLTF
+    let originalImageObj = new Image();
 
     const loader = document.getElementById('ai-loader');
     const scanner = document.getElementById('scanning-overlay');
@@ -302,7 +335,7 @@
     const statusOverlay = document.getElementById('status-overlay');
     const fileInput = document.getElementById('file-input');
 
-    // --- PROTOCOLO DE INTEGRIDADE ---
+    // Integridade
     (function(){
         const _0xPR0T = ["sergio810.github.io", "localhost", "127.0.0.1"];
         const _0xLINK = "https://sergio810.github.io/vexanium-armor-viewer/";
@@ -317,16 +350,13 @@
         setInterval(_0xV3RIFY, 6000);
     })();
 
-    // --- CONFIGURAÇÃO DOS MOTORES 3D ---
+    // Motores 3D
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
-        canvas: skinCanvas,
-        width: skinCanvas.parentElement.clientWidth,
-        height: skinCanvas.parentElement.clientHeight
+        canvas: skinCanvas, width: skinCanvas.parentElement.clientWidth, height: skinCanvas.parentElement.clientHeight
     });
     skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
-    skinViewer.controls.autoRotate = true;
-    skinViewer.controls.autoRotateSpeed = 1.5;
+    skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
 
     const gltfCanvas = document.getElementById('gltfViewer');
     const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true });
@@ -342,12 +372,299 @@
     function animate() {
         requestAnimationFrame(animate);
         if (currentMode === 'model' && currentModel) currentModel.rotation.y += 0.005;
-        controls.update();
-        renderer.render(scene, camera);
+        controls.update(); renderer.render(scene, camera);
     }
     animate();
 
-    // --- MÓDULOS DE IA GEMINI ---
+    // ============================================================================
+    // MÓDULO DE RECONSTRUÇÃO UV (O FATIADOR)
+    // ============================================================================
+    const wsCanvas = document.getElementById('workspace-canvas');
+    const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
+    const gridOverlay = document.getElementById('grid-overlay');
+    const gridCtx = gridOverlay.getContext('2d', { willReadFrequently: true });
+
+    let editorPieces = []; 
+    // Piece structure: { imgData: ImageData, x: num, y: num, w: num, h: num }
+    
+    let currentTool = 'move'; // 'move' or 'slice'
+    let isDragging = false;
+    let dragTargetIndex = -1;
+    let startX = 0, startY = 0;
+    let rectW = 0, rectH = 0; // Para fatiar
+
+    // Ajusta a escala visual do canvas no CSS (Não a resolução interna)
+    const VISUAL_SCALE = 1.0; 
+
+    function abrirEstudioReconstrucao() {
+        if (!lastUploadedBase64 || currentMode !== 'armor') { 
+            alert("Aviso Operador: Carregue uma textura gerada pela IA (PNG) para iniciar o fatiamento."); 
+            return; 
+        }
+        document.getElementById('calib-modal').style.display = 'flex';
+        setEditorTool('move');
+        
+        originalImageObj.onload = () => {
+            // Define o tamanho real baseado na imagem (ex: 1024x512)
+            wsCanvas.width = originalImageObj.width;
+            wsCanvas.height = originalImageObj.height;
+            gridOverlay.width = originalImageObj.width;
+            gridOverlay.height = originalImageObj.height;
+
+            // Desenhar a grelha Minecraft adaptada ao tamanho
+            desenharGrelhaMinecraft();
+
+            limparTudo(); // Inicia com a imagem inteira como peça 0
+        };
+        originalImageObj.src = lastUploadedBase64;
+    }
+
+    function limparTudo() {
+        wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
+        wsCtx.drawImage(originalImageObj, 0, 0);
+        
+        let initialImgData = wsCtx.getImageData(0, 0, wsCanvas.width, wsCanvas.height);
+        editorPieces = [{
+            x: 0, y: 0, w: wsCanvas.width, h: wsCanvas.height, imgData: initialImgData
+        }];
+        renderizarEstudio();
+    }
+
+    function limparFundoBranco() {
+        // Percorre todas as peças e transforma branco puro (ou quase) em alpha 0
+        editorPieces.forEach(piece => {
+            let data = piece.imgData.data;
+            for(let i = 0; i < data.length; i += 4) {
+                // Se R, G, B > 235 (Branco ou quase branco das IAs)
+                if(data[i] > 235 && data[i+1] > 235 && data[i+2] > 235) {
+                    data[i+3] = 0; // Alpha transparente
+                }
+            }
+        });
+        renderizarEstudio();
+        statusOverlay.innerText = "✓ FUNDO BRANCO ELIMINADO";
+    }
+
+    function setEditorTool(tool) {
+        currentTool = tool;
+        document.getElementById('tool-move').classList.toggle('active', tool === 'move');
+        document.getElementById('tool-slice').classList.toggle('active', tool === 'slice');
+        wsCanvas.style.cursor = tool === 'move' ? 'grab' : 'crosshair';
+    }
+
+    function toggleGridOverlay() {
+        gridOverlay.style.display = document.getElementById('show-grid').checked ? 'block' : 'none';
+    }
+
+    function desenharGrelhaMinecraft() {
+        // O Minecraft usa moldes proporcionais a 64x32.
+        // Calculamos o fator multiplicador (Ex: se a imagem tem 1024x512, fator é 1024/64 = 16)
+        let fator = wsCanvas.width / 64;
+        gridCtx.clearRect(0, 0, gridOverlay.width, gridOverlay.height);
+        gridCtx.strokeStyle = "rgba(255, 170, 0, 0.4)";
+        gridCtx.lineWidth = 2;
+
+        // Função auxiliar para desenhar as caixas UV do Minecraft
+        const drawUVBox = (x, y, w, h, name) => {
+            gridCtx.strokeRect(x * fator, y * fator, w * fator, h * fator);
+            gridCtx.fillStyle = "rgba(255, 170, 0, 0.5)";
+            gridCtx.font = `${Math.max(10, fator * 2)}px JetBrains Mono`;
+            gridCtx.fillText(name, (x * fator) + 2, (y * fator) + (fator * 3));
+        };
+
+        // Molde Clássico de Camada 1 e 2
+        drawUVBox(0, 0, 32, 16, "CABEÇA");
+        drawUVBox(16, 16, 24, 16, "TRONCO");
+        drawUVBox(40, 16, 16, 16, "BRAÇO D");
+        drawUVBox(32, 48, 16, 16, "BRAÇO E"); // Para 64x64, mas mantemos mapeado
+        drawUVBox(0, 16, 16, 16, "PERNA D");
+        drawUVBox(16, 48, 16, 16, "PERNA E");
+    }
+
+    function renderizarEstudio() {
+        wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
+        // Desenha as peças do fundo para a frente
+        editorPieces.forEach((piece, index) => {
+            if(piece.imgData) {
+                wsCtx.putImageData(piece.imgData, piece.x, piece.y);
+                // Desenha borda se for a peça sendo movida
+                if(currentTool === 'move' && isDragging && dragTargetIndex === index) {
+                    wsCtx.strokeStyle = "var(--calib-accent)";
+                    wsCtx.lineWidth = 1;
+                    wsCtx.strokeRect(piece.x, piece.y, piece.w, piece.h);
+                }
+            }
+        });
+
+        // Desenha a caixa de fatiamento atual
+        if (currentTool === 'slice' && isDragging) {
+            wsCtx.strokeStyle = "var(--ai-accent)";
+            wsCtx.lineWidth = 2;
+            wsCtx.setLineDash([5, 5]);
+            wsCtx.strokeRect(startX, startY, rectW, rectH);
+            wsCtx.setLineDash([]);
+        }
+    }
+
+    // Eventos do Rato no Editor
+    function getMousePos(e) {
+        const rect = wsCanvas.getBoundingClientRect();
+        // Converte a coordenada do ecrã para a coordenada real do Canvas HD
+        const scaleX = wsCanvas.width / rect.width;
+        const scaleY = wsCanvas.height / rect.height;
+        return {
+            x: (e.clientX - rect.left) * scaleX,
+            y: (e.clientY - rect.top) * scaleY
+        };
+    }
+
+    wsCanvas.addEventListener('mousedown', (e) => {
+        const pos = getMousePos(e);
+        startX = pos.x; startY = pos.y;
+        isDragging = true;
+        rectW = 0; rectH = 0;
+
+        if (currentTool === 'move') {
+            // Acha a peça clicada (ordem inversa para pegar a de cima)
+            dragTargetIndex = -1;
+            for (let i = editorPieces.length - 1; i >= 0; i--) {
+                let p = editorPieces[i];
+                if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) {
+                    // Confirma se clicou num pixel não-transparente (opcional, para ser preciso)
+                    let pxX = Math.floor(pos.x - p.x);
+                    let pxY = Math.floor(pos.y - p.y);
+                    let alphaIndex = (pxY * p.w + pxX) * 4 + 3;
+                    if (p.imgData.data[alphaIndex] > 0) {
+                        dragTargetIndex = i;
+                        wsCanvas.style.cursor = 'grabbing';
+                        // Traz para a frente (frente do array)
+                        let targetPiece = editorPieces.splice(dragTargetIndex, 1)[0];
+                        editorPieces.push(targetPiece);
+                        dragTargetIndex = editorPieces.length - 1;
+                        break;
+                    }
+                }
+            }
+        }
+    });
+
+    wsCanvas.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        const pos = getMousePos(e);
+
+        if (currentTool === 'move' && dragTargetIndex !== -1) {
+            let dx = pos.x - startX;
+            let dy = pos.y - startY;
+            editorPieces[dragTargetIndex].x += dx;
+            editorPieces[dragTargetIndex].y += dy;
+            startX = pos.x; startY = pos.y;
+            renderizarEstudio();
+        } 
+        else if (currentTool === 'slice') {
+            rectW = pos.x - startX;
+            rectH = pos.y - startY;
+            renderizarEstudio();
+        }
+    });
+
+    wsCanvas.addEventListener('mouseup', (e) => {
+        if (!isDragging) return;
+        isDragging = false;
+        wsCanvas.style.cursor = currentTool === 'move' ? 'grab' : 'crosshair';
+
+        if (currentTool === 'move' && dragTargetIndex !== -1) {
+            // SNAP MAGNÉTICO MATEMÁTICO (Encaixa na grelha do Minecraft)
+            if(document.getElementById('snap-grid').checked) {
+                // Alinha com a resolução padrão do Minecraft (16 pixels)
+                let snapUnit = wsCanvas.width / 64; 
+                let p = editorPieces[dragTargetIndex];
+                p.x = Math.round(p.x / snapUnit) * snapUnit;
+                p.y = Math.round(p.y / snapUnit) * snapUnit;
+            }
+            dragTargetIndex = -1;
+            renderizarEstudio();
+        } 
+        else if (currentTool === 'slice') {
+            // Normalizar rectângulo (caso o utilizador desenhe da direita para a esquerda)
+            let rx = rectW < 0 ? startX + rectW : startX;
+            let ry = rectH < 0 ? startY + rectH : startY;
+            let rw = Math.abs(rectW);
+            let rh = Math.abs(rectH);
+
+            if (rw > 5 && rh > 5) {
+                // Fatiar a imagem original (Peça 0, que é o fundo)
+                let basePiece = editorPieces[0];
+                
+                // Pega os pixeis da seleção
+                let sliceData = wsCtx.getImageData(rx, ry, rw, rh);
+                
+                // Verifica se há algo para fatiar (se não é só transparente)
+                let temPixels = false;
+                for(let i=3; i<sliceData.data.length; i+=4) { if(sliceData.data[i] > 0) { temPixels = true; break; } }
+
+                if(temPixels) {
+                    // Cria uma nova peça e adiciona ao array
+                    editorPieces.push({ x: rx, y: ry, w: rw, h: rh, imgData: sliceData });
+                    
+                    // Apaga esses pixeis da imagem base
+                    let tempCanvas = document.createElement('canvas');
+                    tempCanvas.width = basePiece.w; tempCanvas.height = basePiece.h;
+                    let tempCtx = tempCanvas.getContext('2d');
+                    tempCtx.putImageData(basePiece.imgData, 0, 0);
+                    tempCtx.clearRect(rx - basePiece.x, ry - basePiece.y, rw, rh);
+                    basePiece.imgData = tempCtx.getImageData(0, 0, basePiece.w, basePiece.h);
+                    
+                    statusOverlay.innerText = "✓ PARTE BIOMECÂNICA ISOLADA";
+                }
+            }
+            rectW = 0; rectH = 0;
+            renderizarEstudio();
+        }
+    });
+
+    // --- APLICAÇÃO E GERAÇÃO DOS ARQUIVOS ---
+    function aplicarAo3D() {
+        renderizarEstudio(); // Força update final limpo (sem linhas)
+        const finalBase64 = wsCanvas.toDataURL("image/png");
+        
+        if (uploadTarget === 1) {
+            skinViewer.loadSkin(finalBase64);
+            statusOverlay.innerText = "✓ L1: RECONSTRUÇÃO APLICADA";
+        } else if (uploadTarget === 2) {
+            skinViewer.loadCape(finalBase64); 
+            statusOverlay.innerText = "✓ L2: RECONSTRUÇÃO APLICADA";
+        }
+        
+        lastUploadedBase64 = finalBase64; 
+        closeModal('calib-modal');
+    }
+
+    function exportarTexturaJson() {
+        aplicarAo3D(); // Garante que foi aplicado
+        
+        // 1. Baixar o PNG
+        const linkPng = document.createElement('a');
+        linkPng.download = uploadTarget === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
+        linkPng.href = lastUploadedBase64;
+        linkPng.click();
+
+        // 2. Baixar o JSON do Item Correspondente (Formato NeoForge)
+        const jsonContent = {
+            "parent": "minecraft:item/generated",
+            "textures": {
+                "layer0": uploadTarget === 1 ? "moduloiaavancada:item/peitoral_simbionte" : "moduloiaavancada:item/calcas_simbionte"
+            }
+        };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(jsonContent, null, 2));
+        const linkJson = document.createElement('a');
+        linkJson.download = uploadTarget === 1 ? 'peitoral_simbionte.json' : 'calcas_simbionte.json';
+        linkJson.href = dataStr;
+        linkJson.click();
+    }
+
+    // ============================================================================
+    // CHAMADAS DE API GEMINI
+    // ============================================================================
     async function callGemini(payload) {
         loader.style.display = 'block';
         scanner.style.display = 'block';
@@ -378,7 +695,7 @@
             : "Descreva um Mob biomecânico hostil que habita o vácuo profundo do mod Vexanium.";
         const lore = await callGemini({
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português de Portugal com tom tecnológico." }] }
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português." }] }
         });
         aiText.innerText = lore;
     }
@@ -389,17 +706,18 @@
         const analysis = await callGemini({
             contents: [{ 
                 parts: [
-                    { text: "Analise esta textura de armadura de Minecraft. Identifique o que está fora do lugar em relação ao molde 64x32 padrão." },
+                    { text: "Analise esta textura de armadura de Minecraft. Identifique o que está fora do lugar em relação ao molde 64x32 padrão e guie o operador a usar o fatiador UV." },
                     { inlineData: { mimeType: "image/png", data: lastUploadedBase64.split(',')[1] } }
                 ] 
             }],
-            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. em mapeamento UV. Ajude a consertar designs." }] }
+            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. em mapeamento UV. Seja técnico." }] }
         });
         aiText.innerText = analysis;
     }
 
     function showModal(modalId, title, initialText) {
-        document.getElementById(modalId).style.display = 'block';
+        document.getElementById(modalId).style.display = 'flex';
+        document.getElementById(modalId).style.flexDirection = 'column';
         if(title) document.getElementById('modal-title').innerText = title;
         if(initialText) aiText.innerText = initialText;
     }
@@ -409,61 +727,9 @@
         scanner.style.display = 'none'; 
     }
 
-    // --- MÓDULO DE CALIBRAÇÃO 2D ---
-    function openCalibration() {
-        if (!lastUploadedBase64 || currentMode !== 'armor') { 
-            alert("Carregue uma textura PNG para calibrar."); 
-            return; 
-        }
-        uvOffsetX = 0; uvOffsetY = 0;
-        document.getElementById('val-x').innerText = uvOffsetX;
-        document.getElementById('val-y').innerText = uvOffsetY;
-        showModal('calib-modal');
-        
-        sourceImage.onload = () => { renderUVCanvas(); };
-        sourceImage.src = lastUploadedBase64;
-    }
-
-    function shiftUV(dx, dy) {
-        uvOffsetX += dx; uvOffsetY += dy;
-        document.getElementById('val-x').innerText = uvOffsetX;
-        document.getElementById('val-y').innerText = uvOffsetY;
-        renderUVCanvas();
-    }
-
-    function renderUVCanvas() {
-        const c = document.getElementById('uv-canvas-2d');
-        const ctx = c.getContext('2d');
-        ctx.clearRect(0, 0, c.width, c.height);
-        
-        ctx.drawImage(sourceImage, uvOffsetX, uvOffsetY, c.width, c.height);
-
-        ctx.strokeStyle = "rgba(255, 170, 0, 0.5)"; 
-        ctx.lineWidth = 1;
-        
-        ctx.strokeRect(0, 0, 32, 16);
-        ctx.strokeRect(16, 16, 24, 16);
-        ctx.strokeRect(0, 16, 16, 16);
-        ctx.strokeRect(40, 16, 16, 16);
-    }
-
-    function applyCalibration() {
-        const c = document.getElementById('uv-canvas-2d');
-        const calibratedBase64 = c.toDataURL("image/png");
-        
-        if (uploadTarget === 1) {
-            skinViewer.loadSkin(calibratedBase64);
-            statusOverlay.innerText = "✓ L1: UV RECALIBRADA";
-        } else if (uploadTarget === 2) {
-            skinViewer.loadCape(calibratedBase64); 
-            statusOverlay.innerText = "✓ L2: UV RECALIBRADA";
-        }
-        
-        lastUploadedBase64 = calibratedBase64; 
-        closeModal('calib-modal');
-    }
-
-    // --- CONTROLES DE INTERFACE ---
+    // ============================================================================
+    // CONTROLES DE INTERFACE
+    // ============================================================================
     function switchMode(mode) {
         currentMode = mode;
         document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
@@ -498,14 +764,13 @@
         if (currentMode === 'armor' && file.type === "image/png") {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                const base64Data = evt.target.result;
-                lastUploadedBase64 = base64Data; 
+                lastUploadedBase64 = evt.target.result; 
                 
                 if (uploadTarget === 1) {
-                    skinViewer.loadSkin(base64Data);
+                    skinViewer.loadSkin(lastUploadedBase64);
                     statusOverlay.innerText = "✓ CAMADA 1 (CORPO) ASSIMILADA";
                 } else if (uploadTarget === 2) {
-                    skinViewer.loadCape(base64Data);
+                    skinViewer.loadCape(lastUploadedBase64); // Simula L2
                     statusOverlay.innerText = "✓ CAMADA 2 (CALÇAS) ASSIMILADA";
                 }
             };
@@ -529,13 +794,9 @@
     function resize() {
         const parent = skinCanvas.parentElement;
         if (!parent) return;
-        const w = parent.clientWidth;
-        const h = parent.clientHeight;
-        skinViewer.width = w; 
-        skinViewer.height = h;
-        renderer.setSize(w, h);
-        camera.aspect = w / h;
-        camera.updateProjectionMatrix();
+        const w = parent.clientWidth; const h = parent.clientHeight;
+        skinViewer.width = w; skinViewer.height = h;
+        renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
     
     window.addEventListener('resize', resize);
