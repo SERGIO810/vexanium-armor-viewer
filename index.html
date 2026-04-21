@@ -7,28 +7,59 @@
     
     <!-- Fonte técnica limpa e profissional para um terminal tático -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&display=swap" rel="stylesheet">
-
-    <!-- 1. Motor 3D Base -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- 2. Controles de Órbita e Carregador GLTF para Entidades/Armas -->
+    <!-- 0. PROTOCOLO J.A.V.I.S: TRAVA DE DOMÍNIO (ANTI-CLONE) -->
+    <script>
+    (function() {
+        const allowedDomains = ["sergio810.github.io", "localhost", "127.0.0.1"];
+        const currentDomain = window.location.hostname;
+
+        if (!allowedDomains.includes(currentDomain)) {
+            // Função para bloquear a visualização apenas quando o body existir
+            const blockAccess = () => {
+                if (!document.body) return;
+                document.body.innerHTML = "";
+                document.body.style.backgroundColor = "#000000";
+                const warning = document.createElement("div");
+                warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
+                warning.innerHTML = `
+                    <h1 style="font-size: 30px;">⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1>
+                    <p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p>
+                    <p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>
+                `;
+                document.body.appendChild(warning);
+            };
+
+            // Se o DOM já carregou, bloqueia agora. Se não, espera o DOMContentLoaded.
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', blockAccess);
+            } else {
+                blockAccess();
+            }
+            
+            // Lança erro para parar outros scripts
+            throw new Error("J.A.V.I.S SECURITY: Execução bloqueada. Domínio não autorizado.");
+        }
+    })();
+    </script>
+
+    <!-- 1. Motores 3D e Bibliotecas Necessárias -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
-
-    <!-- 3. A biblioteca SkinView3D que desenha o boneco para as armaduras -->
     <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.min.js"></script>
     
     <style>
-        /* --- NOVA PALETA DE CORES PROFISSIONAL (WARDEN / SHRIEKER) --- */
+        /* --- PALETA DE CORES PROFISSIONAL (WARDEN / SHRIEKER) --- */
         :root {
-            --void-bg: #030508;           /* Preto profundo (Fundo absoluto) */
-            --sculk-base: #0a1117;        /* Pedra sculk muito escura (Fundos de caixa) */
-            --sculk-surface: #121e29;     /* Superfície do sculk (Botões e painéis) */
-            --sculk-glow: #0c8a8c;        /* Aqua bioluminescente (Brilho suave) */
-            --sculk-core: #13c9c9;        /* Ciano brilhante (Apenas para pequenos alertas/luzes) */
-            --warden-bone: #d1d5b4;       /* Marfim/Osso do Warden (Destaques e Títulos principais) */
-            --warden-bone-dim: #8b9172;   /* Osso envelhecido/sombrio (Textos secundários e bordas) */
-            --text-main: #e0e4d4;         /* Branco levemente creme para leitura confortável */
+            --void-bg: #030508;
+            --sculk-base: #0a1117;
+            --sculk-surface: #121e29;
+            --sculk-glow: #0c8a8c;
+            --sculk-core: #13c9c9;
+            --warden-bone: #d1d5b4;
+            --warden-bone-dim: #8b9172;
+            --text-main: #e0e4d4;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -43,7 +74,6 @@
             overflow-x: hidden;
         }
 
-        /* Fundo limpo e sutil (pontos do abismo) */
         body::before {
             content: "";
             position: fixed;
@@ -65,7 +95,6 @@
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
         }
 
-        /* Linha de pulso agora usa a cor do núcleo para ser elegante, não agressiva */
         header::after {
             content: '';
             position: absolute; bottom: 0; left: 0; width: 100%; height: 1px;
@@ -97,7 +126,6 @@
             max-width: 1400px; margin: 0 auto; width: 100%;
         }
 
-        /* Paineis de Vidro Fumê Escuro */
         .viewer-section, .controls-section {
             background: rgba(15, 25, 34, 0.7);
             border: 1px solid var(--warden-bone-dim);
@@ -116,12 +144,11 @@
             font-size: 18px; margin-bottom: 20px; 
             color: var(--warden-bone);
             text-transform: uppercase; letter-spacing: 1px;
-            border-bottom: 1px solid rgba(139, 145, 114, 0.3); /* Border dim com opacidade */
+            border-bottom: 1px solid rgba(139, 145, 114, 0.3);
             padding-bottom: 10px;
             display: flex; justify-content: space-between; align-items: center;
         }
 
-        /* Badge de modo elegante */
         #mode-badge {
             background: var(--warden-bone-dim); 
             color: var(--void-bg);
@@ -130,20 +157,18 @@
             letter-spacing: 1px;
         }
 
-        /* Container 3D - O Vazio do Sculk */
         .canvas-container {
             width: 100%; height: 550px; position: relative;
             background: radial-gradient(circle at center, #0a1117 0%, #030508 100%);
             border-radius: 6px; 
             border: 1px solid var(--sculk-surface);
-            box-shadow: inset 0 0 60px rgba(12, 138, 140, 0.08); /* Brilho de alma sutil */
+            box-shadow: inset 0 0 60px rgba(12, 138, 140, 0.08);
             overflow: hidden;
         }
 
         #skinViewer, #gltfViewer { width: 100%; height: 100%; cursor: grab; position: absolute; top: 0; left: 0; }
         #skinViewer:active, #gltfViewer:active { cursor: grabbing; }
 
-        /* --- BOTÕES ESTILO OSSO/SCULK --- */
         .tab-btn, button.action-btn, .file-upload-btn {
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase; font-weight: 600; letter-spacing: 1px;
@@ -184,7 +209,6 @@
             border-bottom-width: 3px;
         }
 
-        /* Inputs e Controles */
         .control-group { display: flex; flex-direction: column; gap: 8px; }
         .control-group label { font-size: 11px; color: var(--warden-bone-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
 
@@ -222,7 +246,6 @@
             display: block; text-align: center; font-size: 11px; padding: 10px; width: 100%;
         }
 
-        /* Status e Informações - Elegantes */
         .status {
             background: rgba(10, 17, 23, 0.8); 
             border: 1px solid var(--warden-bone-dim);
@@ -255,7 +278,6 @@
         .tab-content { display: none; }
         .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
 
-        /* Scrollbar Discreta */
         .controls-section::-webkit-scrollbar { width: 6px; background: transparent; }
         .controls-section::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 3px; }
         .controls-section::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
@@ -351,7 +373,6 @@
     </footer>
 
     <script>
-        // Função auxiliar para UI
         function updateFileName(input) {
             const btn = input.previousElementSibling;
             if (input.files.length > 0) {
@@ -382,7 +403,6 @@
             height: skinCanvas.parentElement.offsetHeight
         });
         
-        // CATCH 1: Tenta carregar a skin base. Se o servidor cair, o catch previne o UNHANDLEDREJECTION.
         skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(err => {
             console.warn("[J.A.V.I.S] O servidor base de texturas está inativo. O manequim será carregado invisível.");
             updateStatus('Manequim base inativo (falha de rede). Aguardando textura local.', 'error');
@@ -399,12 +419,11 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     layer1Texture = evt.target.result;
-                    // CATCH 2: Previne travamento se a imagem local for inválida
                     skinViewer.loadSkin(layer1Texture).then(() => {
                         updateStatus('Assinatura biológica (Camada 1) carregada.', 'success');
                     }).catch(err => {
                         console.error(err);
-                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido ou formato inválido.', 'error');
+                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido.', 'error');
                     });
                 };
                 reader.readAsDataURL(e.target.files[0]);
@@ -416,12 +435,11 @@
                 const reader = new FileReader();
                 reader.onload = function(evt) {
                     layer2Texture = evt.target.result;
-                    // CATCH 3: Previne travamento se a imagem local for inválida
                     skinViewer.loadCape(layer2Texture).then(() => {
                         updateStatus('Assinatura biológica (Camada 2) carregada.', 'success');
                     }).catch(err => {
                         console.error(err);
-                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido ou formato inválido.', 'error');
+                        updateStatus('Falha na assimilação: Arquivo de imagem corrompido.', 'error');
                     });
                 };
                 reader.readAsDataURL(e.target.files[0]);
@@ -495,14 +513,11 @@
                     updateStatus('Entidade materializada com sucesso.', 'success');
                 }, undefined, function(error) {
                     console.error(error);
-                    updateStatus('Falha na descompressão. Arquivo inválido ou corrompido.', 'error');
+                    updateStatus('Falha na descompressão. Arquivo inválido.', 'error');
                 });
             }
         });
 
-        // ==========================================
-        // CONTROLES GLOBAIS
-        // ==========================================
         function switchTab(mode) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
