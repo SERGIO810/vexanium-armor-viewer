@@ -173,21 +173,25 @@
         }
 
         .editor-workspace {
-            flex: 1; background: #050505; border: 1px solid var(--warden-bone-dim); border-radius: 6px;
+            flex: 1; 
+            background: #f1f3f4; /* Branco/Marfim Claro Estilo Google, sem grid escuro */
+            border: 1px solid var(--warden-bone-dim); border-radius: 6px;
             position: relative; display: flex; justify-content: center; align-items: center;
             overflow: hidden;
-            background-image: linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a), 
-                              linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a);
-            background-size: 20px 20px; background-position: 0 0, 10px 10px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
         }
 
+        /* RESOLUÇÃO MATEMÁTICA 2:1 PARA ARMADURAS DO MINECRAFT (1024x512) */
         #workspace-canvas {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            margin: auto;
             max-width: 100%; 
             max-height: 100%; 
-            aspect-ratio: 1 / 1;
-            flex-shrink: 0;
+            aspect-ratio: 2 / 1;
             cursor: crosshair; 
-            box-shadow: 0 0 30px rgba(0,0,0,1);
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            background: transparent;
         }
 
         .slice-category {
@@ -333,17 +337,17 @@ STATUS DA ARMADURA (VEXANIUM):
                 </button>
 
                 <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; margin-bottom:5px;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold; margin-bottom:5px;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);">
                     🧲 Snap Magnético
                 </label>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold;">
                     <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);">
                     📐 Exibir Molde UV
                 </label>
 
                 <div style="margin-top:auto; font-size:10px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
-                    <p><b>Aviso:</b> Está a editar a <span id="hint-layer-name" style="color:var(--calib-accent); font-weight:bold;">Camada 1</span>. Preencha apenas os quadrados correspondentes.</p>
+                    <p><b>Aviso:</b> O Minecraft usa um molde espelhado. Os braços esquerdo e direito partilham o mesmo bloco!</p>
                 </div>
             </div>
 
@@ -407,7 +411,6 @@ STATUS DA ARMADURA (VEXANIUM):
     const apiKey = ""; 
     let currentMode = 'armor';
     
-    // Variáveis de Estado Duplo para suportar L1 e L2 em simultâneo
     let baseImageL1 = null; 
     let baseImageL2 = null; 
     let finalImageL1 = null; 
@@ -466,7 +469,7 @@ STATUS DA ARMADURA (VEXANIUM):
     animate();
 
     // ============================================================================
-    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP E CORTE MANUAL)
+    // ESTÚDIO DE MONTAGEM LIVRE (1024x512 HD ARMOR RESOLUTION)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
@@ -486,7 +489,7 @@ STATUS DA ARMADURA (VEXANIUM):
     let extractedPieces = [];
     let activePieceIndex = -1;
     let nextPieceId = 1;
-    let manualSelection = null; // Variável que guarda o quadro de seleção antes do corte
+    let manualSelection = null; 
 
     function abrirFatiadorLivre() {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
@@ -511,12 +514,16 @@ STATUS DA ARMADURA (VEXANIUM):
         document.getElementById('slicer-modal').style.display = 'flex';
         
         originalImageObj.onload = () => {
+            // PROPORÇÃO 2:1 DO MINECRAFT! (Resolve o erro da bota no braço)
             wsCanvas.width = 1024;
-            wsCanvas.height = 1024;
+            wsCanvas.height = 512;
             offscreenCanvas.width = 1024;
-            offscreenCanvas.height = 1024;
-            offscreenCtx.clearRect(0, 0, 1024, 1024);
-            offscreenCtx.drawImage(originalImageObj, 0, 0);
+            offscreenCanvas.height = 512;
+            offscreenCtx.clearRect(0, 0, 1024, 512);
+            
+            // Desenha com escala para caber na altura, caso a imagem original fosse quadrada
+            let scale = Math.min(1024 / originalImageObj.width, 512 / originalImageObj.height);
+            offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width * scale, originalImageObj.height * scale);
 
             extractedPieces = [];
             activePieceIndex = -1;
@@ -527,14 +534,14 @@ STATUS DA ARMADURA (VEXANIUM):
         originalImageObj.src = targetBase;
     }
     
-    // Adicionar Múltiplas Imagens na mesma Sessão
     document.getElementById('file-input-add').onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
         const url = URL.createObjectURL(file);
         const img = new Image();
         img.onload = () => {
-            offscreenCtx.drawImage(img, 0, 0);
+            let scale = Math.min(1024 / img.width, 512 / img.height);
+            offscreenCtx.drawImage(img, 0, 0, img.width * scale, img.height * scale);
             renderFatiador();
             document.getElementById('status-overlay').innerText = "✓ NOVA IMAGEM ADICIONADA À MESA";
         };
@@ -600,26 +607,22 @@ STATUS DA ARMADURA (VEXANIUM):
         }
     }
 
-    // Nova Função: Confirma o Corte Manual
     function confirmarCorteManual() {
         if (!manualSelection || manualSelection.w <= 2 || manualSelection.h <= 2) {
             alert("Operador, desenhe a caixa de seleção na imagem (usando a ferramenta 📐 Seleção Manual) antes de confirmar o corte.");
             return;
         }
 
-        // Garante coordenadas absolutas inteiras para não extrair imagens invisíveis
         let rx = Math.max(0, Math.floor(manualSelection.x));
         let ry = Math.max(0, Math.floor(manualSelection.y));
         let rw = Math.floor(manualSelection.w);
         let rh = Math.floor(manualSelection.h);
 
-        // Previne ultrapassar os limites do canvas
         if (rx + rw > offscreenCanvas.width) rw = offscreenCanvas.width - rx;
         if (ry + rh > offscreenCanvas.height) rh = offscreenCanvas.height - ry;
 
         let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
         
-        // Verifica se a área não está vazia para evitar quadrados flutuantes invisíveis
         let hasPixels = false;
         for (let i = 3; i < imgD.data.length; i += 4) {
             if (imgD.data[i] > 10) { 
@@ -635,7 +638,6 @@ STATUS DA ARMADURA (VEXANIUM):
             return;
         }
 
-        // Se tem píxeis, limpa a imagem base e transforma a caixa numa peça móvel!
         offscreenCtx.clearRect(rx, ry, rw, rh);
         
         extractedPieces.push({
@@ -652,87 +654,93 @@ STATUS DA ARMADURA (VEXANIUM):
         renderFatiador();
     }
 
+    // A MÁGICA DA PRECISÃO: Molde limpo de 64x32 adaptado ao Fator de Escala 16 (1024x512)
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
         const f = 16; 
-        wsCtx.lineWidth = 1;
+        wsCtx.lineWidth = 1.5;
         wsCtx.font = "bold 12px JetBrains Mono";
         wsCtx.textAlign = "center";
         wsCtx.textBaseline = "middle";
 
-        const drawBox = (x, y, w, h, color, label) => {
+        const drawBox = (x, y, w, h, color, label, sublabel) => {
             wsCtx.strokeStyle = color;
-            wsCtx.fillStyle = color + "22";
+            wsCtx.fillStyle = color + "22"; // Preenchimento leve para destaque
             wsCtx.strokeRect(x*f, y*f, w*f, h*f);
             wsCtx.fillRect(x*f, y*f, w*f, h*f);
-            wsCtx.fillStyle = color;
-            wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2);
+            
+            wsCtx.fillStyle = "#000000"; // Letra a Preto para ler no fundo Branco
+            
+            if (sublabel) {
+                wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2 - 6);
+                wsCtx.font = "bold 9px JetBrains Mono";
+                wsCtx.fillText(sublabel, (x*f) + (w*f)/2, (y*f) + (h*f)/2 + 6);
+                wsCtx.font = "bold 12px JetBrains Mono"; 
+            } else {
+                wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2);
+            }
         };
 
+        // MOLDE L1 (Foca apenas na Cabeça, Peito, Braços Unidos e Botas Unidas)
         if (currentEditingLayer === 1) {
-            drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
-            drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
-            drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
-            drawBox(8, 8, 8, 8, "#ba55d3", "ROSTO");
-            drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
-            drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
+            // CAPACETE (Roxo)
+            drawBox(8, 0, 8, 8, "#9c27b0", "TOPO", "CAPACETE");
+            drawBox(16, 0, 8, 8, "#9c27b0", "FUNDO", "CAPACETE");
+            drawBox(0, 8, 8, 8, "#9c27b0", "DIR.", "CAPACETE");
+            drawBox(8, 8, 8, 8, "#9c27b0", "FRENTE", "CAPACETE");
+            drawBox(16, 8, 8, 8, "#9c27b0", "ESQ.", "CAPACETE");
+            drawBox(24, 8, 8, 8, "#9c27b0", "COSTAS", "CAPACETE");
 
-            drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
-            drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
-            drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
-            drawBox(20, 20, 8, 12, "#00ffff", "PEITO");
-            drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
-            drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
+            // PEITORAL (Ciano)
+            drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "PEITO");
+            drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "PEITO");
+            drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "PEITO");
+            drawBox(20, 20, 8, 12, "#00bcd4", "FRENTE", "PEITO");
+            drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "PEITO");
+            drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "PEITO");
 
-            drawBox(44, 16, 4, 4, "#32cd32", "TOP");
-            drawBox(48, 16, 4, 4, "#32cd32", "BOT");
-            drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
-            drawBox(44, 20, 4, 12, "#32cd32", "BR.DIR");
-            drawBox(48, 20, 4, 12, "#32cd32", "L.ESQ");
-            drawBox(52, 20, 4, 12, "#32cd32", "COSTAS");
+            // BRAÇOS UNIFICADOS (Verde)
+            drawBox(44, 16, 4, 4, "#4caf50", "TOPO", "BRAÇOS");
+            drawBox(48, 16, 4, 4, "#4caf50", "BASE", "BRAÇOS");
+            drawBox(40, 20, 4, 12, "#4caf50", "DIR.", "BRAÇOS");
+            drawBox(44, 20, 4, 12, "#4caf50", "FRENTE", "BRAÇOS");
+            drawBox(48, 20, 4, 12, "#4caf50", "ESQ.", "BRAÇOS");
+            drawBox(52, 20, 4, 12, "#4caf50", "COSTAS", "BRAÇOS");
 
-            drawBox(36, 48, 4, 4, "#32cd32", "TOP");
-            drawBox(40, 48, 4, 4, "#32cd32", "BOT");
-            drawBox(32, 52, 4, 12, "#32cd32", "L.DIR");
-            drawBox(36, 52, 4, 12, "#32cd32", "BR.ESQ");
-            drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
-            drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
-
-            drawBox(4, 26, 4, 6, "#ff4500", "BOTA");
-            drawBox(12, 26, 4, 6, "#ff4500", "B.COST");
-            drawBox(20, 58, 4, 6, "#ff4500", "BOTA");
-            drawBox(28, 58, 4, 6, "#ff4500", "B.COST");
+            // BOTAS UNIFICADAS (Laranja)
+            drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "BOTAS");
+            drawBox(8, 16, 4, 4, "#ff9800", "BASE", "BOTAS");
+            drawBox(0, 20, 4, 12, "#ff9800", "DIR.", "BOTAS");
+            drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
+            drawBox(8, 20, 4, 12, "#ff9800", "ESQ.", "BOTAS");
+            drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
         } 
+        // MOLDE L2 (Foca apenas na Cintura/Cinto e Pernas/Calças)
         else if (currentEditingLayer === 2) {
-            drawBox(20, 16, 8, 4, "#00ffaa", "C.TOP");
-            drawBox(28, 16, 8, 4, "#00ffaa", "C.BOT");
-            drawBox(16, 20, 4, 12, "#00ffaa", "L.DIR");
-            drawBox(20, 20, 8, 12, "#00ffaa", "CINTURA");
-            drawBox(28, 20, 4, 12, "#00ffaa", "L.ESQ");
-            drawBox(32, 20, 8, 12, "#00ffaa", "COSTAS");
+            // CINTURA (Ocupa o mesmo espaço que o peito no UV)
+            drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
+            drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
+            drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "CINTURA");
+            drawBox(20, 20, 8, 12, "#00bcd4", "FRENTE", "CINTURA");
+            drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
+            drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
 
-            drawBox(4, 16, 4, 4, "#ffd700", "TOP");
-            drawBox(8, 16, 4, 4, "#ffd700", "BOT");
-            drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
-            drawBox(4, 20, 4, 12, "#ffd700", "PE.DIR");
-            drawBox(8, 20, 4, 12, "#ffd700", "L.ESQ");
-            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS");
-
-            drawBox(20, 48, 4, 4, "#ffd700", "TOP");
-            drawBox(24, 48, 4, 4, "#ffd700", "BOT");
-            drawBox(16, 52, 4, 12, "#ffd700", "L.DIR");
-            drawBox(20, 52, 4, 12, "#ffd700", "PE.ESQ");
-            drawBox(24, 52, 4, 12, "#ffd700", "L.ESQ");
-            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS");
+            // CALÇAS UNIFICADAS
+            drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "PERNAS");
+            drawBox(8, 16, 4, 4, "#ff9800", "BASE", "PERNAS");
+            drawBox(0, 20, 4, 12, "#ff9800", "DIR.", "PERNAS");
+            drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "PERNAS");
+            drawBox(8, 20, 4, 12, "#ff9800", "ESQ.", "PERNAS");
+            drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "PERNAS");
         }
     }
 
     function renderFatiador() {
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
-        desenharMoldeUV();
+        
         wsCtx.drawImage(offscreenCanvas, 0, 0);
+        desenharMoldeUV();
 
-        // Renderiza as Peças Extraídas
         extractedPieces.forEach((p, i) => {
             let tempC = document.createElement('canvas');
             tempC.width = p.imgData.width;
@@ -765,9 +773,8 @@ STATUS DA ARMADURA (VEXANIUM):
             }
         });
 
-        // Renderiza a Seleção Manual se ela existir
         if (currentTool === 'slice' && manualSelection && manualSelection.w > 0) {
-            wsCtx.strokeStyle = "var(--ai-accent)";
+            wsCtx.strokeStyle = "var(--ai-accent)"; 
             wsCtx.lineWidth = 2;
             wsCtx.setLineDash([5, 5]);
             wsCtx.strokeRect(manualSelection.x, manualSelection.y, manualSelection.w, manualSelection.h);
@@ -1023,14 +1030,38 @@ STATUS DA ARMADURA (VEXANIUM):
                 }
                 renderFatiador();
             }
-            // Não cortamos em mouseup se a tool for 'slice', apenas deixamos a caixa de seleção pronta
         }
     });
+
+    // SISTEMA DE PREVIEW INTELIGENTE (Combina a Layer 1 e Layer 2 para exibir no 3D)
+    function atualizarPreview3D() {
+        const previewCanvas = document.createElement('canvas');
+        previewCanvas.width = 1024;
+        previewCanvas.height = 512;
+        const pCtx = previewCanvas.getContext('2d');
+        pCtx.imageSmoothingEnabled = false;
+
+        const drawLayer = (base64Str) => {
+            return new Promise((resolve) => {
+                if (!base64Str) { resolve(); return; }
+                const img = new Image();
+                img.onload = () => { pCtx.drawImage(img, 0, 0); resolve(); };
+                img.src = base64Str;
+            });
+        };
+
+        // L2 (Calças) fica por baixo, L1 (Peito) fica por cima
+        drawLayer(finalImageL2).then(() => {
+            drawLayer(finalImageL1).then(() => {
+                skinViewer.loadSkin(previewCanvas.toDataURL('image/png'));
+            });
+        });
+    }
 
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
-        outCanvas.height = 1024;
+        outCanvas.height = 512;
         const outCtx = outCanvas.getContext('2d');
         outCtx.imageSmoothingEnabled = false; 
 
@@ -1047,14 +1078,13 @@ STATUS DA ARMADURA (VEXANIUM):
         
         if (currentEditingLayer === 1) {
             finalImageL1 = finalArmaduraBase64;
-            skinViewer.loadSkin(finalImageL1);
-            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) MONTADA E VESTIDA!";
+            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!";
         } else {
             finalImageL2 = finalArmaduraBase64;
-            skinViewer.loadCape(finalImageL2); 
-            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) MONTADA!";
+            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) ATUALIZADA!";
         }
         
+        atualizarPreview3D();
         closeModal('slicer-modal');
     }
 
