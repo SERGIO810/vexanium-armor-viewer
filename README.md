@@ -1,264 +1,97 @@
-# 🛡️ Vexanium Armor Viewer
+⟁ Vexanium Viewer - Laboratório J.A.V.I.S.
 
-> **Visualizador 3D interativo de texturas de armadura para Minecraft Java Edition 1.21.1**
->
-> Renderize, visualize e compartilhe suas criações de armadura em tempo real com Three.js e skinview3d.
+O Visualizador 3D definitivo para texturas e entidades do mod Vexanium. Renderize, inspecione e valide suas criações de armadura e modelos 3D em tempo real, direto do seu navegador, impulsionado por Three.js e skinview3d.
 
----
+🌐 Acesse o Laboratório Online Aqui
 
-## 🎮 O que é Vexanium?
+🌑 O que é o Vexanium?
 
-Vexanium é um mod NeoForge revolucionário que introduz a **armadura Parasita Alienígena**, uma fusão de tecnologia mecha com matéria orgânica extraterrestre. A armadura oferece habilidades especiais e uma estética visual única no universo Minecraft.
+Vexanium é um mod NeoForge revolucionário que introduz a Armadura Parasita Alienígena e a inteligência de silício J.A.V.I.S. — uma fusão letal de tecnologia militar avançada com matéria orgânica extraterrestre do Deep Dark.
 
-Este visualizador permite que você:
-- ✅ Visualize texturas de armadura em 360°
-- ✅ Teste diferentes designs antes de implementar
-- ✅ Compartilhe suas criações com a comunidade
-- ✅ Faça upload de texturas customizadas em tempo real
+Este laboratório web foi construído para a comunidade e desenvolvedores testarem rapidamente recursos visuais antes de implementá-los no motor do Minecraft.
 
----
+✨ Recursos Exclusivos do Laboratório
 
-## 🚀 Quick Start
+Para garantir a melhor experiência de design, o nosso terminal foi equipado com tecnologia de ponta:
 
-### Usar Online (Recomendado)
-Acesse diretamente: **https://sergio810.github.io/vexanium-armor-viewer/**
+👁‍🗨 Renderização 360° em Tempo Real: Inspecione cada pixel da sua armadura ou entidade com controles de órbita fluidos e zoom de precisão.
 
-### Usar Localmente
-1. Clone este repositório:
-```bash
-git clone https://github.com/SEU_USUARIO/vexanium-armor-viewer.git
-cd vexanium-armor-viewer
-```
+🛡️ Modo Armadura (PNG): Suporte completo para moldes padrão e HD (High Definition) de armaduras do Minecraft. Teste a Camada 1 (Capacete, Peito, Botas) e a Camada 2 (Calças) simultaneamente.
 
-2. Abra `index.html` em seu navegador:
-```bash
-# Windows
-start index.html
+👾 Modo Entidade e Armas (GLTF/GLB): Trouxemos a bancada do Blockbench para a web! Faça upload de modelos 3D de novas armas ou monstros e o sistema ajustará a escala e iluminação automaticamente.
 
-# Mac
-open index.html
+💡 Iluminação Deep Dark Adaptativa: O modelo 3D é banhado por luzes "Osso de Warden" e recortes "Aqua Bioluminescente", simulando a atmosfera real das Ancient Cities.
 
-# Linux
-xdg-open index.html
-```
+🚀 Zero Instalação: Roda 100% no seu navegador (PC ou Mobile) sem precisar baixar nenhum software pesado.
 
----
+📖 Como Usar o Visualizador
 
-## 📖 Como Usar o Visualizador
+A interface foi desenhada para ser intuitiva. Escolha a sua aba de testes:
 
-### 1. Upload de Texturas
+1. Testando Armaduras
 
-1. **Camada 1 (Capacete, Armadura, Botas):**
-   - Clique em "Upload Layer 1"
-   - Selecione um arquivo PNG (1024x512 pixels)
-   - A textura aparecerá no modelo em tempo real
+Acesse a aba "Armaduras".
 
-2. **Camada 2 (Calças):**
-   - Clique em "Upload Layer 2"
-   - Selecione um arquivo PNG (1024x512 pixels)
-   - A textura será aplicada automaticamente
+Clique em Selecionar Arquivo PNG na Camada 1 (Capacete/Peito/Botas).
 
-### 2. Controlar o Modelo
+(Opcional) Faça o upload da Camada 2 para as Calças.
 
-| Ação | Controle |
-|------|----------|
-| **Rotação Automática** | Clique em "Auto Rotate" |
-| **Rotação Manual** | Arraste com mouse |
-| **Zoom** | Scroll do mouse |
-| **Ângulos Rápidos** | Botões (Frente, Lado, Costas) |
-| **Reset** | Clique em "Reset Camera" |
+A armadura será vestida instantaneamente no manequim de testes.
 
-### 3. Exportar
+2. Testando Entidades ou Armas
 
-- Clique em "Screenshot" para capturar a tela
-- Use Print Screen para salvar a imagem completa
+Acesse a aba "Entidades".
 
----
+Faça o upload do seu modelo exportado do Blockbench no formato .gltf ou .glb.
 
-## 📐 Especificações de Textura
+O núcleo J.A.V.I.S. calculará o tamanho do modelo e o centralizará na câmera automaticamente.
 
-### Formato Obrigatório
-- **Resolução:** 1024x512 pixels (proporção 2:1)
-- **Formato:** PNG
-- **Compressão:** Sem transparência (fundo sólido)
+3. Controles
 
-### Layer 1 (Capacete, Armadura, Botas)
-```
-┌─────────────────────────────────────────┐
-│  Capacete  │  Armadura  │  Braços  │    │
-├─────────────────────────────────────────┤
-│  Botas     │  Botas     │  Botas   │    │
-└─────────────────────────────────────────┘
-```
+Mouse Esquerdo: Clique e arraste para rotacionar o modelo livremente.
 
-### Layer 2 (Calças - Caixa Desmontada)
-```
-┌─────────────────────────────────────────┐
-│  Frente    │  Costas    │  Lado    │    │
-├─────────────────────────────────────────┤
-│  Esquerda  │  Direita   │  Topo    │    │
-└─────────────────────────────────────────┘
-```
+Zoom: Use o slider de Foco Analítico para aproximar detalhes.
 
----
+Rotação Automática: Ligue a chave para uma apresentação de 360 graus suave.
 
-## 🎨 Exemplos de Uso
+📐 Especificações de Textura (Armaduras)
 
-### Criar uma Armadura Customizada
+Para que a armadura se encaixe perfeitamente no jogador, o arquivo deve seguir as regras de mapeamento UV do Minecraft:
 
-1. **Design no Photoshop/GIMP:**
-   - Crie uma imagem 1024x512
-   - Siga o layout acima
-   - Exporte como PNG
+Formato: .PNG (fundo transparente).
 
-2. **Testar no Visualizador:**
-   - Faça upload no site
-   - Visualize em 360°
-   - Ajuste cores e detalhes
+Proporção: Estritamente 2:1 (A largura deve ser o dobro da altura).
 
-3. **Implementar no Mod:**
-   - Copie a textura para `src/main/resources/assets/vexanium/textures/armor/`
-   - Compile o mod
-   - Teste no Minecraft
+Resoluções Aceitas: * Padrão: 64x32 pixels
 
----
+HD: 128x64, 256x128, 512x256, ou 1024x512.
 
-## 🛠️ Desenvolvimento
+🌐 Comunidade e Conexões
 
-### Estrutura do Projeto
+Junte-se à iniciativa Vexanium. Compartilhe os seus designs de armadura, sugira ideias para o mod e interaja com os desenvolvedores:
 
-```
-vexanium-armor-viewer/
-├── index.html          # Visualizador principal
-├── README.md           # Este arquivo
-├── .gitignore          # Configuração Git
-└── assets/             # Texturas de exemplo (opcional)
-    ├── layer1.png
-    └── layer2.png
-```
+🎮 CurseForge: [LINK_CURSEFORGE_AQUI]
 
-### Tecnologias Usadas
+💬 Discord Oficial: [LINK_DISCORD_AQUI]
 
-- **Three.js** - Motor 3D em WebGL
-- **skinview3d** - Renderizador de skins Minecraft
-- **HTML5 Canvas** - Renderização gráfica
-- **Vanilla JavaScript** - Sem dependências externas
+📺 YouTube: [LINK_YOUTUBE_AQUI]
 
-### Modificar o Visualizador
+🐦 Twitter/X: [LINK_TWITTER_AQUI]
 
-1. Clone o repositório
-2. Edite `index.html`
-3. Teste localmente
-4. Faça commit e push
+💜 Apoie o Projeto (Patreon): [LINK_PATREON_AQUI]
 
-```bash
-git add .
-git commit -m "Descrição da mudança"
-git push origin main
-```
+🔗 Site do Mod: [LINK_WEBSITE_AQUI]
 
----
+🙏 Tecnologias e Créditos
 
-## 🌐 Comunidade & Links
+O Laboratório J.A.V.I.S. foi construído com amor e arquitetura de código aberto:
 
-### Conecte-se Conosco
+Three.js - O poderoso motor WebGL que dá vida aos modelos 3D.
 
-| Plataforma | Link |
-|-----------|------|
-| 🎮 **CurseForge** | [LINK_CURSEFORGE_AQUI] |
-| 💜 **Patreon** | [LINK_PATREON_AQUI] |
-| 💬 **Discord** | [LINK_DISCORD_AQUI] |
-| 🐦 **Twitter/X** | [LINK_TWITTER_AQUI] |
-| 📺 **YouTube** | [LINK_YOUTUBE_AQUI] |
-| 🔗 **Website** | [LINK_WEBSITE_AQUI] |
+skinview3d - Renderizador perfeito da anatomia do Minecraft.
 
-### Contribuir
+Vexanium Team - Pelos conceitos e design de interface.
 
-Quer contribuir com novos designs ou melhorias?
+"A carne alienígena é forte, mas o silício é perfeito." — Dr. Aldrich.
 
-1. Faça um fork deste repositório
-2. Crie uma branch: `git checkout -b feature/novo-design`
-3. Faça suas alterações
-4. Faça commit: `git commit -m "Add novo design"`
-5. Faça push: `git push origin feature/novo-design`
-6. Abra um Pull Request
-
----
-
-## 📊 Estatísticas
-
-| Métrica | Valor |
-|---------|-------|
-| **Resolução Máxima** | 1024x512 |
-| **Tempo de Carregamento** | < 1 segundo |
-| **Compatibilidade** | Todos os navegadores modernos |
-| **Dependências Externas** | 0 (apenas CDN) |
-| **Tamanho do Arquivo** | ~50 KB |
-
----
-
-## 🐛 Problemas Conhecidos
-
-- [ ] Texturas com transparência podem não renderizar corretamente
-- [ ] Alguns navegadores antigos (IE11) não suportam WebGL
-- [ ] Zoom extremo pode causar clipping do modelo
-
-**Soluções:**
-- Use PNG sem transparência
-- Use navegadores modernos (Chrome, Firefox, Safari, Edge)
-- Use zoom moderado (1x a 3x)
-
----
-
-## 📝 Licença
-
-Este projeto está sob a licença **MIT**. Veja o arquivo `LICENSE` para detalhes.
-
----
-
-## 🙏 Créditos
-
-- **Three.js** - Comunidade de código aberto
-- **skinview3d** - Renderizador Minecraft
-- **Vexanium** - Seu mod incrível
-
----
-
-## 📞 Suporte
-
-Tem dúvidas ou encontrou um bug?
-
-1. **Verifique a seção de Troubleshooting** acima
-2. **Abra uma Issue** no GitHub
-3. **Entre em contato** via Discord: [LINK_DISCORD_AQUI]
-
----
-
-## 🎯 Roadmap
-
-- [ ] Adicionar editor de cores integrado
-- [ ] Suporte para múltiplas camadas de textura
-- [ ] Comparador de designs lado-a-lado
-- [ ] Exportar para formato glTF
-- [ ] Integração com CurseForge API
-- [ ] Modo escuro/claro
-
----
-
-## 📈 Estatísticas do Projeto
-
-![GitHub Stars](https://img.shields.io/github/stars/SEU_USUARIO/vexanium-armor-viewer?style=flat-square)
-![GitHub Forks](https://img.shields.io/github/forks/SEU_USUARIO/vexanium-armor-viewer?style=flat-square)
-![GitHub Issues](https://img.shields.io/github/issues/SEU_USUARIO/vexanium-armor-viewer?style=flat-square)
-
----
-
-## 🎉 Agradecimentos Especiais
-
-Obrigado a todos que testaram e contribuíram com feedback para melhorar o visualizador!
-
----
-
-**Desenvolvido com ❤️ para a comunidade Minecraft**
-
-*Última atualização: Abril 2026*
+📝 Licença: Este projeto está sob licença MIT. Desenvolvido para a comunidade Minecraft. (Atualizado em Abril de 2026).
