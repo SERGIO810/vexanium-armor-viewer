@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J.A.V.I.S. 3D AI Widget - Reconstruction Mode</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Ecrã Inteiro)</title>
     
     <!-- Fonte Técnica e Tática -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
@@ -24,22 +24,21 @@
             --warden-bone: #d1d5b4;
             --warden-bone-dim: #8b9172;
             --ai-accent: #ff00ff;
+            --calib-accent: #ffaa00;
             --warning: #ff3333;
         }
 
+        /* O SEGREDO DA PERFORMANCE E IMERSÃO: ECRÃ INTEIRO E LIMPO */
         body, html { 
-            margin: 0; padding: 0; width: 100%; height: 100%; 
+            margin: 0; padding: 0; width: 100vw; height: 100vh; 
             overflow: hidden; font-family: 'JetBrains Mono', monospace;
             background: var(--void-bg);
-            user-select: none;
-            color: #fff;
+            user-select: none; color: #fff;
         }
 
         #javis-widget-container {
             width: 100%; height: 100%;
             display: flex; flex-direction: column;
-            border: 1px solid var(--warden-bone-dim);
-            box-sizing: border-box;
             position: relative;
         }
 
@@ -47,9 +46,10 @@
             flex: 1; position: relative;
             background: radial-gradient(circle at center, #0a1117 0%, #030508 100%);
             overflow: hidden;
+            box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
         }
 
-        canvas { width: 100%; height: 100%; cursor: grab; }
+        canvas { width: 100%; height: 100%; cursor: grab; outline: none; }
         canvas:active { cursor: grabbing; }
 
         /* Efeito de Scanner Biomecânico */
@@ -67,16 +67,17 @@
             100% { top: 100%; opacity: 0; }
         }
 
+        /* BARRA TÁTICA INFERIOR */
         .control-bar {
-            background: var(--sculk-base);
-            border-top: 1px solid var(--warden-bone-dim);
-            padding: 10px;
+            background: rgba(10, 17, 23, 0.95);
+            border-top: 2px solid var(--warden-bone-dim);
+            padding: 12px 20px;
             display: flex; justify-content: space-between; align-items: center;
-            gap: 10px;
-            z-index: 10;
+            gap: 15px; z-index: 10;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
-        .btn-group { display: flex; gap: 8px; }
+        .btn-group { display: flex; gap: 10px; align-items: center; }
 
         .btn {
             background: var(--sculk-surface);
@@ -84,142 +85,233 @@
             border: 1px solid var(--warden-bone-dim);
             border-bottom-width: 3px; 
             border-radius: 4px;
-            padding: 8px 14px;
-            font-size: 12px; font-weight: 800; cursor: pointer;
+            padding: 10px 18px;
+            font-size: 13px; font-weight: 800; cursor: pointer;
             text-transform: uppercase; transition: 0.2s;
-            display: flex; align-items: center; gap: 6px;
+            display: flex; align-items: center; gap: 8px;
+            letter-spacing: 1px;
         }
 
         .btn:hover { background: #1f3447; border-color: var(--warden-bone); transform: translateY(-1px); }
-        .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); }
+        .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
+        .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
+        
         .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
         .btn-recon { border-color: var(--ai-accent); color: var(--ai-accent); border-bottom-color: var(--ai-accent); }
+        .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
 
-        #javis-branding {
-            font-size: 10px; color: var(--warden-bone-dim);
+        .divider { width: 1px; height: 30px; background: var(--warden-bone-dim); opacity: 0.5; margin: 0 5px; }
+
+        #javis-branding-main {
+            font-size: 11px; color: var(--warden-bone-dim);
             text-decoration: none; display: flex; align-items: center; gap: 5px;
+            letter-spacing: 1px; text-transform: uppercase;
         }
-        #javis-branding b { color: var(--sculk-core); }
+        #javis-branding-main b { color: var(--sculk-core); font-size: 13px; }
 
         #file-input { display: none; }
 
+        /* HUD DE STATUS (Canto Superior Esquerdo) */
         #status-overlay {
-            position: absolute; top: 15px; left: 15px;
-            font-size: 11px; color: var(--sculk-glow);
+            position: absolute; top: 20px; left: 20px;
+            font-size: 12px; color: var(--sculk-glow);
             pointer-events: none; text-transform: uppercase;
-            z-index: 5; font-weight: 800;
-            background: rgba(0,0,0,0.6); padding: 6px 10px; border-radius: 4px;
+            z-index: 5; font-weight: 800; letter-spacing: 2px;
+            background: rgba(10, 17, 23, 0.8); padding: 8px 15px; border-radius: 4px;
             border-left: 3px solid var(--sculk-core);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            backdrop-filter: blur(5px);
         }
 
-        #ai-modal {
-            position: absolute;
-            top: 50%; left: 50%;
-            transform: translate(-50%, -50%);
-            width: 85%; max-width: 480px;
-            background: rgba(5, 10, 15, 0.98);
-            border: 2px solid var(--sculk-core);
-            padding: 25px; border-radius: 8px;
-            box-shadow: 0 0 50px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1);
-            z-index: 100;
-            display: none;
-            color: var(--warden-bone);
+        /* MODAIS GERAIS */
+        .modal {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 85%; max-width: 550px; background: rgba(5, 10, 15, 0.95);
+            border: 2px solid var(--sculk-core); padding: 30px; border-radius: 8px;
+            box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1);
+            z-index: 100; display: none; color: var(--warden-bone);
             backdrop-filter: blur(10px);
         }
 
-        #ai-modal h3 { 
-            color: var(--sculk-core); margin-top: 0; font-size: 16px; 
-            border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px;
-            display: flex; align-items: center; gap: 10px;
+        .modal h3 { 
+            color: var(--sculk-core); margin-top: 0; font-size: 18px; 
+            border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 15px;
+            display: flex; align-items: center; gap: 10px; letter-spacing: 1px;
         }
 
         #ai-response-text {
-            font-size: 13px; line-height: 1.6; margin: 20px 0;
-            max-height: 320px; overflow-y: auto;
-            white-space: pre-wrap; color: var(--text-main);
+            font-size: 14px; line-height: 1.6; margin: 20px 0;
+            max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* Scrollbar Personalizada */
-        #ai-response-text::-webkit-scrollbar { width: 6px; }
-        #ai-response-text::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 3px; }
-
-        .loader {
-            width: 18px; height: 18px; border: 2px solid var(--sculk-core);
-            border-top-color: transparent; border-radius: 50%;
-            animation: spin 1s linear infinite; display: none;
+        /* MÓDULO DE CALIBRAÇÃO UV */
+        #calib-modal { border-color: var(--calib-accent); max-width: 600px; }
+        #calib-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); }
+        
+        .uv-container {
+            width: 100%; height: 240px; background: #111;
+            border: 1px solid var(--warden-bone-dim); margin: 20px 0;
+            position: relative; display: flex; justify-content: center; align-items: center;
+            overflow: hidden;
+            background-image: linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a), 
+                              linear-gradient(45deg, #0a0a0a 25%, transparent 25%, transparent 75%, #0a0a0a 75%, #0a0a0a);
+            background-size: 10px 10px; background-position: 0 0, 5px 5px;
+            box-shadow: inset 0 0 20px rgba(0,0,0,1);
         }
 
-        @keyframes spin { to { transform: rotate(360deg); } }
+        #uv-canvas-2d {
+            image-rendering: pixelated; transform: scale(3.5); transform-origin: center;
+            border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+
+        .calib-controls { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 140px; margin: 0 auto; }
+        .calib-btn {
+            background: var(--sculk-base); color: var(--calib-accent); border: 1px solid var(--calib-accent);
+            padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 14px;
+            transition: 0.1s;
+        }
+        .calib-btn:active { background: var(--calib-accent); color: #000; transform: scale(0.95); }
+        .calib-btn-empty { visibility: hidden; }
 
         .close-modal {
             background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim);
             color: #fff; cursor: pointer; width: 100%;
-            padding: 12px; font-size: 11px; border-radius: 4px;
-            font-weight: 800; text-transform: uppercase;
+            padding: 15px; font-size: 13px; border-radius: 4px;
+            font-weight: 800; text-transform: uppercase; margin-top: 15px;
+            transition: 0.2s; letter-spacing: 1px;
         }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
+
+        .loader {
+            width: 20px; height: 20px; border: 3px solid var(--sculk-core);
+            border-top-color: transparent; border-radius: 50%;
+            animation: spin 1s linear infinite; display: none;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
     </style>
 </head>
 <body oncontextmenu="return false;">
 
 <div id="javis-widget-container">
+    
+    <!-- HUD SUPERIOR (Aviso de Status) -->
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
+    <!-- ÁREA 3D GIGANTE -->
     <div class="viewer-area">
         <div id="scanning-overlay"></div>
         <canvas id="skinViewer"></canvas>
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <div id="ai-modal">
+    <!-- MODAL IA -->
+    <div id="ai-modal" class="modal">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
-        <button class="close-modal" onclick="closeModal()">Sincronizar e Sair</button>
+        <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <div class="control-bar">
-        <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="switchMode('armor')" title="Visualizar Armaduras">🛡️</button>
-            <button class="btn" id="btn-model" onclick="switchMode('model')" title="Visualizar Entidades">👾</button>
-            <button class="btn" onclick="triggerUpload()" title="Carregar Ficheiro">📤</button>
+    <!-- MODAL CALIBRAÇÃO UV -->
+    <div id="calib-modal" class="modal">
+        <h3>✂️ CALIBRAÇÃO DE MALHA UV</h3>
+        <p style="font-size: 12px; color: var(--warden-bone-dim); margin-top: -5px; line-height: 1.5;">Ajuste o offset da imagem gerada pela IA para encaixar no molde 64x32 padrão do Minecraft.</p>
+        
+        <div class="uv-container">
+            <canvas id="uv-canvas-2d" width="64" height="32"></canvas>
         </div>
 
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="font-size: 13px; color: var(--calib-accent); font-weight: bold; background: rgba(0,0,0,0.5); padding: 10px; border-radius: 4px; border-left: 2px solid var(--calib-accent);">
+                Eixo X: <span id="val-x">0</span>px<br>
+                Eixo Y: <span id="val-y">0</span>px
+            </div>
+            
+            <div class="calib-controls">
+                <div class="calib-btn-empty"></div>
+                <button class="calib-btn" onclick="shiftUV(0, -1)">▲</button>
+                <div class="calib-btn-empty"></div>
+                <button class="calib-btn" onclick="shiftUV(-1, 0)">◀</button>
+                <button class="calib-btn" onclick="shiftUV(0, 1)">▼</button>
+                <button class="calib-btn" onclick="shiftUV(1, 0)">▶</button>
+            </div>
+        </div>
+
+        <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent);" onclick="applyCalibration()">Aplicar ao Modelo 3D</button>
+        <button class="close-modal" style="margin-top: 10px; background: transparent;" onclick="closeModal('calib-modal')">Cancelar Operação</button>
+    </div>
+
+    <!-- BARRA TÁTICA INFERIOR (Onde toda a magia acontece agora) -->
+    <div class="control-bar">
+        
+        <!-- Bloco Esquerdo: Tipos de Visualização -->
         <div class="btn-group">
-            <button class="btn btn-ai" onclick="generateLore()">✨ LORE</button>
-            <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()">🧠 ALINHAR</button>
+            <button class="btn active" id="btn-armor" onclick="switchMode('armor')" title="Visualizar Armaduras">🛡️ Armadura</button>
+            <button class="btn" id="btn-model" onclick="switchMode('model')" title="Visualizar Entidades">👾 Entidade</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Bloco Central: Uploads Dinâmicos -->
+        <div class="btn-group" id="upload-group">
+            <!-- Aparecem no Modo Armadura -->
+            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Carregar Camada 1 (Capacete/Peito/Botas)">📤 Upload L1 (Corpo)</button>
+            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Carregar Camada 2 (Calças)">📤 Upload L2 (Calças)</button>
+            <!-- Aparece no Modo Modelo 3D -->
+            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)" title="Carregar Entidade 3D">📤 Importar Malha (.gltf)</button>
+        </div>
+
+        <div class="divider"></div>
+
+        <!-- Bloco Direito: Ferramentas e IA -->
+        <div class="btn-group">
+            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore da Criatura">✨ LORE</button>
+            <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()" title="Pedir à IA para encontrar erros na textura">🧠 ALINHAR</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="openCalibration()" title="Ajustar coordenadas UV manualmente">✂️ CALIBRAR</button>
             <div class="loader" id="ai-loader"></div>
         </div>
 
-        <a id="javis-branding" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
+        <div style="flex: 1;"></div> <!-- Empurra os créditos para a direita -->
+
+        <a id="javis-branding-main" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
             Powered by <b>J.A.V.I.S.</b>
         </a>
     </div>
 </div>
 
-<input type="file" id="file-input" accept="image/png,.gltf,.glb">
+<input type="file" id="file-input">
 
 <script>
-    const apiKey = ""; // Provisionada em runtime pelo ambiente
+    const apiKey = ""; // Provisionada em runtime
     let currentMode = 'armor';
-    let lastUploadedBase64 = null;
+    let lastUploadedBase64 = null; 
+    let uploadTarget = 1; // 1 = L1, 2 = L2, 3 = GLTF
     
-    const fileInput = document.getElementById('file-input');
-    const status = document.getElementById('status-overlay');
-    const modal = document.getElementById('ai-modal');
-    const aiText = document.getElementById('ai-response-text');
+    // Variáveis de Calibração UV
+    let uvOffsetX = 0;
+    let uvOffsetY = 0;
+    let sourceImage = new Image();
+
     const loader = document.getElementById('ai-loader');
     const scanner = document.getElementById('scanning-overlay');
+    const aiText = document.getElementById('ai-response-text');
+    const statusOverlay = document.getElementById('status-overlay');
+    const fileInput = document.getElementById('file-input');
 
-    // --- PROTOCOLO DE INTEGRIDADE (PROTEÇÃO ANTI-COPY) ---
+    // --- PROTOCOLO DE INTEGRIDADE ---
     (function(){
         const _0xPR0T = ["sergio810.github.io", "localhost", "127.0.0.1"];
         const _0xLINK = "https://sergio810.github.io/vexanium-armor-viewer/";
         function _0xV3RIFY() {
-            const b = document.getElementById('javis-branding');
+            const b = document.getElementById('javis-branding-main');
             if (!b || b.getAttribute('href') !== _0xLINK || !b.innerText.includes('J.A.V.I.S.')) _0xKILL();
         }
         function _0xKILL() {
-            document.body.innerHTML = "<div style='color:#ff3333; text-align:center; padding-top:20%; font-family:monospace; background:#000; height:100vh;'><h1>⚠️ ERRO DE INTEGRIDADE ⚠️</h1><p>Violação de Direitos Autorais detetada. O código genético J.A.V.I.S. foi corrompido.</p></div>";
+            document.body.innerHTML = "<div style='color:#ff3333; text-align:center; padding-top:20%; font-family:monospace; background:#000; height:100vh; display:flex; flex-direction:column; justify-content:center;'><h1>⚠️ ERRO DE INTEGRIDADE ⚠️</h1><p>Violação de Direitos Autorais.</p></div>";
             throw new Error("Integrity Failed");
         }
         setInterval(_0xV3RIFY, 6000);
@@ -229,11 +321,10 @@
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
         canvas: skinCanvas,
-        width: skinCanvas.clientWidth,
-        height: skinCanvas.clientHeight
+        width: skinCanvas.parentElement.clientWidth,
+        height: skinCanvas.parentElement.clientHeight
     });
-    // Tenta carregar a skin base com tratamento de erro
-    skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => console.warn("Servidor de skins offline."));
+    skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
     skinViewer.controls.autoRotate = true;
     skinViewer.controls.autoRotateSpeed = 1.5;
 
@@ -256,97 +347,148 @@
     }
     animate();
 
-    // --- MÓDULOS DE INTELIGÊNCIA ARTIFICIAL GEMINI ---
+    // --- MÓDULOS DE IA GEMINI ---
     async function callGemini(payload) {
         loader.style.display = 'block';
         scanner.style.display = 'block';
-        
-        let retries = 0;
-        const maxRetries = 5;
-
+        let retries = 0; const maxRetries = 5;
         while (retries < maxRetries) {
             try {
                 const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
                 });
-                
                 if (!response.ok) throw new Error("Connection failed");
-                
                 const data = await response.json();
                 return data.candidates[0].content.parts[0].text;
             } catch (e) {
-                retries++;
-                const delay = Math.pow(2, retries) * 1000;
-                await new Promise(res => setTimeout(res, delay));
+                retries++; await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000));
             } finally {
                 if (retries === maxRetries || !loader.style.display) {
-                    loader.style.display = 'none';
-                    scanner.style.display = 'none';
+                    loader.style.display = 'none'; scanner.style.display = 'none';
                 }
             }
         }
-        return "Sistemas sobrecarregados. O vácuo não respondeu à chamada neural.";
+        return "Falha na recepção neural.";
     }
 
     async function generateLore() {
-        modal.style.display = 'block';
-        document.getElementById('modal-title').innerText = "✨ ANÁLISE DE LORE BIOMECÂNICA";
-        aiText.innerText = "A consultar o diário do Dr. Aldrich...";
-        
+        showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
         const prompt = currentMode === 'armor' 
-            ? "Gere uma descrição técnica e lore sombria em Português para uma nova Armadura Parasita Alienígena de Minecraft. Fale sobre a simbiose com o hospedeiro."
-            : "Descreva um Mob ou Entidade biomecânica hostil em Português que habita o vácuo profundo do mod Vexanium.";
-
+            ? "Gere uma descrição técnica e lore sombria para uma Armadura Parasita Alienígena de Minecraft."
+            : "Descreva um Mob biomecânico hostil que habita o vácuo profundo do mod Vexanium.";
         const lore = await callGemini({
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português de forma técnica, sombria e imersiva." }] }
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português de Portugal com tom tecnológico." }] }
         });
         aiText.innerText = lore;
-        scanner.style.display = 'none';
     }
 
     async function analyzeTexture() {
-        if (!lastUploadedBase64 || currentMode !== 'armor') {
-            alert("Aviso: É necessário carregar uma textura PNG para iniciar o protocolo de alinhamento.");
-            return;
-        }
-
-        modal.style.display = 'block';
-        document.getElementById('modal-title').innerText = "🧠 PROTOCOLO DE RECONSTRUÇÃO";
-        aiText.innerText = "A analisar malha de textura e coordenadas UV...";
-
-        const prompt = "Analise esta imagem de textura de armadura de Minecraft. Ela parece estar mal estruturada ou com as peças fora do lugar em relação ao molde 64x32 padrão. Identifique o que está errado e sugira como reorganizar os blocos de pixels (Capacete, Peito, Braços, Pernas) para que o 'quebra-cabeça' da textura encaixe perfeitamente no modelo 3D.";
-
+        if (!lastUploadedBase64 || currentMode !== 'armor') { alert("Carregue uma textura PNG L1 ou L2 primeiro."); return; }
+        showModal("ai-modal", "🧠 PROTOCOLO DE RECONSTRUÇÃO", "A analisar malha de textura e coordenadas UV...");
         const analysis = await callGemini({
             contents: [{ 
                 parts: [
-                    { text: prompt },
+                    { text: "Analise esta textura de armadura de Minecraft. Identifique o que está fora do lugar em relação ao molde 64x32 padrão." },
                     { inlineData: { mimeType: "image/png", data: lastUploadedBase64.split(',')[1] } }
                 ] 
             }],
-            systemInstruction: { parts: [{ text: "Você é um especialista J.A.V.I.S. em mapeamento UV e texturas de Minecraft. Ajude o Operador a consertar designs bagunçados." }] }
+            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. em mapeamento UV. Ajude a consertar designs." }] }
         });
         aiText.innerText = analysis;
-        scanner.style.display = 'none';
     }
 
-    function closeModal() { modal.style.display = 'none'; }
+    function showModal(modalId, title, initialText) {
+        document.getElementById(modalId).style.display = 'block';
+        if(title) document.getElementById('modal-title').innerText = title;
+        if(initialText) aiText.innerText = initialText;
+    }
+    
+    function closeModal(modalId) { 
+        document.getElementById(modalId).style.display = 'none'; 
+        scanner.style.display = 'none'; 
+    }
 
-    // --- CONTROLOS DE INTERFACE ---
+    // --- MÓDULO DE CALIBRAÇÃO 2D ---
+    function openCalibration() {
+        if (!lastUploadedBase64 || currentMode !== 'armor') { 
+            alert("Carregue uma textura PNG para calibrar."); 
+            return; 
+        }
+        uvOffsetX = 0; uvOffsetY = 0;
+        document.getElementById('val-x').innerText = uvOffsetX;
+        document.getElementById('val-y').innerText = uvOffsetY;
+        showModal('calib-modal');
+        
+        sourceImage.onload = () => { renderUVCanvas(); };
+        sourceImage.src = lastUploadedBase64;
+    }
+
+    function shiftUV(dx, dy) {
+        uvOffsetX += dx; uvOffsetY += dy;
+        document.getElementById('val-x').innerText = uvOffsetX;
+        document.getElementById('val-y').innerText = uvOffsetY;
+        renderUVCanvas();
+    }
+
+    function renderUVCanvas() {
+        const c = document.getElementById('uv-canvas-2d');
+        const ctx = c.getContext('2d');
+        ctx.clearRect(0, 0, c.width, c.height);
+        
+        ctx.drawImage(sourceImage, uvOffsetX, uvOffsetY, c.width, c.height);
+
+        ctx.strokeStyle = "rgba(255, 170, 0, 0.5)"; 
+        ctx.lineWidth = 1;
+        
+        ctx.strokeRect(0, 0, 32, 16);
+        ctx.strokeRect(16, 16, 24, 16);
+        ctx.strokeRect(0, 16, 16, 16);
+        ctx.strokeRect(40, 16, 16, 16);
+    }
+
+    function applyCalibration() {
+        const c = document.getElementById('uv-canvas-2d');
+        const calibratedBase64 = c.toDataURL("image/png");
+        
+        if (uploadTarget === 1) {
+            skinViewer.loadSkin(calibratedBase64);
+            statusOverlay.innerText = "✓ L1: UV RECALIBRADA";
+        } else if (uploadTarget === 2) {
+            skinViewer.loadCape(calibratedBase64); 
+            statusOverlay.innerText = "✓ L2: UV RECALIBRADA";
+        }
+        
+        lastUploadedBase64 = calibratedBase64; 
+        closeModal('calib-modal');
+    }
+
+    // --- CONTROLES DE INTERFACE ---
     function switchMode(mode) {
         currentMode = mode;
         document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
         document.getElementById('btn-model').classList.toggle('active', mode === 'model');
+        
         skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
         gltfCanvas.style.display = mode === 'model' ? 'block' : 'none';
-        document.getElementById('btn-align').style.opacity = mode === 'armor' ? "1" : "0.3";
-        status.innerText = `SISTEMAS: ${mode.toUpperCase()} // IA: STANDBY`;
+        
+        const isArmor = mode === 'armor';
+        document.getElementById('btn-align').style.opacity = isArmor ? "1" : "0.3";
+        document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
+        
+        document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
+        
+        statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
         resize();
     }
 
-    function triggerUpload() { fileInput.click(); }
+    function triggerUpload(targetId) { 
+        uploadTarget = targetId; 
+        fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png";
+        fileInput.click(); 
+    }
 
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
@@ -356,9 +498,16 @@
         if (currentMode === 'armor' && file.type === "image/png") {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                lastUploadedBase64 = evt.target.result;
-                skinViewer.loadSkin(lastUploadedBase64);
-                status.innerText = "✓ TEXTURA ASSIMILADA COM SUCESSO";
+                const base64Data = evt.target.result;
+                lastUploadedBase64 = base64Data; 
+                
+                if (uploadTarget === 1) {
+                    skinViewer.loadSkin(base64Data);
+                    statusOverlay.innerText = "✓ CAMADA 1 (CORPO) ASSIMILADA";
+                } else if (uploadTarget === 2) {
+                    skinViewer.loadCape(base64Data);
+                    statusOverlay.innerText = "✓ CAMADA 2 (CALÇAS) ASSIMILADA";
+                }
             };
             reader.readAsDataURL(file);
         } else if (currentMode === 'model') {
@@ -371,22 +520,25 @@
                 currentModel.scale.set(scale, scale, scale);
                 currentModel.position.set(0, -1, 0);
                 scene.add(currentModel);
-                status.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
-            }, undefined, () => {
-                status.innerText = "❌ FALHA NA MATERIALIZAÇÃO 3D";
+                statusOverlay.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
             });
         }
+        e.target.value = ""; 
     };
 
     function resize() {
-        const w = skinCanvas.parentElement.clientWidth;
-        const h = skinCanvas.parentElement.clientHeight;
-        skinViewer.width = w; skinViewer.height = h;
+        const parent = skinCanvas.parentElement;
+        if (!parent) return;
+        const w = parent.clientWidth;
+        const h = parent.clientHeight;
+        skinViewer.width = w; 
+        skinViewer.height = h;
         renderer.setSize(w, h);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
     }
-    window.onresize = resize;
+    
+    window.addEventListener('resize', resize);
     setTimeout(resize, 200);
 </script>
 
