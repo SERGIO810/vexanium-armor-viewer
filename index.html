@@ -97,6 +97,7 @@
         .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
         .btn-recon { border-color: var(--ai-accent); color: var(--ai-accent); border-bottom-color: var(--ai-accent); }
         .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
+        
         .btn-save { border-color: var(--success); color: var(--success); border-bottom-color: var(--success); background: rgba(0, 255, 170, 0.05); }
         .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 255, 170, 0.2); }
 
@@ -144,14 +145,21 @@
             max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* ESTÚDIO DE CIRURGIA UV (DRAG AND DROP) */
+        /* ESTÚDIO DE CIRURGIA UV */
         #slicer-modal { 
             width: 95vw; height: 95vh; max-width: 1600px; 
             border-color: var(--calib-accent); 
             display: flex; flex-direction: column;
             padding: 15px;
         }
-        #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px;}
+        
+        #slicer-modal h3 { 
+            color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px;
+        }
+
+        .layer-badge {
+            background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto;
+        }
         
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
 
@@ -171,8 +179,13 @@
         }
 
         #workspace-canvas {
-            max-width: 100%; max-height: 100%; object-fit: contain;
-            cursor: crosshair; box-shadow: 0 0 30px rgba(0,0,0,1);
+            width: auto;
+            height: auto;
+            max-width: 100%; 
+            max-height: 100%; 
+            aspect-ratio: 1 / 1;
+            cursor: crosshair; 
+            box-shadow: 0 0 30px rgba(0,0,0,1);
         }
 
         .slice-category {
@@ -211,6 +224,16 @@
         }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
 
+        /* Cores das Peças Específicas */
+        .slice-btn[data-part^="helmet"].active { background: rgba(186, 85, 211, 0.2); border-color: #ba55d3; color: #ba55d3; }
+        .slice-btn[data-part^="chest"].active { background: rgba(0, 255, 255, 0.2); border-color: #00ffff; color: #00ffff; }
+        .slice-btn[data-part^="arm"].active { background: rgba(50, 205, 50, 0.2); border-color: #32cd32; color: #32cd32; }
+        .slice-btn[data-part^="leg"].active { background: rgba(255, 215, 0, 0.2); border-color: #ffd700; color: #ffd700; }
+        .slice-btn[data-part^="boot"].active { background: rgba(255, 69, 0, 0.2); border-color: #ff4500; color: #ff4500; }
+
+        .slice-status { font-size: 10px; opacity: 0.5; }
+        .slice-status.done { color: #00ff00; opacity: 1; font-weight: 800; }
+
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
@@ -243,9 +266,12 @@
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <!-- ESTÚDIO DE ARRASTAR E SOLTAR (DRAG AND DROP) -->
+    <!-- ESTÚDIO DE ARRASTAR E SOLTAR -->
     <div id="slicer-modal" class="modal" style="display: none;">
-        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE</h3>
+        <h3>
+            ✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE 
+            <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span>
+        </h3>
         
         <div class="editor-layout">
             <div class="editor-toolbar">
@@ -281,8 +307,7 @@
                 </label>
 
                 <div style="margin-top:auto; font-size:10px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
-                    <p><b>1.</b> Use a Varinha Mágica para extrair peças da arte.</p>
-                    <p><b>2.</b> Arraste a peça extraída para as caixas do Molde UV no fundo!</p>
+                    <p><b>Aviso:</b> Está a editar a <span id="hint-layer-name" style="color:var(--calib-accent); font-weight:bold;">Camada 1</span>. Preencha apenas os quadrados correspondentes.</p>
                 </div>
             </div>
 
@@ -306,18 +331,25 @@
 
         <div class="divider"></div>
 
+        <!-- BOTÕES DE UPLOAD DUPLOS -->
         <div class="btn-group" id="upload-group">
-            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)">📤 Carregar Arte Base (IA)</button>
-            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)">📤 Importar Malha (.gltf)</button>
+            <!-- L1 = Capacete/Peitoral/Botas | L2 = Calças -->
+            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Carregar Arte Base para Capacete, Peito e Botas">📥 BASE L1 (C/P/B)</button>
+            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Carregar Arte Base para Calças/Pernas">📥 BASE L2 (CALÇAS)</button>
+            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)">📥 IMPORTAR MALHA (.GLTF)</button>
         </div>
 
         <div class="divider"></div>
 
+        <!-- MÓDULOS DE EDIÇÃO E SALVAMENTO DUPLOS -->
         <div class="btn-group">
-            <button class="btn btn-ai" onclick="generateLore()">✨ LORE</button>
-            <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()">🧠 ANALISAR</button>
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()">✂️ ESTÚDIO DE MONTAGEM</button>
-            <button class="btn btn-save" onclick="baixarTexturaAtual()">💾 SALVAR (.PNG)</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Abre o Estúdio para recortar a camada ativa.">✂️ ESTÚDIO DE MONTAGEM</button>
+            
+            <div class="divider" id="div-export"></div>
+
+            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" title="Salvar a malha L1 montada como PNG">💾 EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" title="Salvar a malha L2 montada como PNG">💾 EXPORTAR L2</button>
+            
             <div class="loader" id="ai-loader"></div>
         </div>
 
@@ -333,12 +365,20 @@
 
 <script>
     // ============================================================================
-    // NÚCLEO J.A.V.I.S. & THREE.JS
+    // NÚCLEO J.A.V.I.S. E GESTÃO DE ESTADO (LAYERS)
     // ============================================================================
     const apiKey = ""; 
     let currentMode = 'armor';
-    let lastUploadedBase64 = null; 
+    
+    // Variáveis de Estado Duplo para suportar L1 e L2 em simultâneo
+    let baseImageL1 = null; // A arte bruta carregada para a Camada 1
+    let baseImageL2 = null; // A arte bruta carregada para a Camada 2
+    let finalImageL1 = null; // O PNG montado e fundido da Camada 1
+    let finalImageL2 = null; // O PNG montado e fundido da Camada 2
+    
     let uploadTarget = 1; 
+    let currentEditingLayer = 1; // Controla qual camada (1 ou 2) o Bloco Operatório está a editar
+    
     let originalImageObj = new Image();
 
     const loader = document.getElementById('ai-loader');
@@ -389,42 +429,54 @@
     animate();
 
     // ============================================================================
-    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP PARA O MOLDE)
+    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
     
-    // Canvas que guarda a imagem original sendo esburacada
     let offscreenCanvas = document.createElement('canvas');
     let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
-    let currentTool = 'magic'; // 'magic' ou 'move'
+    let currentTool = 'magic'; 
     let isDragging = false;
     let startX = 0, startY = 0;
     
-    // As peças que o utilizador cortou
-    // Formato: { id, imgData, x, y, ox, oy, w, h }
     let extractedPieces = [];
     let activePieceIndex = -1;
     let nextPieceId = 1;
 
     function abrirFatiadorLivre() {
-        if (!lastUploadedBase64 || currentMode !== 'armor') { 
-            alert("Aviso Operador: Carregue uma imagem base gerada por IA primeiro."); 
+        // O utilizador abre o fatiador para a camada que carregou mais recentemente, 
+        // ou avisamos para carregar uma das duas.
+        let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
+        
+        if (!targetBase || currentMode !== 'armor') { 
+            alert(`Aviso Operador: Carregue uma Arte Base para a Camada ${currentEditingLayer} primeiro.`); 
             return; 
         }
+
+        // Atualiza a UI do Modal para indicar a camada
+        let badge = document.getElementById('slicer-layer-badge');
+        let hint = document.getElementById('hint-layer-name');
+        if (currentEditingLayer === 1) {
+            badge.innerText = "L1 (C/P/B)";
+            badge.style.background = "var(--calib-accent)";
+            hint.innerText = "Camada 1 (Capacete, Peito, Botas)";
+        } else {
+            badge.innerText = "L2 (CALÇAS)";
+            badge.style.background = "#00ffaa";
+            hint.innerText = "Camada 2 (Exclusivo para Calças/Pernas)";
+        }
+
         document.getElementById('slicer-modal').style.display = 'flex';
         
         originalImageObj.onload = () => {
-            // O Workspace agora é SEMPRE 1024x1024 (HD Minecraft Formato 64x64)
             wsCanvas.width = 1024;
             wsCanvas.height = 1024;
             
             offscreenCanvas.width = 1024;
             offscreenCanvas.height = 1024;
             offscreenCtx.clearRect(0, 0, 1024, 1024);
-            
-            // Desenha a imagem da IA no topo esquerdo (ou centrada, consoante o tamanho)
             offscreenCtx.drawImage(originalImageObj, 0, 0);
 
             extractedPieces = [];
@@ -432,7 +484,7 @@
             setTool('magic');
             renderFatiador();
         };
-        originalImageObj.src = lastUploadedBase64;
+        originalImageObj.src = targetBase;
     }
 
     function setTool(tool) {
@@ -449,8 +501,7 @@
         const data = imgData.data;
 
         for (let i = 0; i < data.length; i += 4) {
-            // Clareza acima de 230 vira transparente
-            if (data[i] > 230 && data[i+1] > 230 && data[i+2] > 230) {
+            if (data[i] > 220 && data[i+1] > 220 && data[i+2] > 220) {
                 data[i+3] = 0; 
             }
         }
@@ -465,7 +516,7 @@
             extractedPieces.push({
                 id: nextPieceId++,
                 imgData: p.imgData,
-                ox: undefined, // Duplicados não têm origem para restaurar
+                ox: undefined, 
                 oy: undefined,
                 x: p.x + 20, 
                 y: p.y + 20,
@@ -481,36 +532,32 @@
     function apagarPecaAtiva() {
         if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
             const p = extractedPieces[activePieceIndex];
-            
-            // Restauro Inteligente: Se a peça tiver uma origem, cola os píxeis de volta no fundo!
             if (p.ox !== undefined && p.oy !== undefined) {
                 offscreenCtx.putImageData(p.imgData, p.ox, p.oy);
             }
-            
             extractedPieces.splice(activePieceIndex, 1);
             activePieceIndex = -1;
             renderFatiador();
         }
     }
 
-    // Desenha o Guia Visual do Minecraft no fundo
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
-        const f = 16; // Fator de escala (1024 / 64)
+        const f = 16; 
         wsCtx.lineWidth = 1;
         wsCtx.font = "bold 12px JetBrains Mono";
         wsCtx.textAlign = "center";
 
         const drawBox = (x, y, w, h, color, label) => {
             wsCtx.strokeStyle = color;
-            wsCtx.fillStyle = color + "22"; // 13% opacity
+            wsCtx.fillStyle = color + "22";
             wsCtx.strokeRect(x*f, y*f, w*f, h*f);
             wsCtx.fillRect(x*f, y*f, w*f, h*f);
             wsCtx.fillStyle = color;
             wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + 16);
         };
 
-        // Cabeça (Magenta)
+        // Cabeça
         drawBox(8, 0, 8, 8, "#ba55d3", "TOPO");
         drawBox(16, 0, 8, 8, "#ba55d3", "FUNDO");
         drawBox(0, 8, 8, 8, "#ba55d3", "LADO.D");
@@ -518,7 +565,7 @@
         drawBox(16, 8, 8, 8, "#ba55d3", "LADO.E");
         drawBox(24, 8, 8, 8, "#ba55d3", "COSTAS");
 
-        // Peito (Ciano)
+        // Peito
         drawBox(20, 16, 8, 4, "#00ffff", "P.TOP");
         drawBox(28, 16, 8, 4, "#00ffff", "P.BOT");
         drawBox(16, 20, 4, 12, "#00ffff", "L.DIR");
@@ -526,7 +573,7 @@
         drawBox(28, 20, 4, 12, "#00ffff", "L.ESQ");
         drawBox(32, 20, 8, 12, "#00ffff", "COSTAS");
 
-        // Braço Direito (Verde)
+        // Braços
         drawBox(44, 16, 4, 4, "#32cd32", "TOP");
         drawBox(48, 16, 4, 4, "#32cd32", "BOT");
         drawBox(40, 20, 4, 12, "#32cd32", "L.DIR");
@@ -534,7 +581,6 @@
         drawBox(48, 20, 4, 12, "#32cd32", "L.ESQ");
         drawBox(52, 20, 4, 12, "#32cd32", "COSTAS");
 
-        // Braço Esquerdo (Verde)
         drawBox(36, 48, 4, 4, "#32cd32", "TOP");
         drawBox(40, 48, 4, 4, "#32cd32", "BOT");
         drawBox(32, 52, 4, 12, "#32cd32", "L.DIR");
@@ -542,7 +588,7 @@
         drawBox(40, 52, 4, 12, "#32cd32", "L.ESQ");
         drawBox(44, 52, 4, 12, "#32cd32", "COSTAS");
 
-        // Perna Direita (Amarelo)
+        // Pernas (L2 foca aqui principalmente)
         drawBox(4, 16, 4, 4, "#ffd700", "TOP");
         drawBox(8, 16, 4, 4, "#ffd700", "BOT");
         drawBox(0, 20, 4, 12, "#ffd700", "L.DIR");
@@ -550,7 +596,6 @@
         drawBox(8, 20, 4, 12, "#ffd700", "L.ESQ");
         drawBox(12, 20, 4, 12, "#ffd700", "COSTAS");
 
-        // Perna Esquerda (Amarelo)
         drawBox(20, 48, 4, 4, "#ffd700", "TOP");
         drawBox(24, 48, 4, 4, "#ffd700", "BOT");
         drawBox(16, 52, 4, 12, "#ffd700", "L.DIR");
@@ -561,14 +606,9 @@
 
     function renderFatiador() {
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
-        
-        // 1. Desenha o Molde Oficial por baixo
         desenharMoldeUV();
-
-        // 2. Desenha a Imagem Raw (Que tem buracos de onde as peças foram tiradas)
         wsCtx.drawImage(offscreenCanvas, 0, 0);
 
-        // 3. Desenha os autocolantes/peças extraídas
         extractedPieces.forEach((p, i) => {
             let tempC = document.createElement('canvas');
             tempC.width = p.w; tempC.height = p.h;
@@ -576,7 +616,6 @@
             
             wsCtx.drawImage(tempC, p.x, p.y);
             
-            // Borda se estiver selecionada
             if (i === activePieceIndex) {
                 wsCtx.strokeStyle = "var(--calib-accent)";
                 wsCtx.lineWidth = 2;
@@ -587,7 +626,6 @@
         });
     }
 
-    // Seleção Mágica Baseada em Flood Fill
     function selecaoMagica(sx, sy) {
         const w = offscreenCanvas.width;
         const h = offscreenCanvas.height;
@@ -661,7 +699,6 @@
 
         if (currentTool === 'move') {
             activePieceIndex = -1;
-            // Procura de cima para baixo
             for (let i = extractedPieces.length - 1; i >= 0; i--) {
                 let p = extractedPieces[i];
                 if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) {
@@ -669,7 +706,6 @@
                     isDragging = true;
                     wsCanvas.style.cursor = 'grabbing';
                     
-                    // Traz para a frente
                     let target = extractedPieces.splice(i, 1)[0];
                     extractedPieces.push(target);
                     activePieceIndex = extractedPieces.length - 1;
@@ -679,24 +715,27 @@
             renderFatiador();
         } 
         else if (currentTool === 'magic') {
-            // Executa a extração
-            const box = selecaoMagica(Math.floor(pos.x), Math.floor(pos.y));
+            let sx = Math.floor(pos.x);
+            let sy = Math.floor(pos.y);
+            
+            sx = Math.max(0, Math.min(offscreenCanvas.width - 1, sx));
+            sy = Math.max(0, Math.min(offscreenCanvas.height - 1, sy));
+
+            const box = selecaoMagica(sx, sy);
             if (box && box.w > 5 && box.h > 5) {
-                // Copia
                 let imgD = offscreenCtx.getImageData(box.x, box.y, box.w, box.h);
-                // Apaga do fundo
                 offscreenCtx.clearRect(box.x, box.y, box.w, box.h);
                 
                 extractedPieces.push({
                     id: nextPieceId++,
                     imgData: imgD,
-                    ox: box.x, oy: box.y, // Guarda a origem para restauro!
+                    ox: box.x, oy: box.y, 
                     x: box.x, y: box.y,
                     w: box.w, h: box.h
                 });
                 
                 activePieceIndex = extractedPieces.length - 1;
-                setTool('move'); // Muda para a ferramenta de mover automaticamente!
+                setTool('move'); 
                 renderFatiador();
             }
         }
@@ -719,7 +758,6 @@
             isDragging = false;
             wsCanvas.style.cursor = 'grab';
             
-            // Snap Magnético ao Molde (Alinha à grelha de 16 pixels)
             if (document.getElementById('snap-grid').checked) {
                 let p = extractedPieces[activePieceIndex];
                 p.x = Math.round(p.x / 16) * 16;
@@ -729,16 +767,13 @@
         }
     });
 
-    // ============================================================================
-    // A FUSÃO FINAL: O ECRÃ INTEIRO VIRA A TEXTURA E O EXPORTADOR
-    // ============================================================================
+    // Funde as imagens consoante a camada que estamos a editar
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
         outCanvas.height = 1024;
         const outCtx = outCanvas.getContext('2d');
 
-        // Pega exatamente o que o utilizador arrastou e colou na tela
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas');
             temp.width = p.w;
@@ -750,81 +785,42 @@
 
         const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
         
-        skinViewer.loadSkin(finalArmaduraBase64);
-        statusOverlay.innerText = "✓ SIMBIOSE NEURAL: TEXTURA PERSONALIZADA MONTADA!";
-        lastUploadedBase64 = finalArmaduraBase64; 
+        if (currentEditingLayer === 1) {
+            finalImageL1 = finalArmaduraBase64;
+            skinViewer.loadSkin(finalImageL1);
+            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) MONTADA E VESTIDA!";
+        } else {
+            finalImageL2 = finalArmaduraBase64;
+            // No Skinview3D o 'loadCape' ou pintar partes das calças é usado para simular a L2.
+            // Para manter a estabilidade da visualização base sem conflito com a L1, usamos a capa.
+            skinViewer.loadCape(finalImageL2); 
+            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) MONTADA!";
+        }
         
         closeModal('slicer-modal');
     }
 
-    // Função de Exportação (O botão verde no Dashboard)
-    function baixarTexturaAtual() {
-        if (!lastUploadedBase64) {
-            alert("Aviso: Nenhuma textura foi fundida ou carregada para guardar.");
+    // Exportação com Nome Automático de Acordo com o Minecraft
+    function baixarTextura(layer) {
+        let imageData = layer === 1 ? finalImageL1 : finalImageL2;
+        let fileName = layer === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
+
+        if (!imageData) {
+            alert(`Aviso Operador: A Camada ${layer} ainda não foi gerada. Use o Estúdio de Montagem primeiro.`);
             return;
         }
         const a = document.createElement('a');
-        a.href = lastUploadedBase64;
-        a.download = 'vexanium_simbionte_hd.png';
+        a.href = imageData;
+        a.download = fileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        statusOverlay.innerText = "✓ ARQUIVO EXPORTADO PARA A BASE DE DADOS LOCAL!";
+        statusOverlay.innerText = `✓ SUCESSO: Arquivo ${fileName} gerado!`;
     }
 
     // ============================================================================
-    // CHAMADAS DE API GEMINI
+    // CONTROLES DE INTERFACE & UPLOADS
     // ============================================================================
-    async function callGemini(payload) {
-        loader.style.display = 'block';
-        scanner.style.display = 'block';
-        let retries = 0; const maxRetries = 5;
-        while (retries < maxRetries) {
-            try {
-                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`, {
-                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
-                });
-                if (!response.ok) throw new Error("Connection failed");
-                const data = await response.json();
-                return data.candidates[0].content.parts[0].text;
-            } catch (e) {
-                retries++; await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000));
-            } finally {
-                if (retries === maxRetries || !loader.style.display) {
-                    loader.style.display = 'none'; scanner.style.display = 'none';
-                }
-            }
-        }
-        return "Falha na recepção neural.";
-    }
-
-    async function generateLore() {
-        showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
-        const prompt = currentMode === 'armor' 
-            ? "Gere uma descrição técnica e lore sombria para uma Armadura Parasita Alienígena de Minecraft."
-            : "Descreva um Mob biomecânico hostil que habita o vácuo profundo do mod Vexanium.";
-        const lore = await callGemini({
-            contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português." }] }
-        });
-        aiText.innerText = lore;
-    }
-
-    async function analyzeTexture() {
-        if (!lastUploadedBase64 || currentMode !== 'armor') { alert("Carregue uma imagem base primeiro."); return; }
-        showModal("ai-modal", "🧠 PROTOCOLO DE ANÁLISE", "A investigar falhas na malha orgânica...");
-        const analysis = await callGemini({
-            contents: [{ 
-                parts: [
-                    { text: "Analise esta textura. Aconselhe o Operador a usar o ESTÚDIO DE MONTAGEM para extrair peças com a Varinha Mágica e arrastar para o Molde UV." },
-                    { inlineData: { mimeType: "image/png", data: lastUploadedBase64.split(',')[1] } }
-                ] 
-            }],
-            systemInstruction: { parts: [{ text: "Especialista J.A.V.I.S. Seja técnico." }] }
-        });
-        aiText.innerText = analysis;
-    }
-
     function showModal(modalId, title, initialText) {
         document.getElementById(modalId).style.display = 'flex';
         document.getElementById(modalId).style.flexDirection = 'column';
@@ -837,9 +833,6 @@
         scanner.style.display = 'none'; 
     }
 
-    // ============================================================================
-    // CONTROLES DE INTERFACE
-    // ============================================================================
     function switchMode(mode) {
         currentMode = mode;
         document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
@@ -853,7 +846,12 @@
         document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
         
         document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
         document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
+        
+        document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
+        document.getElementById('div-export').style.display = isArmor ? "block" : "none";
         
         statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
         resize();
@@ -861,6 +859,12 @@
 
     function triggerUpload(targetId) { 
         uploadTarget = targetId; 
+        
+        // Define qual camada será editada com base no botão clicado (L1 ou L2)
+        if (targetId === 1 || targetId === 2) {
+            currentEditingLayer = targetId;
+        }
+
         fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg";
         fileInput.click(); 
     }
@@ -873,8 +877,13 @@
         if (currentMode === 'armor' && (file.type === "image/png" || file.type === "image/jpeg")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                lastUploadedBase64 = evt.target.result; 
-                statusOverlay.innerText = "✓ ARTE BASE CARREGADA (Aceda ao Estúdio de Montagem)";
+                if (uploadTarget === 1) {
+                    baseImageL1 = evt.target.result;
+                    statusOverlay.innerText = "✓ BASE L1 CARREGADA (Aceda ao Estúdio para Fatiar)";
+                } else if (uploadTarget === 2) {
+                    baseImageL2 = evt.target.result;
+                    statusOverlay.innerText = "✓ BASE L2 CARREGADA (Aceda ao Estúdio para Fatiar)";
+                }
             };
             reader.readAsDataURL(file);
         } else if (currentMode === 'model') {
