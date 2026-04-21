@@ -8,11 +8,12 @@
     <!-- Fonte Técnica e Tática -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
 
-    <!-- Motores 3D -->
+    <!-- Motores 3D e Ferramentas (JSZip para exportação em massa) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     
     <style>
         :root {
@@ -26,7 +27,6 @@
             --ai-accent: #ff00ff;
             --calib-accent: #ffaa00;
             --warning: #ff3333;
-            --success: #00ffaa;
             --uplink-accent: #00e5ff;
         }
 
@@ -67,14 +67,15 @@
             100% { top: 100%; opacity: 0; }
         }
 
-        /* BARRA TÁTICA POLIDA E COMPACTA */
+        /* ========================================================= */
+        /* BARRA TÁTICA INFERIOR - DESIGN MINIMALISTA (SÓ ÍCONES)    */
+        /* ========================================================= */
         .control-bar {
-            background: rgba(10, 17, 23, 0.95);
-            border-top: 2px solid var(--warden-bone-dim);
-            padding: 10px 15px;
+            background: rgba(6, 10, 14, 0.98);
+            border-top: 1px solid #1a2a3a;
+            padding: 8px 15px;
             display: flex; justify-content: space-between; align-items: center;
             gap: 12px; z-index: 10;
-            box-shadow: 0 -5px 20px rgba(0,0,0,0.5);
         }
 
         .btn-group { display: flex; gap: 8px; align-items: center; }
@@ -84,16 +85,20 @@
             color: var(--warden-bone);
             border: 1px solid var(--warden-bone-dim);
             border-bottom-width: 3px; 
-            border-radius: 4px;
-            padding: 8px 14px;
-            font-size: 12px;
-            font-weight: 800; cursor: pointer;
-            text-transform: uppercase; transition: 0.2s;
-            display: flex; align-items: center; gap: 6px;
-            letter-spacing: 1px;
+            border-radius: 6px; 
+            padding: 10px;
+            font-size: 16px; 
+            cursor: pointer; transition: 0.2s;
+            display: flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; 
+            position: relative;
         }
 
-        .btn:hover { background: #1f3447; border-color: var(--warden-bone); transform: translateY(-1px); }
+        /* Oculta o texto base do botão e exibe apenas a class .icon */
+        .btn span:not(.icon) { display: none; }
+        .btn .icon { font-size: 18px; }
+
+        .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
         .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
         
@@ -102,28 +107,52 @@
         .btn-uplink { border-color: var(--uplink-accent); color: var(--uplink-accent); border-bottom-color: var(--uplink-accent); background: rgba(0, 229, 255, 0.05); }
         .btn-uplink:hover { border-color: #fff; color: #fff; background: rgba(0, 229, 255, 0.2); }
         
-        .btn-save { border-color: var(--success); color: var(--success); border-bottom-color: var(--success); background: rgba(0, 255, 170, 0.05); }
-        .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 255, 170, 0.2); }
+        /* Paleta Ciano/Azul substituindo o verde para manter temática Deep Dark */
+        .btn-save { border-color: #00bcd4; color: #00bcd4; border-bottom-color: #00bcd4; background: rgba(0, 188, 212, 0.05); }
+        .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 188, 212, 0.2); }
 
-        .divider { width: 1px; height: 26px; background: var(--warden-bone-dim); opacity: 0.5; margin: 0 5px; }
+        .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
 
-        #javis-branding-main {
+        /* SISTEMA DE TOOLTIP (Aparece no Hover do rato) */
+        .btn::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%; 
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000;
+            color: #fff;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: 0.2s;
+            border: 1px solid var(--sculk-core);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            z-index: 100;
+        }
+        .btn:hover::after { opacity: 1; bottom: 135%; }
+
+        #javis-branding {
             font-size: 11px; color: var(--warden-bone-dim);
             text-decoration: none; display: flex; align-items: center; gap: 5px;
-            letter-spacing: 1px; text-transform: uppercase;
+            letter-spacing: 1px; text-transform: uppercase; margin-left: auto;
         }
-        #javis-branding-main b { color: var(--sculk-core); font-size: 12px; }
+        #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
 
-        #file-input { display: none; }
+        #file-input, #file-input-preset, #file-input-add { display: none; }
 
         #status-overlay {
             position: absolute; top: 20px; left: 20px;
             font-size: 11px; color: var(--sculk-glow);
             pointer-events: none; text-transform: uppercase;
             z-index: 5; font-weight: 800; letter-spacing: 2px;
-            background: rgba(10, 17, 23, 0.8); padding: 8px 12px; border-radius: 4px;
+            background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px;
             border-left: 3px solid var(--sculk-core);
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
             backdrop-filter: blur(5px);
         }
 
@@ -149,62 +178,117 @@
             max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
         }
 
-        /* ESTÚDIO DE CIRURGIA UV */
+        /* ========================================================= */
+        /* ESTÚDIO DE CIRURGIA UV (Layout 3 Colunas: Tools, Canvas, Pieces) */
+        /* ========================================================= */
         #slicer-modal { 
-            width: 95vw; height: 95vh; max-width: 1600px; 
+            width: 98vw; height: 95vh; max-width: 1900px; 
             border-color: var(--calib-accent); 
             display: flex; flex-direction: column;
             padding: 15px;
         }
         
         #slicer-modal h3 { 
-            color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 15px;
+            color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px;
         }
 
         .layer-badge {
-            background: var(--calib-accent); color: #000; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; margin-left: auto;
+            background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto;
         }
         
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
 
+        /* Coluna 1: Ferramentas */
         .editor-toolbar {
-            flex: 0 0 260px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim);
-            border-radius: 6px; padding: 12px; display: flex; flex-direction: column; gap: 6px;
+            flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim);
+            border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px;
             overflow-y: auto;
         }
 
+        /* Coluna 2: Canvas (Com Zoom e Scroll) */
         .editor-workspace {
             flex: 1; 
-            background: #f1f3f4; /* Fundo Limpo Estilo Google */
+            background: #f1f3f4; /* Fundo Limpo Google para Contraste */
             border: 1px solid var(--warden-bone-dim); border-radius: 6px;
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden;
+            display: flex;
+            overflow: auto; /* Permite scroll ao dar Zoom */
             box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
             position: relative;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
-        /* RESOLUÇÃO MATEMÁTICA 2:1 */
+        #canvas-wrapper {
+            width: 1024px; height: 512px;
+            min-width: 1024px; min-height: 512px;
+            margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3);
+            transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s;
+        }
+
         #workspace-canvas {
-            max-width: 100%; 
-            max-height: 100%; 
-            aspect-ratio: 2 / 1;
-            object-fit: contain;
-            flex-shrink: 0;
-            cursor: crosshair; 
-            box-shadow: 0 0 30px rgba(0,0,0,0.3);
-            background: transparent;
+            width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; 
         }
 
+        /* Coluna 3: Painel de Peças Extraídas */
+        .pieces-panel {
+            flex: 0 0 300px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim);
+            border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px;
+            overflow-y: auto;
+        }
+
+        .pieces-header {
+            font-size: 12px; color: var(--calib-accent); font-weight: 800; 
+            border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px;
+            text-transform: uppercase; letter-spacing: 1px;
+        }
+
+        .pieces-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+
+        .piece-item {
+            background: rgba(18, 30, 41, 0.8); border: 1px solid var(--warden-bone-dim);
+            border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.2s;
+        }
+        .piece-item:hover { background: rgba(31, 52, 71, 0.9); border-color: var(--calib-accent); }
+        .piece-item.selected { background: rgba(255, 170, 0, 0.15); border-color: var(--calib-accent); }
+
+        .piece-preview {
+            width: 100%; height: 70px; background: #000; border: 1px solid var(--warden-bone-dim);
+            border-radius: 4px; display: flex; align-items: center; justify-content: center;
+            overflow: hidden; cursor: pointer;
+        }
+        .piece-preview img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+
+        .piece-info { font-size: 10px; color: var(--warden-bone-dim); display: flex; justify-content: space-between; font-weight: bold; }
+        .piece-actions { display: flex; gap: 6px; }
+
+        .piece-btn {
+            flex: 1; background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim);
+            padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
+            text-align: center; transition: 0.2s;
+        }
+        .piece-btn:hover { background: var(--warden-bone-dim); color: #000; }
+        .piece-btn.delete { border-color: #ff5555; color: #ff5555; }
+        .piece-btn.delete:hover { background: #ff5555; color: #fff; }
+
+        .pieces-footer { border-top: 1px solid var(--warden-bone-dim); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
+
+        .download-btn {
+            background: rgba(0, 188, 212, 0.1); color: #00bcd4; border: 1px solid #00bcd4;
+            padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
+            text-align: center; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px;
+        }
+        .download-btn:hover { background: #00bcd4; color: #000; }
+
+        /* Estilos Gerais do Slicer Toolbar */
         .slice-category {
-            font-size: 10px; color: var(--warden-bone-dim); font-weight: 800; 
-            margin-top: 10px; border-bottom: 1px solid #222; padding-bottom: 3px;
-            display: flex; justify-content: space-between; align-items: center;
-            text-transform: uppercase;
+            font-size: 11px; color: var(--warden-bone-dim); font-weight: 800; 
+            margin-top: 12px; border-bottom: 1px solid #222; padding-bottom: 5px;
+            display: flex; justify-content: space-between; align-items: center; text-transform: uppercase;
         }
 
         .tool-btn {
             background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim);
-            padding: 8px 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
+            padding: 10px 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px;
             text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s;
         }
         .tool-btn:hover { background: #1f3447; }
@@ -212,50 +296,71 @@
 
         .action-btn {
             background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim);
-            padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 10px;
+            padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px;
             text-align: center; transition: 0.2s;
         }
         .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
         .delete-btn { border-color: #ff5555; color: #ff5555; }
         .delete-btn:hover { background: #ff5555; color: #fff; }
 
-        .editor-footer {
-            flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 8px;
-        }
+        .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
 
         .close-modal {
-            background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim);
-            color: #fff; cursor: pointer; padding: 10px 20px; font-size: 12px; border-radius: 4px;
-            font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px;
+            background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; 
+            padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px;
         }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
+
+        .zoom-bar {
+            position: absolute; top: 15px; right: 35px; background: rgba(10,17,23, 0.9); border: 1px solid var(--warden-bone-dim);
+            padding: 8px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; z-index: 10;
+        }
 
         /* UPLINK IN-GAME MODAL */
         #ingame-modal { width: 85%; max-width: 600px; border-color: var(--uplink-accent); }
         #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
 
         #jarvis-telemetry-input {
-            width: 100%; height: 160px; background: #050505; color: var(--uplink-accent);
-            border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 12px;
-            font-family: 'JetBrains Mono', monospace; font-size: 11px; margin-bottom: 12px;
+            width: 100%; height: 180px; background: #050505; color: var(--uplink-accent);
+            border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px;
+            font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px;
             resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
         }
         #jarvis-telemetry-input:focus { outline: none; border-color: var(--uplink-accent); }
 
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 3px; }
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
 
         .loader {
-            width: 16px; height: 16px; border: 3px solid var(--sculk-core);
-            border-top-color: transparent; border-radius: 50%;
+            width: 20px; height: 20px; border: 3px solid var(--sculk-core); border-top-color: transparent; border-radius: 50%;
             animation: spin 1s linear infinite; display: none;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
-
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+<!-- SEGURANÇA E PROTEÇÃO (Impede cópias não autorizadas em outros domínios) -->
+<script>
+(function() {
+    const allowedDomains = ["sergio810.github.io", "localhost", "127.0.0.1"];
+    const currentDomain = window.location.hostname;
+    if (!allowedDomains.includes(currentDomain) && currentDomain !== "") {
+        document.body.innerHTML = "";
+        document.body.style.backgroundColor = "#000000";
+        const warning = document.createElement("div");
+        warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
+        warning.innerHTML = `
+            <h1 style="font-size: 30px;">⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1>
+            <p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p>
+            <p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>
+        `;
+        document.body.appendChild(warning);
+        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada. Domínio não autorizado.");
+    }
+})();
+</script>
 
 <div id="javis-widget-container">
     
@@ -267,7 +372,7 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAL IA LORE -->
+    <!-- MODAL IA LORE & ATRIBUTOS -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
@@ -277,22 +382,15 @@
     <!-- MODAL UPLINK IN-GAME -->
     <div id="ingame-modal" class="modal" style="display: none;">
         <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
-        <p style="font-size:11px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole abaixo o Relatório Tático gerado pelo <b>JarvisBrain.java</b> no seu mod para que a IA processe a telemetria real da sua partida atual.</p>
-        
-        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR:
-- Integridade Física: 20/20
-- Nível Nutricional: 20/20
-STATUS DA ARMADURA (VEXANIUM):
-- Biomassa Disponível: 85/100
-..."></textarea>
-
-        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole abaixo o Relatório Tático gerado pelo <b>JarvisBrain.java</b> no seu mod para que a IA processe a telemetria real da sua partida atual.</p>
+        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
             <button class="close-modal" style="background: transparent;" onclick="closeModal('ingame-modal')">Cancelar Conexão</button>
             <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
         </div>
     </div>
 
-    <!-- ESTÚDIO DE MONTAGEM E CORTE -->
+    <!-- ESTÚDIO DE MONTAGEM E CORTE COM PAINEL DIREITO -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>
             ✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE 
@@ -301,14 +399,30 @@ STATUS DA ARMADURA (VEXANIUM):
         
         <div class="editor-layout">
             <div class="editor-toolbar">
+                <div class="slice-category">MEMÓRIA E PRESETS (JSON)</div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn" style="flex: 1;" onclick="desfazerEstado()" title="Desfazer">↩️ Undo</button>
+                    <button class="action-btn" style="flex: 1;" onclick="refazerEstado()" title="Refazer">↪️ Redo</button>
+                </div>
+                <div style="display: flex; gap: 5px;">
+                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="salvarPresetJSON()">💾 Salvar</button>
+                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="document.getElementById('file-input-preset').click()">📂 Abrir</button>
+                    <input type="file" id="file-input-preset" accept="application/json">
+                </div>
+
                 <div class="slice-category">PREPARAÇÃO MULTI-IMAGEM</div>
-                <button class="tool-btn" style="justify-content: center; background: rgba(0, 255, 170, 0.1); border-color: var(--success); color: var(--success); margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">
+                <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">
                     📥 1. Adicionar Nova Imagem
                 </button>
                 <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
                 
-                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent);" onclick="removerFundoBranco()">
+                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">
                     ✨ 2. Remover Fundo
+                </button>
+
+                <!-- Botão IA Vision -->
+                <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">
+                    ✨ 3. Analisar Arte (IA Vision)
                 </button>
 
                 <div class="slice-category">FERRAMENTAS DE EXTRAÇÃO</div>
@@ -334,23 +448,41 @@ STATUS DA ARMADURA (VEXANIUM):
                 </button>
 
                 <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
-                <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer; color:#000; font-weight:bold; margin-bottom:5px;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold; margin-bottom:5px;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);">
                     🧲 Snap Magnético
                 </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:6px; cursor:pointer; color:#000; font-weight:bold;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold;">
                     <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);">
                     📐 Exibir Molde UV
                 </label>
 
-                <!-- TEXTO DO AVISO COM ID PARA A FUNÇÃO showModal() ACESSAR SEGURO -->
-                <div style="margin-top:auto; font-size:10px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 10px;">
-                    <p><b>Aviso:</b> Está a editar a <span id="hint-layer-name" style="color:var(--calib-accent); font-weight:bold;">Camada 1</span>. Preencha apenas os quadrados correspondentes.</p>
+                <div style="margin-top:auto; font-size:11px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 12px;">
+                    <p><b>Aviso:</b> O Minecraft usa um molde espelhado (64x32). Os braços e as pernas esq/dir partilham o mesmo bloco!</p>
                 </div>
             </div>
 
-            <div class="editor-workspace">
-                <canvas id="workspace-canvas"></canvas>
+            <!-- ÁREA DO CANVAS (CENTRO) -->
+            <div class="editor-workspace" id="workspace-scroll-area">
+                <div class="zoom-bar">
+                    <button class="action-btn" style="padding:6px 10px; margin:0;" onclick="ajustarZoom(0.5)">➖</button>
+                    <span id="zoom-label" style="font-size:12px; font-weight:bold; width: 45px; text-align:center;">100%</span>
+                    <button class="action-btn" style="padding:6px 10px; margin:0;" onclick="ajustarZoom(2.0)">➕</button>
+                </div>
+
+                <div id="canvas-wrapper">
+                    <canvas id="workspace-canvas"></canvas>
+                </div>
+            </div>
+
+            <!-- PAINEL DE PEÇAS EXTRAÍDAS (DIREITA) -->
+            <div class="pieces-panel">
+                <div class="pieces-header">📦 Peças Extraídas</div>
+                <div class="pieces-list" id="pieces-list"></div>
+                <div class="pieces-footer">
+                    <button class="download-btn" onclick="downloadAllPieces()">📥 Baixar Tudo (ZIP)</button>
+                    <button class="download-btn" style="background: rgba(0, 229, 255, 0.1); color: var(--uplink-accent); border-color: var(--uplink-accent);" onclick="downloadAllIndividual()">📥 Baixar Individual</button>
+                </div>
             </div>
         </div>
 
@@ -360,42 +492,65 @@ STATUS DA ARMADURA (VEXANIUM):
         </div>
     </div>
 
-    <!-- BARRA TÁTICA INFERIOR -->
+    <!-- BARRA TÁTICA INFERIOR - MINIMALISTA (APENAS ÍCONES COM HOVER TOOLTIP) -->
     <div class="control-bar">
+        
         <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="switchMode('armor')">🛡️ Armadura</button>
-            <button class="btn" id="btn-model" onclick="switchMode('model')">👾 Entidade</button>
+            <button class="btn active" id="btn-armor" onclick="switchMode('armor')" data-tooltip="Modo Armadura">
+                <span class="icon">🛡️</span>
+            </button>
+            <button class="btn" id="btn-model" onclick="switchMode('model')" data-tooltip="Modo Entidade (Mob)">
+                <span class="icon">👾</span>
+            </button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- BOTÕES DE UPLOAD DUPLOS -->
         <div class="btn-group" id="upload-group">
-            <button class="btn" id="btn-upload-l1" onclick="triggerUpload(1)" title="Carregar Arte Base para Capacete, Peito e Botas">📥 BASE L1 (C/P/B)</button>
-            <button class="btn" id="btn-upload-l2" onclick="triggerUpload(2)" title="Carregar Arte Base para Calças/Pernas">📥 BASE L2 (CALÇAS)</button>
-            <button class="btn" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)">📥 IMPORTAR MALHA (.GLTF)</button>
+            <button class="btn btn-calib" id="btn-upload-l1" onclick="triggerUpload(1)" data-tooltip="Carregar Base L1 (Peito/Botas)">
+                <span class="icon">📥</span>
+            </button>
+            <button class="btn btn-calib" id="btn-upload-l2" onclick="triggerUpload(2)" data-tooltip="Carregar Base L2 (Calças)">
+                <span class="icon">📥</span>
+            </button>
+            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)" data-tooltip="Importar Malha 3D (.GLTF)">
+                <span class="icon">📥</span>
+            </button>
         </div>
 
         <div class="divider"></div>
 
-        <!-- MÓDULOS DE EDIÇÃO, IA E SALVAMENTO -->
         <div class="btn-group">
-            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Importar dados do Minecraft">📡 UPLINK IN-GAME</button>
-            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Narrativa">✨ LORE</button>
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Abre o Estúdio para recortar a camada ativa.">✂️ ESTÚDIO DE MONTAGEM</button>
+            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" data-tooltip="Uplink Neural (Logs Minecraft)">
+                <span class="icon">📡</span>
+            </button>
+            <button class="btn btn-ai" onclick="generateLore()" data-tooltip="Gerar Lore Biomecânica">
+                <span class="icon">✨</span>
+            </button>
+            <!-- Botão Atributos -->
+            <button class="btn btn-ai" onclick="gerarAtributos()" data-tooltip="Gerar Atributos Táticos (Estatísticas)">
+                <span class="icon">📊</span>
+            </button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" data-tooltip="Estúdio de Montagem Livre">
+                <span class="icon">✂️</span>
+            </button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" title="Salvar a malha L1 montada como PNG">💾 EXPORTAR L1</button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" title="Salvar a malha L2 montada como PNG">💾 EXPORTAR L2</button>
+            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" data-tooltip="Exportar Textura L1 Final">
+                <span class="icon">💾</span>
+            </button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" data-tooltip="Exportar Textura L2 Final">
+                <span class="icon">💾</span>
+            </button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
 
         <div style="flex: 1;"></div>
 
-        <a id="javis-branding-main" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
-            Powered by <b>J.A.V.I.S.</b>
+        <a id="javis-branding" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank">
+            <span>Powered by <b>J.A.V.I.S.</b></span>
         </a>
     </div>
 </div>
@@ -404,7 +559,7 @@ STATUS DA ARMADURA (VEXANIUM):
 
 <script>
     // ============================================================================
-    // NÚCLEO J.A.V.I.S. E GESTÃO DE ESTADO (LAYERS)
+    // GESTÃO DE ESTADO (LAYERS E CONFIG)
     // ============================================================================
     const apiKey = ""; 
     let currentMode = 'armor';
@@ -424,20 +579,47 @@ STATUS DA ARMADURA (VEXANIUM):
     const statusOverlay = document.getElementById('status-overlay');
     const fileInput = document.getElementById('file-input');
 
-    // Integridade
-    (function(){
-        const _0xPR0T = ["sergio810.github.io", "localhost", "127.0.0.1"];
-        const _0xLINK = "https://sergio810.github.io/vexanium-armor-viewer/";
-        function _0xV3RIFY() {
-            const b = document.getElementById('javis-branding-main');
-            if (!b || b.getAttribute('href') !== _0xLINK || !b.innerText.includes('J.A.V.I.S.')) _0xKILL();
-        }
-        function _0xKILL() {
-            document.body.innerHTML = "<div style='color:#ff3333; text-align:center; padding-top:20%; font-family:monospace; background:#000; height:100vh; display:flex; flex-direction:column; justify-content:center;'><h1>⚠️ ERRO DE INTEGRIDADE ⚠️</h1><p>Violação de Direitos Autorais.</p></div>";
-            throw new Error("Integrity Failed");
-        }
-        setInterval(_0xV3RIFY, 6000);
-    })();
+    function showModal(modalId, title, message) {
+        const modal = document.getElementById(modalId);
+        if (!modal) return;
+        
+        const titleEl = modal.querySelector('h3');
+        const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
+        
+        if (titleEl && title) titleEl.innerText = title;
+        if (textEl && message) textEl.innerText = message;
+        
+        modal.style.display = 'flex';
+    }
+
+    function closeModal(modalId) { 
+        const modal = document.getElementById(modalId);
+        if (modal) modal.style.display = 'none'; 
+        if (scanner) scanner.style.display = 'none'; 
+    }
+
+    function switchMode(mode) {
+        currentMode = mode;
+        document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
+        document.getElementById('btn-model').classList.toggle('active', mode === 'model');
+        
+        skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
+        gltfCanvas.style.display = mode === 'model' ? 'block' : 'none';
+        
+        const isArmor = mode === 'armor';
+        document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
+        
+        document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
+        
+        document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
+        document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
+        document.getElementById('div-export').style.display = isArmor ? "block" : "none";
+        
+        if (statusOverlay) statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
+        resize();
+    }
 
     // Motores 3D
     const skinCanvas = document.getElementById('skinViewer');
@@ -466,7 +648,7 @@ STATUS DA ARMADURA (VEXANIUM):
     animate();
 
     // ============================================================================
-    // ESTÚDIO DE MONTAGEM LIVRE (1024x512 HD ARMOR RESOLUTION)
+    // ESTÚDIO DE MONTAGEM LIVRE (COM ZOOM, HISTÓRICO E PAINEL)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
@@ -488,6 +670,100 @@ STATUS DA ARMADURA (VEXANIUM):
     let nextPieceId = 1;
     let manualSelection = null; 
 
+    let currentZoom = 1.0;
+    const canvasWrapper = document.getElementById('canvas-wrapper');
+
+    let historyUndo = [];
+    let historyRedo = [];
+
+    function registrarEstadoMemoria() {
+        const offCopy = document.createElement('canvas');
+        offCopy.width = 1024; offCopy.height = 512;
+        offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+        
+        const piecesCopy = extractedPieces.map(p => {
+            const idata = new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height);
+            return { ...p, imgData: idata };
+        });
+
+        historyUndo.push({ offscreen: offCopy, pieces: piecesCopy, nextId: nextPieceId });
+        if(historyUndo.length > 20) historyUndo.shift(); 
+        historyRedo = []; 
+        updatePiecesList();
+    }
+
+    function desfazerEstado() {
+        if (historyUndo.length <= 1) return; 
+        
+        const currOffCopy = document.createElement('canvas');
+        currOffCopy.width = 1024; currOffCopy.height = 512;
+        currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+        const currPiecesCopy = extractedPieces.map(p => {
+            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+        });
+        historyRedo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
+
+        historyUndo.pop();
+        const prevState = historyUndo[historyUndo.length - 1]; 
+
+        offscreenCtx.clearRect(0,0,1024,512);
+        offscreenCtx.drawImage(prevState.offscreen, 0, 0);
+        extractedPieces = prevState.pieces.map(p => {
+            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+        });
+        nextPieceId = prevState.nextId;
+        
+        activePieceIndex = -1;
+        manualSelection = null;
+        renderFatiador();
+        updatePiecesList();
+    }
+
+    function refazerEstado() {
+        if (historyRedo.length === 0) return;
+        
+        const nextState = historyRedo.pop();
+        
+        const currOffCopy = document.createElement('canvas');
+        currOffCopy.width = 1024; currOffCopy.height = 512;
+        currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+        const currPiecesCopy = extractedPieces.map(p => {
+            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+        });
+        historyUndo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
+
+        offscreenCtx.clearRect(0,0,1024,512);
+        offscreenCtx.drawImage(nextState.offscreen, 0, 0);
+        extractedPieces = nextState.pieces.map(p => {
+            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+        });
+        nextPieceId = nextState.nextId;
+        
+        activePieceIndex = -1;
+        manualSelection = null;
+        renderFatiador();
+        updatePiecesList();
+    }
+
+    function ajustarZoom(fator) {
+        if (fator === 1) {
+            currentZoom = 1.0;
+        } else {
+            currentZoom *= fator;
+            currentZoom = Math.max(0.5, Math.min(currentZoom, 4.0)); 
+        }
+        
+        const newW = 1024 * currentZoom;
+        const newH = 512 * currentZoom;
+        
+        canvasWrapper.style.width = `${newW}px`;
+        canvasWrapper.style.height = `${newH}px`;
+        canvasWrapper.style.minWidth = `${newW}px`;
+        canvasWrapper.style.minHeight = `${newH}px`;
+
+        document.getElementById('zoom-label').innerText = `${Math.round(currentZoom * 100)}%`;
+    }
+
     function abrirFatiadorLivre() {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         
@@ -508,9 +784,9 @@ STATUS DA ARMADURA (VEXANIUM):
         }
 
         showModal('slicer-modal');
+        ajustarZoom(1); 
         
         originalImageObj.onload = () => {
-            // PROPORÇÃO 2:1 DO MINECRAFT
             wsCanvas.width = 1024;
             wsCanvas.height = 512;
             offscreenCanvas.width = 1024;
@@ -525,8 +801,12 @@ STATUS DA ARMADURA (VEXANIUM):
             currentRectW = 0;
             currentRectH = 0;
             manualSelection = null;
+            historyUndo = [];
+            historyRedo = [];
+            
             setTool('magic');
             renderFatiador();
+            registrarEstadoMemoria(); 
         };
         originalImageObj.src = targetBase;
     }
@@ -540,7 +820,8 @@ STATUS DA ARMADURA (VEXANIUM):
             let scale = Math.min(1024 / img.width, 512 / img.height);
             offscreenCtx.drawImage(img, 0, 0, img.width * scale, img.height * scale);
             renderFatiador();
-            document.getElementById('status-overlay').innerText = "✓ NOVA IMAGEM ADICIONADA À MESA";
+            registrarEstadoMemoria(); 
+            if (statusOverlay) statusOverlay.innerText = "✓ NOVA IMAGEM ADICIONADA À MESA";
         };
         img.src = url;
         e.target.value = ""; 
@@ -570,7 +851,8 @@ STATUS DA ARMADURA (VEXANIUM):
         }
         offscreenCtx.putImageData(imgData, 0, 0);
         renderFatiador();
-        document.getElementById('status-overlay').innerText = "✨ FUNDO BRANCO ELIMINADO";
+        registrarEstadoMemoria(); 
+        if (statusOverlay) statusOverlay.innerText = "✨ FUNDO BRANCO ELIMINADO";
     }
 
     function duplicarPecaAtiva() {
@@ -589,6 +871,7 @@ STATUS DA ARMADURA (VEXANIUM):
             activePieceIndex = extractedPieces.length - 1;
             setTool('move');
             renderFatiador();
+            registrarEstadoMemoria(); 
         }
     }
 
@@ -601,6 +884,7 @@ STATUS DA ARMADURA (VEXANIUM):
             extractedPieces.splice(activePieceIndex, 1);
             activePieceIndex = -1;
             renderFatiador();
+            registrarEstadoMemoria(); 
         }
     }
 
@@ -651,7 +935,8 @@ STATUS DA ARMADURA (VEXANIUM):
         activePieceIndex = extractedPieces.length - 1;
         setTool('move'); 
         renderFatiador();
-        document.getElementById('status-overlay').innerText = "✂️ CORTE MANUAL EXECUTADO COM SUCESSO!";
+        registrarEstadoMemoria(); 
+        if (statusOverlay) statusOverlay.innerText = "✂️ CORTE MANUAL EXECUTADO COM SUCESSO!";
     }
 
     function desenharMoldeUV() {
@@ -697,16 +982,16 @@ STATUS DA ARMADURA (VEXANIUM):
 
             drawBox(44, 16, 4, 4, "#4caf50", "TOPO", "BRAÇOS");
             drawBox(48, 16, 4, 4, "#4caf50", "BASE", "BRAÇOS");
-            drawBox(40, 20, 4, 12, "#4caf50", "DIR.", "BRAÇOS");
+            drawBox(40, 20, 4, 12, "#4caf50", "LADO", "BRAÇOS");
             drawBox(44, 20, 4, 12, "#4caf50", "FRENTE", "BRAÇOS");
-            drawBox(48, 20, 4, 12, "#4caf50", "ESQ.", "BRAÇOS");
+            drawBox(48, 20, 4, 12, "#4caf50", "LADO", "BRAÇOS");
             drawBox(52, 20, 4, 12, "#4caf50", "COSTAS", "BRAÇOS");
 
             drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "BOTAS");
             drawBox(8, 16, 4, 4, "#ff9800", "BASE", "BOTAS");
-            drawBox(0, 20, 4, 12, "#ff9800", "DIR.", "BOTAS");
+            drawBox(0, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
             drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
-            drawBox(8, 20, 4, 12, "#ff9800", "ESQ.", "BOTAS");
+            drawBox(8, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
             drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
         } 
         else if (currentEditingLayer === 2) {
@@ -719,9 +1004,9 @@ STATUS DA ARMADURA (VEXANIUM):
 
             drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNAS");
             drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNAS");
-            drawBox(0, 20, 4, 12, "#ffd700", "DIR.", "PERNAS");
+            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
             drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNAS");
-            drawBox(8, 20, 4, 12, "#ffd700", "ESQ.", "PERNAS");
+            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
             drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNAS");
         }
     }
@@ -907,6 +1192,7 @@ STATUS DA ARMADURA (VEXANIUM):
                 activePieceIndex = extractedPieces.length - 1;
                 setTool('move'); 
                 renderFatiador();
+                registrarEstadoMemoria(); 
             }
         }
         else if (currentTool === 'slice') {
@@ -1005,6 +1291,7 @@ STATUS DA ARMADURA (VEXANIUM):
                 p.h = Math.max(16, bottom - p.y);
             }
             renderFatiador();
+            registrarEstadoMemoria(); 
             return;
         }
 
@@ -1020,9 +1307,204 @@ STATUS DA ARMADURA (VEXANIUM):
                     p.y = Math.round(p.y / 16) * 16;
                 }
                 renderFatiador();
+                registrarEstadoMemoria(); 
             }
         }
     });
+
+    // ============================================================================
+    // GESTÃO DE PEÇAS, DOWNLOADS (JSZIP) E JSON
+    // ============================================================================
+    function updatePiecesList() {
+        const list = document.getElementById('pieces-list');
+        list.innerHTML = '';
+
+        extractedPieces.forEach((p, i) => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'piece-item' + (i === activePieceIndex ? ' selected' : '');
+            
+            const previewDiv = document.createElement('div');
+            previewDiv.className = 'piece-preview';
+            previewDiv.onclick = () => {
+                activePieceIndex = i;
+                renderFatiador();
+                updatePiecesList();
+            };
+            
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = p.imgData.width;
+            tempCanvas.height = p.imgData.height;
+            tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+            
+            const img = document.createElement('img');
+            img.src = tempCanvas.toDataURL('image/png');
+            previewDiv.appendChild(img);
+            
+            const infoDiv = document.createElement('div');
+            infoDiv.className = 'piece-info';
+            infoDiv.innerHTML = `<span>Peça #${p.id}</span><span>${p.w}x${p.h}</span>`;
+            
+            const actionsDiv = document.createElement('div');
+            actionsDiv.className = 'piece-actions';
+            
+            const dlBtn = document.createElement('button');
+            dlBtn.className = 'piece-btn';
+            dlBtn.textContent = '📥';
+            dlBtn.onclick = () => downloadPiece(p);
+            
+            const delBtn = document.createElement('button');
+            delBtn.className = 'piece-btn delete';
+            delBtn.textContent = '🗑️';
+            delBtn.onclick = () => {
+                activePieceIndex = i;
+                apagarPecaAtiva();
+            };
+            
+            actionsDiv.appendChild(dlBtn);
+            actionsDiv.appendChild(delBtn);
+            
+            itemDiv.appendChild(previewDiv);
+            itemDiv.appendChild(infoDiv);
+            itemDiv.appendChild(actionsDiv);
+            
+            list.appendChild(itemDiv);
+        });
+    }
+
+    function downloadPiece(piece) {
+        const tempCanvas = document.createElement('canvas');
+        tempCanvas.width = piece.imgData.width;
+        tempCanvas.height = piece.imgData.height;
+        tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
+        
+        const a = document.createElement('a');
+        a.href = tempCanvas.toDataURL('image/png');
+        a.download = `peça_${piece.id}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        if (statusOverlay) statusOverlay.innerText = `✓ Peça #${piece.id} baixada!`;
+    }
+
+    function downloadAllIndividual() {
+        if (extractedPieces.length === 0) {
+            alert("Nenhuma peça extraída para baixar.");
+            return;
+        }
+        
+        extractedPieces.forEach((p, i) => {
+            setTimeout(() => downloadPiece(p), i * 200);
+        });
+        
+        if (statusOverlay) statusOverlay.innerText = `✓ Baixando ${extractedPieces.length} peças...`;
+    }
+
+    function downloadAllPieces() {
+        if (extractedPieces.length === 0) {
+            alert("Nenhuma peça extraída para baixar.");
+            return;
+        }
+
+        if (statusOverlay) statusOverlay.innerText = `✓ Criando ZIP com ${extractedPieces.length} peças...`;
+
+        const zip = new JSZip();
+        const folder = zip.folder("pecas_extraidas");
+
+        extractedPieces.forEach((p) => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = p.imgData.width;
+            tempCanvas.height = p.imgData.height;
+            tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+            
+            const base64 = tempCanvas.toDataURL('image/png').split(',')[1];
+            folder.file(`peça_${p.id}.png`, base64, {base64: true});
+        });
+
+        zip.generateAsync({type: "blob"}).then((blob) => {
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pecas_extraidas_${new Date().getTime()}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            if (statusOverlay) statusOverlay.innerText = `✓ ZIP baixado com sucesso!`;
+        });
+    }
+
+    async function salvarPresetJSON() {
+        if (extractedPieces.length === 0) {
+            alert("Não existem peças extraídas para salvar.");
+            return;
+        }
+        const preset = {
+            layer: currentEditingLayer,
+            baseImage: offscreenCanvas.toDataURL('image/png'),
+            pieces: extractedPieces.map(p => {
+                const temp = document.createElement('canvas');
+                temp.width = p.w; temp.height = p.h;
+                temp.getContext('2d').putImageData(p.imgData, 0, 0);
+                return {
+                    id: p.id, ox: p.ox, oy: p.oy, x: p.x, y: p.y, w: p.w, h: p.h,
+                    base64: temp.toDataURL('image/png')
+                };
+            })
+        };
+        const blob = new Blob([JSON.stringify(preset)], {type: "application/json"});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `vexanium_preset_layer${currentEditingLayer}.json`;
+        a.click();
+    }
+
+    document.getElementById('file-input-preset').onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async (evt) => {
+            try {
+                const preset = JSON.parse(evt.target.result);
+                if(preset.layer !== currentEditingLayer) {
+                    alert(`Aviso: Este Preset foi gravado para a Camada ${preset.layer}, mas o estúdio está na Camada ${currentEditingLayer}. Recomenda-se cancelar a extração e abrir a camada correta.`);
+                }
+
+                const img = new Image();
+                img.onload = async () => {
+                    offscreenCtx.clearRect(0,0,1024,512);
+                    offscreenCtx.drawImage(img, 0, 0);
+                    
+                    extractedPieces = [];
+                    for (let p of preset.pieces) {
+                        await new Promise(r => {
+                            const pImg = new Image();
+                            pImg.onload = () => {
+                                const temp = document.createElement('canvas');
+                                temp.width = p.w; temp.height = p.h;
+                                temp.getContext('2d').drawImage(pImg, 0, 0);
+                                extractedPieces.push({
+                                    id: p.id, ox: p.ox, oy: p.oy, x: p.x, y: p.y, w: p.w, h: p.h,
+                                    imgData: temp.getContext('2d').getImageData(0,0,p.w,p.h)
+                                });
+                                r();
+                            };
+                            pImg.src = p.base64;
+                        });
+                    }
+                    registrarEstadoMemoria();
+                    renderFatiador();
+                    alert("Preset carregado com sucesso! A simbiose visual foi restaurada.");
+                };
+                img.src = preset.baseImage;
+            } catch (err) {
+                alert("Falha ao ler o ficheiro JSON. Arquivo corrompido.");
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = "";
+    };
 
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
@@ -1044,42 +1526,60 @@ STATUS DA ARMADURA (VEXANIUM):
         
         if (currentEditingLayer === 1) {
             finalImageL1 = finalArmaduraBase64;
-            skinViewer.loadSkin(finalImageL1);
-            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!";
+            if (statusOverlay) statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!";
         } else {
             finalImageL2 = finalArmaduraBase64;
-            skinViewer.loadCape(finalImageL2); 
-            statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) ATUALIZADA!";
+            if (statusOverlay) statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) ATUALIZADA!";
         }
         
         atualizarPreview3D();
         closeModal('slicer-modal');
     }
 
-    // SISTEMA DE PREVIEW INTELIGENTE (Combina a Layer 1 e Layer 2 para exibir no 3D)
     function atualizarPreview3D() {
         const previewCanvas = document.createElement('canvas');
         previewCanvas.width = 1024;
-        previewCanvas.height = 512;
+        previewCanvas.height = 1024; 
         const pCtx = previewCanvas.getContext('2d');
         pCtx.imageSmoothingEnabled = false;
 
-        const drawLayer = (base64Str) => {
+        const f = 16;
+        const copyRegion = (img, sx, sy, sw, sh, dx, dy) => {
+            pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f);
+        };
+
+        const loadImage = (base64Str) => {
             return new Promise((resolve) => {
-                if (!base64Str) { resolve(); return; }
+                if (!base64Str) { resolve(null); return; }
                 const img = new Image();
-                img.onload = () => { pCtx.drawImage(img, 0, 0); resolve(); };
+                img.onload = () => resolve(img);
                 img.src = base64Str;
             });
         };
 
-        pCtx.clearRect(0, 0, 1024, 512);
+        pCtx.fillStyle = "#111111";
+        pCtx.fillRect(0, 0, 32*f, 16*f);         
+        pCtx.fillRect(16*f, 16*f, 24*f, 16*f);   
+        pCtx.fillRect(40*f, 16*f, 16*f, 16*f);   
+        pCtx.fillRect(32*f, 48*f, 16*f, 16*f);   
+        pCtx.fillRect(0, 16*f, 16*f, 16*f);      
+        pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
 
-        // A Camada 2 (Pernas) é pintada primeiro, a Camada 1 (Resto do Corpo) vem por cima
-        drawLayer(finalImageL2).then(() => {
-            drawLayer(finalImageL1).then(() => {
-                skinViewer.loadSkin(previewCanvas.toDataURL('image/png'));
-            });
+        Promise.all([loadImage(finalImageL1), loadImage(finalImageL2)]).then(([imgL1, imgL2]) => {
+            if (imgL2) {
+                copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
+                copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
+                copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
+            }
+            if (imgL1) {
+                copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
+                copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
+                copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
+                copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
+                copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
+                copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
+            }
+            skinViewer.loadSkin(previewCanvas.toDataURL('image/png'));
         });
     }
 
@@ -1097,53 +1597,7 @@ STATUS DA ARMADURA (VEXANIUM):
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-        statusOverlay.innerText = `✓ SUCESSO: Arquivo ${fileName} gerado!`;
-    }
-
-    // ============================================================================
-    // CONTROLES DE INTERFACE E UPLOADS (A Função de Modal Seguro Atualizada)
-    // ============================================================================
-    // A SUA FUNÇÃO CORRIGIDA ESTÁ AQUI - FLEXBOX PROTEGIDO E DYNAMIC SELECTORS
-    function showModal(modalId, title, message) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-        
-        const titleEl = modal.querySelector('h3');
-        const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
-        
-        if (titleEl && title) titleEl.innerText = title;
-        if (textEl && message) textEl.innerText = message;
-        
-        modal.style.display = 'flex';
-    }
-
-    function closeModal(modalId) { 
-        const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = 'none'; 
-        scanner.style.display = 'none'; 
-    }
-
-    function switchMode(mode) {
-        currentMode = mode;
-        document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
-        document.getElementById('btn-model').classList.toggle('active', mode === 'model');
-        
-        skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
-        gltfCanvas.style.display = mode === 'model' ? 'block' : 'none';
-        
-        const isArmor = mode === 'armor';
-        document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
-        
-        document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
-        
-        document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
-        document.getElementById('div-export').style.display = isArmor ? "block" : "none";
-        
-        statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
-        resize();
+        if (statusOverlay) statusOverlay.innerText = `✓ SUCESSO: Arquivo ${fileName} gerado!`;
     }
 
     function triggerUpload(targetId) { 
@@ -1163,10 +1617,10 @@ STATUS DA ARMADURA (VEXANIUM):
             reader.onload = (evt) => {
                 if (uploadTarget === 1) {
                     baseImageL1 = evt.target.result;
-                    statusOverlay.innerText = "✓ BASE L1 CARREGADA (Aceda ao Estúdio para Fatiar)";
+                    if (statusOverlay) statusOverlay.innerText = "✓ BASE L1 CARREGADA (Aceda ao Estúdio para Fatiar)";
                 } else if (uploadTarget === 2) {
                     baseImageL2 = evt.target.result;
-                    statusOverlay.innerText = "✓ BASE L2 CARREGADA (Aceda ao Estúdio para Fatiar)";
+                    if (statusOverlay) statusOverlay.innerText = "✓ BASE L2 CARREGADA (Aceda ao Estúdio para Fatiar)";
                 }
             };
             reader.readAsDataURL(file);
@@ -1180,7 +1634,7 @@ STATUS DA ARMADURA (VEXANIUM):
                 currentModel.scale.set(scale, scale, scale);
                 currentModel.position.set(0, -1, 0);
                 scene.add(currentModel);
-                statusOverlay.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
+                if (statusOverlay) statusOverlay.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
             });
         }
         e.target.value = ""; 
@@ -1198,11 +1652,11 @@ STATUS DA ARMADURA (VEXANIUM):
     setTimeout(resize, 200);
 
     // ============================================================================
-    // API GEMINI (UPLINK J.A.V.I.S.)
+    // API GEMINI (UPLINK J.A.V.I.S. & IA VISION)
     // ============================================================================
     async function callGemini(payload) {
-        loader.style.display = 'block';
-        scanner.style.display = 'block';
+        if (loader) loader.style.display = 'block';
+        if (scanner) scanner.style.display = 'block';
         let retries = 0; const maxRetries = 5;
         while (retries < maxRetries) {
             try {
@@ -1215,28 +1669,79 @@ STATUS DA ARMADURA (VEXANIUM):
             } catch (e) {
                 retries++; await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000));
             } finally {
-                if (retries === maxRetries || !loader.style.display) {
-                    loader.style.display = 'none'; scanner.style.display = 'none';
+                if (retries === maxRetries || (loader && !loader.style.display)) {
+                    if (loader) loader.style.display = 'none'; 
+                    if (scanner) scanner.style.display = 'none';
                 }
             }
         }
         return "Falha na recepção neural.";
     }
 
+    async function analisarArteBase() {
+        if (!originalImageObj || !originalImageObj.src || originalImageObj.src === "") {
+            alert("Operador, necessita de carregar uma Imagem Base primeiro.");
+            return;
+        }
+
+        const base64Data = originalImageObj.src.split(',')[1];
+        let mimeType = "image/png";
+        if(originalImageObj.src.startsWith("data:image/jpeg")) mimeType = "image/jpeg";
+
+        showModal("ai-modal", "✨ ANÁLISE VISUAL DE ARTE (VISION)", "A processar padrões visuais e biologia da armadura...");
+        
+        const prompt = "Aja como J.A.V.I.S., uma IA tática de engenharia biomecânica. Analise visualmente esta textura de armadura de Minecraft. Descreva de forma técnica e sombria a paleta de cores, a biologia aparente e como estas peças se enquadram na temática do 'Vexanium' (um mod de parasitas espaciais e tecnologia alienígena nas profundezas do Deep Dark).";
+
+        const payload = {
+            contents: [{
+                role: "user",
+                parts: [
+                    { text: prompt },
+                    { inlineData: { mimeType: mimeType, data: base64Data } }
+                ]
+            }],
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português com formatação clara e tática." }] }
+        };
+
+        const analise = await callGemini(payload);
+        const respText = document.getElementById('ai-response-text');
+        if(respText) respText.innerText = analise;
+    }
+
+    async function gerarAtributos() {
+        showModal("ai-modal", "✨ FORJA DE ATRIBUTOS TÁTICOS", "A calcular integridade estrutural e sinergia do hospedeiro...");
+        const prompt = currentMode === 'armor' 
+            ? "Gere uma lista técnica de atributos de combate para o Minecraft (Armor, Toughness, Knockback Resistance, Habilidades Especiais Passivas, Maldições/Debuffs) para uma Armadura Parasita do tipo Vexanium. Equilibre para ser incrivelmente poderosa no late-game, mas com custos biológicos para o hospedeiro."
+            : "Gere uma lista de atributos técnicos e estatísticas (HP, Dano Base, Velocidade de Movimento, Padrão de Ataque, Habilidades Especiais) para um Mob Hostil Biomecânico implacável do mod Vexanium. Crie uma mecânica de ataque única e aterrorizante.";
+        
+        const payload = {
+            contents: [{ parts: [{ text: prompt }] }],
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português usando pontos táticos e liste os valores como se fossem variáveis de código do Minecraft." }] }
+        };
+
+        const stats = await callGemini(payload);
+        const respText = document.getElementById('ai-response-text');
+        if(respText) respText.innerText = stats;
+    }
+
     async function generateLore() {
         showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
         const prompt = currentMode === 'armor' 
-            ? "Gere uma descrição técnica e lore sombria para uma Armadura Parasita Alienígena de Minecraft."
-            : "Descreva um Mob biomecânico hostil que habita o vácuo profundo do mod Vexanium.";
-        const lore = await callGemini({
+            ? "Gere um fragmento de diário de pesquisa (Lore) intenso e sombrio sobre a descoberta de uma Armadura Parasita Alienígena no Minecraft."
+            : "Descreva as origens sombrias e os horrores de um Mob biomecânico que habita o vácuo profundo do mod Vexanium.";
+        const payload = {
             contents: [{ parts: [{ text: prompt }] }],
-            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., IA do Dr. Aldrich. Responda em Português." }] }
-        });
-        document.getElementById('ai-response-text').innerText = lore;
+            systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português. Mantenha o tom sombrio, de ficção científica de terror." }] }
+        };
+        const lore = await callGemini(payload);
+        const respText = document.getElementById('ai-response-text');
+        if(respText) respText.innerText = lore;
     }
 
     async function processarTelemetriaInGame() {
-        const telemetria = document.getElementById('jarvis-telemetry-input').value;
+        const telemetriaInput = document.getElementById('jarvis-telemetry-input');
+        const telemetria = telemetriaInput ? telemetriaInput.value : "";
+        
         if (!telemetria || telemetria.trim() === '') {
             alert("Operador, por favor insira os dados de telemetria do jogo (gerados pelo JarvisBrain.java) na caixa de texto primeiro.");
             return;
@@ -1247,12 +1752,14 @@ STATUS DA ARMADURA (VEXANIUM):
         
         const prompt = `Aqui está o relatório de telemetria atual do mundo do jogador no Minecraft:\n\n${telemetria}\n\nCom base nestes dados exatos, aja como a IA J.A.V.I.S., faça um diagnóstico da situação, avise o jogador sobre o estado da armadura, ameaças no radar e condições ambientais. Seja imersivo, tático e aja como se estivesse a falar diretamente para o visor da armadura do Operador.`;
         
-        const analise = await callGemini({
+        const payload = {
             contents: [{ parts: [{ text: prompt }] }],
             systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] }
-        });
-        
-        document.getElementById('ai-response-text').innerText = analise;
+        };
+
+        const analise = await callGemini(payload);
+        const respText = document.getElementById('ai-response-text');
+        if(respText) respText.innerText = analise;
     }
 </script>
 
