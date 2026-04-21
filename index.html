@@ -26,6 +26,7 @@
             --ai-accent: #ff00ff;
             --calib-accent: #ffaa00;
             --warning: #ff3333;
+            --success: #00ffaa;
         }
 
         body, html { 
@@ -96,6 +97,8 @@
         .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
         .btn-recon { border-color: var(--ai-accent); color: var(--ai-accent); border-bottom-color: var(--ai-accent); }
         .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
+        .btn-save { border-color: var(--success); color: var(--success); border-bottom-color: var(--success); background: rgba(0, 255, 170, 0.05); }
+        .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 255, 170, 0.2); }
 
         .divider { width: 1px; height: 30px; background: var(--warden-bone-dim); opacity: 0.5; margin: 0 5px; }
 
@@ -264,7 +267,7 @@
                     🖨️ Duplicar Peça
                 </button>
                 <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">
-                    🗑️ Apagar Peça
+                    🗑️ Apagar Peça (Restaurar)
                 </button>
 
                 <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
@@ -314,6 +317,7 @@
             <button class="btn btn-ai" onclick="generateLore()">✨ LORE</button>
             <button class="btn btn-recon" id="btn-align" onclick="analyzeTexture()">🧠 ANALISAR</button>
             <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()">✂️ ESTÚDIO DE MONTAGEM</button>
+            <button class="btn btn-save" onclick="baixarTexturaAtual()">💾 SALVAR (.PNG)</button>
             <div class="loader" id="ai-loader"></div>
         </div>
 
@@ -399,7 +403,7 @@
     let startX = 0, startY = 0;
     
     // As peças que o utilizador cortou
-    // Formato: { id, imgData, x, y, w, h }
+    // Formato: { id, imgData, x, y, ox, oy, w, h }
     let extractedPieces = [];
     let activePieceIndex = -1;
     let nextPieceId = 1;
@@ -461,7 +465,9 @@
             extractedPieces.push({
                 id: nextPieceId++,
                 imgData: p.imgData,
-                x: p.x + 20, // Copia um pouco ao lado
+                ox: undefined, // Duplicados não têm origem para restaurar
+                oy: undefined,
+                x: p.x + 20, 
                 y: p.y + 20,
                 w: p.w,
                 h: p.h
@@ -474,6 +480,13 @@
 
     function apagarPecaAtiva() {
         if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
+            const p = extractedPieces[activePieceIndex];
+            
+            // Restauro Inteligente: Se a peça tiver uma origem, cola os píxeis de volta no fundo!
+            if (p.ox !== undefined && p.oy !== undefined) {
+                offscreenCtx.putImageData(p.imgData, p.ox, p.oy);
+            }
+            
             extractedPieces.splice(activePieceIndex, 1);
             activePieceIndex = -1;
             renderFatiador();
@@ -677,10 +690,9 @@
                 extractedPieces.push({
                     id: nextPieceId++,
                     imgData: imgD,
-                    x: box.x,
-                    y: box.y,
-                    w: box.w,
-                    h: box.h
+                    ox: box.x, oy: box.y, // Guarda a origem para restauro!
+                    x: box.x, y: box.y,
+                    w: box.w, h: box.h
                 });
                 
                 activePieceIndex = extractedPieces.length - 1;
@@ -718,7 +730,7 @@
     });
 
     // ============================================================================
-    // A FUSÃO FINAL: O ECRÃ INTEIRO VIRA A TEXTURA
+    // A FUSÃO FINAL: O ECRÃ INTEIRO VIRA A TEXTURA E O EXPORTADOR
     // ============================================================================
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
@@ -743,6 +755,21 @@
         lastUploadedBase64 = finalArmaduraBase64; 
         
         closeModal('slicer-modal');
+    }
+
+    // Função de Exportação (O botão verde no Dashboard)
+    function baixarTexturaAtual() {
+        if (!lastUploadedBase64) {
+            alert("Aviso: Nenhuma textura foi fundida ou carregada para guardar.");
+            return;
+        }
+        const a = document.createElement('a');
+        a.href = lastUploadedBase64;
+        a.download = 'vexanium_simbionte_hd.png';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        statusOverlay.innerText = "✓ ARQUIVO EXPORTADO PARA A BASE DE DADOS LOCAL!";
     }
 
     // ============================================================================
