@@ -6,7 +6,7 @@ O Visualizador 3D definitivo para texturas e entidades do mod Vexanium. Renderiz
 
 ## 🌐 Acesse o Laboratório Online
 
-**[LINK_DO_VISUALIZADOR_AQUI]**
+**https://sergio810.github.io/vexanium-armor-viewer/**
 
 ---
 
