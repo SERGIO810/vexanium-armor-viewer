@@ -514,14 +514,13 @@ STATUS DA ARMADURA (VEXANIUM):
         document.getElementById('slicer-modal').style.display = 'flex';
         
         originalImageObj.onload = () => {
-            // PROPORÇÃO 2:1 DO MINECRAFT! (Resolve o erro da bota no braço)
+            // PROPORÇÃO 2:1 DO MINECRAFT
             wsCanvas.width = 1024;
             wsCanvas.height = 512;
             offscreenCanvas.width = 1024;
             offscreenCanvas.height = 512;
             offscreenCtx.clearRect(0, 0, 1024, 512);
             
-            // Desenha com escala para caber na altura, caso a imagem original fosse quadrada
             let scale = Math.min(1024 / originalImageObj.width, 512 / originalImageObj.height);
             offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width * scale, originalImageObj.height * scale);
 
@@ -609,7 +608,7 @@ STATUS DA ARMADURA (VEXANIUM):
 
     function confirmarCorteManual() {
         if (!manualSelection || manualSelection.w <= 2 || manualSelection.h <= 2) {
-            alert("Operador, desenhe a caixa de seleção na imagem (usando a ferramenta 📐 Seleção Manual) antes de confirmar o corte.");
+            alert("Operador, desenhe a caixa de seleção na imagem (usando a ferramenta 📐 Seleção Manual) antes de clicar em Recortar.");
             return;
         }
 
@@ -654,7 +653,6 @@ STATUS DA ARMADURA (VEXANIUM):
         renderFatiador();
     }
 
-    // A MÁGICA DA PRECISÃO: Molde limpo de 64x32 adaptado ao Fator de Escala 16 (1024x512)
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
         const f = 16; 
@@ -665,11 +663,11 @@ STATUS DA ARMADURA (VEXANIUM):
 
         const drawBox = (x, y, w, h, color, label, sublabel) => {
             wsCtx.strokeStyle = color;
-            wsCtx.fillStyle = color + "22"; // Preenchimento leve para destaque
+            wsCtx.fillStyle = color + "22";
             wsCtx.strokeRect(x*f, y*f, w*f, h*f);
             wsCtx.fillRect(x*f, y*f, w*f, h*f);
             
-            wsCtx.fillStyle = "#000000"; // Letra a Preto para ler no fundo Branco
+            wsCtx.fillStyle = "#000000"; 
             
             if (sublabel) {
                 wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2 - 6);
@@ -681,9 +679,7 @@ STATUS DA ARMADURA (VEXANIUM):
             }
         };
 
-        // MOLDE L1 (Foca apenas na Cabeça, Peito, Braços Unidos e Botas Unidas)
         if (currentEditingLayer === 1) {
-            // CAPACETE (Roxo)
             drawBox(8, 0, 8, 8, "#9c27b0", "TOPO", "CAPACETE");
             drawBox(16, 0, 8, 8, "#9c27b0", "FUNDO", "CAPACETE");
             drawBox(0, 8, 8, 8, "#9c27b0", "DIR.", "CAPACETE");
@@ -691,7 +687,6 @@ STATUS DA ARMADURA (VEXANIUM):
             drawBox(16, 8, 8, 8, "#9c27b0", "ESQ.", "CAPACETE");
             drawBox(24, 8, 8, 8, "#9c27b0", "COSTAS", "CAPACETE");
 
-            // PEITORAL (Ciano)
             drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "PEITO");
             drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "PEITO");
             drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "PEITO");
@@ -699,7 +694,6 @@ STATUS DA ARMADURA (VEXANIUM):
             drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "PEITO");
             drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "PEITO");
 
-            // BRAÇOS UNIFICADOS (Verde)
             drawBox(44, 16, 4, 4, "#4caf50", "TOPO", "BRAÇOS");
             drawBox(48, 16, 4, 4, "#4caf50", "BASE", "BRAÇOS");
             drawBox(40, 20, 4, 12, "#4caf50", "DIR.", "BRAÇOS");
@@ -707,7 +701,6 @@ STATUS DA ARMADURA (VEXANIUM):
             drawBox(48, 20, 4, 12, "#4caf50", "ESQ.", "BRAÇOS");
             drawBox(52, 20, 4, 12, "#4caf50", "COSTAS", "BRAÇOS");
 
-            // BOTAS UNIFICADAS (Laranja)
             drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "BOTAS");
             drawBox(8, 16, 4, 4, "#ff9800", "BASE", "BOTAS");
             drawBox(0, 20, 4, 12, "#ff9800", "DIR.", "BOTAS");
@@ -715,9 +708,7 @@ STATUS DA ARMADURA (VEXANIUM):
             drawBox(8, 20, 4, 12, "#ff9800", "ESQ.", "BOTAS");
             drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
         } 
-        // MOLDE L2 (Foca apenas na Cintura/Cinto e Pernas/Calças)
         else if (currentEditingLayer === 2) {
-            // CINTURA (Ocupa o mesmo espaço que o peito no UV)
             drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
             drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
             drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "CINTURA");
@@ -725,7 +716,6 @@ STATUS DA ARMADURA (VEXANIUM):
             drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
             drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
 
-            // CALÇAS UNIFICADAS
             drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "PERNAS");
             drawBox(8, 16, 4, 4, "#ff9800", "BASE", "PERNAS");
             drawBox(0, 20, 4, 12, "#ff9800", "DIR.", "PERNAS");
@@ -1033,31 +1023,6 @@ STATUS DA ARMADURA (VEXANIUM):
         }
     });
 
-    // SISTEMA DE PREVIEW INTELIGENTE (Combina a Layer 1 e Layer 2 para exibir no 3D)
-    function atualizarPreview3D() {
-        const previewCanvas = document.createElement('canvas');
-        previewCanvas.width = 1024;
-        previewCanvas.height = 512;
-        const pCtx = previewCanvas.getContext('2d');
-        pCtx.imageSmoothingEnabled = false;
-
-        const drawLayer = (base64Str) => {
-            return new Promise((resolve) => {
-                if (!base64Str) { resolve(); return; }
-                const img = new Image();
-                img.onload = () => { pCtx.drawImage(img, 0, 0); resolve(); };
-                img.src = base64Str;
-            });
-        };
-
-        // L2 (Calças) fica por baixo, L1 (Peito) fica por cima
-        drawLayer(finalImageL2).then(() => {
-            drawLayer(finalImageL1).then(() => {
-                skinViewer.loadSkin(previewCanvas.toDataURL('image/png'));
-            });
-        });
-    }
-
     function aplicarMontagemUVLivre() {
         const outCanvas = document.createElement('canvas');
         outCanvas.width = 1024;
@@ -1086,6 +1051,31 @@ STATUS DA ARMADURA (VEXANIUM):
         
         atualizarPreview3D();
         closeModal('slicer-modal');
+    }
+
+    // SISTEMA DE PREVIEW INTELIGENTE (Combina a Layer 1 e Layer 2 para exibir no 3D)
+    function atualizarPreview3D() {
+        const previewCanvas = document.createElement('canvas');
+        previewCanvas.width = 1024;
+        previewCanvas.height = 512;
+        const pCtx = previewCanvas.getContext('2d');
+        pCtx.imageSmoothingEnabled = false;
+
+        const drawLayer = (base64Str) => {
+            return new Promise((resolve) => {
+                if (!base64Str) { resolve(); return; }
+                const img = new Image();
+                img.onload = () => { pCtx.drawImage(img, 0, 0); resolve(); };
+                img.src = base64Str;
+            });
+        };
+
+        // L2 (Calças) fica por baixo, L1 (Peito) fica por cima
+        drawLayer(finalImageL2).then(() => {
+            drawLayer(finalImageL1).then(() => {
+                skinViewer.loadSkin(previewCanvas.toDataURL('image/png'));
+            });
+        });
     }
 
     function baixarTextura(layer) {
