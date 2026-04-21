@@ -181,13 +181,12 @@
             background-size: 20px 20px; background-position: 0 0, 10px 10px;
         }
 
+        /* CORREÇÃO DO ZOOM: Sem position absolute. O Canvas alinha-se perfeitamente por Flexbox. */
         #workspace-canvas {
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            margin: auto;
             max-width: 100%; 
             max-height: 100%; 
             aspect-ratio: 1 / 1;
+            flex-shrink: 0;
             cursor: crosshair; 
             box-shadow: 0 0 30px rgba(0,0,0,1);
         }
@@ -316,8 +315,11 @@ STATUS DA ARMADURA (VEXANIUM):
                 <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')">
                     ✂️ Varinha Mágica (Extrair)
                 </button>
+                <button class="tool-btn" id="tool-slice" onclick="setTool('slice')">
+                    🔪 Corte Manual (Arrastar)
+                </button>
                 <button class="tool-btn" id="tool-move" onclick="setTool('move')">
-                    🖐️ Mover / Selecionar
+                    🖐️ Mover / Scale
                 </button>
 
                 <div class="slice-category">AÇÕES DA PEÇA SELECIONADA</div>
@@ -473,6 +475,7 @@ STATUS DA ARMADURA (VEXANIUM):
     let currentTool = 'magic'; 
     let isDragging = false;
     let startX = 0, startY = 0;
+    let rectW = 0, rectH = 0;
     
     let isResizing = false;
     let resizeHandle = '';
@@ -538,8 +541,9 @@ STATUS DA ARMADURA (VEXANIUM):
     function setTool(tool) {
         currentTool = tool;
         document.getElementById('tool-magic').classList.toggle('active', tool === 'magic');
+        document.getElementById('tool-slice').classList.toggle('active', tool === 'slice');
         document.getElementById('tool-move').classList.toggle('active', tool === 'move');
-        wsCanvas.style.cursor = tool === 'magic' ? 'crosshair' : 'grab';
+        wsCanvas.style.cursor = (tool === 'magic' || tool === 'slice') ? 'crosshair' : 'grab';
     }
 
     function removerFundoBranco() {
@@ -703,6 +707,19 @@ STATUS DA ARMADURA (VEXANIUM):
                 drawHandle(p.x + p.w, p.y + p.h);     
             }
         });
+
+        if (isDragging && currentTool === 'slice' && rectW !== 0) {
+            let rx = rectW < 0 ? startX + rectW : startX;
+            let ry = rectH < 0 ? startY + rectH : startY;
+            let rw = Math.abs(rectW);
+            let rh = Math.abs(rectH);
+            
+            wsCtx.strokeStyle = "var(--ai-accent)";
+            wsCtx.lineWidth = 2;
+            wsCtx.setLineDash([5, 5]);
+            wsCtx.strokeRect(rx, ry, rw, rh);
+            wsCtx.setLineDash([]);
+        }
     }
 
     function selecaoMagica(sx, sy) {
@@ -784,6 +801,7 @@ STATUS DA ARMADURA (VEXANIUM):
     wsCanvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(e);
         startX = pos.x; startY = pos.y;
+        rectW = 0; rectH = 0;
 
         if (currentTool === 'move') {
             if (activePieceIndex !== -1) {
@@ -839,6 +857,9 @@ STATUS DA ARMADURA (VEXANIUM):
                 renderFatiador();
             }
         }
+        else if (currentTool === 'slice') {
+            isDragging = true;
+        }
     });
 
     wsCanvas.addEventListener('mousemove', (e) => {
@@ -892,14 +913,21 @@ STATUS DA ARMADURA (VEXANIUM):
             return;
         }
 
-        if (!isDragging || currentTool !== 'move' || activePieceIndex === -1) return;
+        if (!isDragging) return;
         
-        let p = extractedPieces[activePieceIndex];
-        p.x += pos.x - startX;
-        p.y += pos.y - startY;
-        
-        startX = pos.x; startY = pos.y;
-        renderFatiador();
+        if (currentTool === 'move' && activePieceIndex !== -1) {
+            let p = extractedPieces[activePieceIndex];
+            p.x += pos.x - startX;
+            p.y += pos.y - startY;
+            
+            startX = pos.x; startY = pos.y;
+            renderFatiador();
+        } 
+        else if (currentTool === 'slice') {
+            rectW = pos.x - startX;
+            rectH = pos.y - startY;
+            renderFatiador();
+        }
     });
 
     wsCanvas.addEventListener('mouseup', (e) => {
@@ -920,15 +948,43 @@ STATUS DA ARMADURA (VEXANIUM):
             return;
         }
 
-        if (isDragging && currentTool === 'move' && activePieceIndex !== -1) {
+        if (isDragging) {
             isDragging = false;
             
-            if (document.getElementById('snap-grid').checked) {
-                let p = extractedPieces[activePieceIndex];
-                p.x = Math.round(p.x / 16) * 16;
-                p.y = Math.round(p.y / 16) * 16;
+            if (currentTool === 'move' && activePieceIndex !== -1) {
+                wsCanvas.style.cursor = 'grab';
+                
+                if (document.getElementById('snap-grid').checked) {
+                    let p = extractedPieces[activePieceIndex];
+                    p.x = Math.round(p.x / 16) * 16;
+                    p.y = Math.round(p.y / 16) * 16;
+                }
+                renderFatiador();
             }
-            renderFatiador();
+            else if (currentTool === 'slice') {
+                let rx = rectW < 0 ? startX + rectW : startX;
+                let ry = rectH < 0 ? startY + rectH : startY;
+                let rw = Math.abs(rectW);
+                let rh = Math.abs(rectH);
+
+                if (rw > 5 && rh > 5) {
+                    let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
+                    offscreenCtx.clearRect(rx, ry, rw, rh);
+                    
+                    extractedPieces.push({
+                        id: nextPieceId++,
+                        imgData: imgD,
+                        ox: rx, oy: ry, 
+                        x: rx, y: ry,
+                        w: rw, h: rh
+                    });
+                    
+                    activePieceIndex = extractedPieces.length - 1;
+                    setTool('move'); 
+                }
+                rectW = 0; rectH = 0;
+                renderFatiador();
+            }
         }
     });
 
