@@ -3,417 +3,520 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Armor Viewer - Painel J.A.V.I.S.</title>
+    <title>Vexanium Viewer - Interface do Abismo</title>
     
+    <!-- Importando uma fonte mais "alienígena/antiga" para os títulos -->
+    <link href="https://fonts.googleapis.com/css2?family=Creepster&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+
     <!-- 1. Motor 3D Base -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     
-    <!-- 2. CORREÇÃO CRÍTICA: A biblioteca SkinView3D que desenha o boneco -->
+    <!-- 2. Controles de Órbita e Carregador GLTF para Entidades/Armas -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+    <!-- 3. A biblioteca SkinView3D que desenha o boneco para as armaduras -->
     <script src="https://cdn.jsdelivr.net/npm/skinview3d@3.0.0/bundles/skinview3d.bundle.min.js"></script>
     
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+        /* --- PALETA DE CORES DEEP DARK / WARDEN --- */
+        :root {
+            --void-bg: #050a0f;        /* Fundo preto azulado profundo */
+            --sculk-stone: #1a2a3a;    /* Cor de pedra escura */
+            --sculk-accent: #00ffa2;   /* O Ciano brilhante das almas/sensores */
+            --sculk-dim: #008f5b;      /* Ciano mais escuro para estados inativos */
+            --text-glow: 0 0 10px rgba(0, 255, 162, 0.7); /* Brilho do texto */
+            --box-glow: 0 0 20px rgba(0, 255, 162, 0.3);  /* Brilho das caixas */
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            background: linear-gradient(135deg, #0f0a1a 0%, #1a0f2e 100%);
-            color: #00d9ff;
+            font-family: 'JetBrains Mono', monospace; /* Fonte técnica para o corpo */
+            background: radial-gradient(circle at center bottom, #0a1520 0%, #000000 100%); /* Gradiente tipo abismo */
+            color: var(--sculk-accent);
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* Efeito de partículas de fundo sutil (opcional) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%2300ffa2' fill-opacity='0.05' fill-rule='evenodd'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: -1;
         }
 
         header {
-            background: rgba(15, 10, 26, 0.9);
-            border-bottom: 2px solid #00d9ff;
-            padding: 20px;
+            background: rgba(10, 20, 30, 0.95);
+            border-bottom: 3px solid var(--sculk-dim);
+            padding: 25px;
             text-align: center;
-            box-shadow: 0 0 20px rgba(0, 217, 255, 0.3);
+            box-shadow: var(--box-glow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de "som" do Shrieker no header */
+        header::after {
+            content: '';
+            position: absolute; bottom: 0; left: 0; width: 100%; height: 2px;
+            background: var(--sculk-accent);
+            box-shadow: 0 0 20px var(--sculk-accent), 0 0 40px var(--sculk-accent);
+            animation: pulseSensor 4s infinite ease-in-out;
         }
 
         header h1 {
-            font-size: 28px;
+            font-family: 'Creepster', cursive; /* Fonte de monstro */
+            font-size: 36px;
             margin-bottom: 5px;
-            text-shadow: 0 0 10px #00d9ff;
+            color: var(--sculk-accent);
+            text-shadow: var(--text-glow);
+            letter-spacing: 3px;
         }
-
-        header p {
-            font-size: 12px;
-            color: #6b21a8;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
+        header p { font-size: 12px; color: var(--sculk-dim); text-transform: uppercase; letter-spacing: 4px; font-weight: bold; }
 
         .container {
-            display: flex;
-            flex: 1;
-            gap: 20px;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
+            display: flex; flex: 1; gap: 25px; padding: 30px;
+            max-width: 1400px; margin: 0 auto; width: 100%;
         }
 
-        .viewer-section {
-            flex: 1;
-            background: rgba(107, 33, 168, 0.1);
-            border: 2px solid #6b21a8;
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 0 20px rgba(107, 33, 168, 0.2);
+        /* Estilo de Pedra Esculpida para os Painéis */
+        .viewer-section, .controls-section {
+            background: rgba(26, 42, 58, 0.8); /* Pedra escura translúcida */
+            border: 3px solid var(--sculk-dim);
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.8), var(--box-glow);
+            backdrop-filter: blur(5px);
         }
 
-        .viewer-section h2 {
-            font-size: 16px;
-            margin-bottom: 15px;
-            color: #00d9ff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .viewer-section { flex: 1; display: flex; flex-direction: column; }
+        .controls-section { flex: 0 0 380px; display: flex; flex-direction: column; gap: 20px; max-height: 700px; overflow-y: auto; }
+
+        h2 {
+            font-family: 'Creepster', cursive;
+            font-size: 22px; margin-bottom: 20px; color: var(--sculk-accent);
+            text-transform: uppercase; letter-spacing: 2px;
+            text-shadow: var(--text-glow);
+            border-bottom: 1px solid var(--sculk-dim); padding-bottom: 10px;
+            display: flex; justify-content: space-between; align-items: center;
         }
 
-        #skinViewer {
-            width: 100%;
-            height: 500px;
-            background: linear-gradient(135deg, #1a0f2e 0%, #0f0a1a 100%);
-            border-radius: 4px;
-            border: 1px solid #00d9ff;
-            box-shadow: inset 0 0 20px rgba(0, 217, 255, 0.1);
-            /* Opcional: Cursor para indicar que é interativo */
-            cursor: grab;
+        /* Badge de modo */
+        #mode-badge {
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--sculk-dim); color: var(--void-bg);
+            padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: bold;
+            box-shadow: 0 0 10px var(--sculk-dim);
+        }
+
+        /* Container dos Canvases - O Vazio */
+        .canvas-container {
+            width: 100%; height: 550px; position: relative;
+            background: radial-gradient(circle at center, #0a1520 0%, #000000 80%); /* Fundo de abismo */
+            border-radius: 8px; border: 3px solid var(--sculk-accent);
+            box-shadow: inset 0 0 50px rgba(0, 255, 162, 0.2); /* Brilho interno */
+            overflow: hidden;
+        }
+
+        #skinViewer, #gltfViewer { width: 100%; height: 100%; cursor: grab; position: absolute; top: 0; left: 0; }
+        #skinViewer:active, #gltfViewer:active { cursor: grabbing; }
+
+        /* --- BOTÕES ESTILO WARDEN/SCULK --- */
+        /* Estes estilos simulam botões de imagem esculpidos */
+        .tab-btn, button.action-btn, .file-upload-btn {
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase; font-weight: bold; letter-spacing: 1px;
+            
+            background: linear-gradient(180deg, #2a4a5a 0%, #1a2a3a 100%); /* Gradiente de pedra */
+            color: var(--sculk-accent);
+            border: 2px solid var(--sculk-accent);
+            border-bottom-width: 4px; /* Efeito 3D de bloco */
+            border-radius: 6px;
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+            box-shadow: 0 4px 0 var(--sculk-dim), 0 0 10px rgba(0, 255, 162, 0.1); /* Sombra 3D + brilho */
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Efeito de brilho ao passar o mouse */
+        .tab-btn:hover, button.action-btn:hover, .file-upload-btn:hover {
+            background: linear-gradient(180deg, #3a5a6a 0%, #2a3a4a 100%);
+            color: #ffffff;
+            border-color: #ffffff;
+            text-shadow: var(--text-glow);
+            box-shadow: 0 4px 0 var(--sculk-accent), 0 0 20px var(--sculk-accent);
+            transform: translateY(-1px);
         }
         
-        #skinViewer:active {
-            cursor: grabbing;
+        /* Efeito de clique (afundar o botão) */
+        .tab-btn:active, button.action-btn:active, .file-upload-btn:active {
+            transform: translateY(3px);
+            box-shadow: 0 1px 0 var(--sculk-dim), inset 0 2px 5px rgba(0,0,0,0.5);
+            border-bottom-width: 2px;
         }
 
-        .controls-section {
-            flex: 0 0 350px;
-            background: rgba(107, 33, 168, 0.1);
-            border: 2px solid #6b21a8;
-            border-radius: 8px;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-            box-shadow: 0 0 20px rgba(107, 33, 168, 0.2);
-            max-height: 600px;
-            overflow-y: auto;
+        /* Estilo específico para abas ativas */
+        .tabs { display: flex; gap: 15px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; font-size: 11px; opacity: 0.7; }
+        .tab-btn.active {
+            opacity: 1;
+            background: linear-gradient(180deg, var(--sculk-dim) 0%, #1a2a3a 100%);
+            border-color: var(--sculk-accent);
+            box-shadow: 0 4px 0 var(--sculk-accent), inset 0 0 15px var(--sculk-accent);
+            color: #fff;
+            text-shadow: var(--text-glow);
         }
 
-        .controls-section h2 {
-            font-size: 14px;
-            color: #00d9ff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 10px;
+        /* Inputs e Controles */
+        .control-group { display: flex; flex-direction: column; gap: 10px; }
+        .control-group label { font-size: 11px; color: var(--sculk-dim); text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+
+        input[type="range"], .custom-file-input-wrapper {
+            background: rgba(0, 0, 0, 0.5);
+            border: 2px solid var(--sculk-dim);
+            padding: 5px; border-radius: 4px;
+            height: 30px;
+        }
+        
+        /* Estilizando o slider (range) para parecer energia */
+        input[type="range"] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type="range"]::-webkit-slider-runnable-track {
+            width: 100%; height: 8px; background: var(--sculk-stone); border-radius: 4px; border: 1px solid var(--sculk-dim);
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%;
+            background: var(--sculk-accent); box-shadow: var(--text-glow);
+            margin-top: -5px; cursor: pointer;
         }
 
-        .control-group {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
+        /* Input de Arquivo Customizado (para parecer botão) */
+        .custom-file-input-wrapper {
+            position: relative; padding: 0; border: none; background: none; height: auto;
+        }
+        .custom-file-input-wrapper input[type="file"] {
+            position: absolute; left: 0; top: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer;
+        }
+        .file-upload-btn {
+            display: block; text-align: center; font-size: 11px; padding: 10px; width: 100%;
         }
 
-        .control-group label {
-            font-size: 12px;
-            color: #00d9ff;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .control-group input[type="file"],
-        .control-group input[type="range"],
-        .control-group select {
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid #00d9ff;
-            color: #00d9ff;
-            padding: 8px;
-            border-radius: 4px;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 12px;
-        }
-
-        .control-group input[type="file"]::file-selector-button {
-            background: #6b21a8;
-            color: #00d9ff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            font-size: 11px;
-            transition: all 0.3s;
-        }
-
-        .control-group input[type="file"]::file-selector-button:hover {
-            background: #00d9ff;
-            color: #0f0a1a;
-            box-shadow: 0 0 10px #00d9ff;
-        }
-
-        button {
-            background: linear-gradient(135deg, #00d9ff 0%, #6b21a8 100%);
-            color: #0f0a1a;
-            border: none;
-            padding: 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-family: 'JetBrains Mono', monospace;
-            text-transform: uppercase;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.3s;
-            letter-spacing: 1px;
-        }
-
-        button:hover {
-            box-shadow: 0 0 15px #00d9ff;
-            transform: translateY(-2px);
-        }
-
-        button:active {
-            transform: translateY(0);
-        }
-
+        /* Status e Informações */
         .status {
-            background: rgba(0, 217, 255, 0.1);
-            border: 1px solid #00d9ff;
-            padding: 10px;
-            border-radius: 4px;
-            font-size: 11px;
-            color: #00d9ff;
-            text-align: center;
+            background: rgba(0, 20, 30, 0.8); border: 2px solid var(--sculk-dim);
+            padding: 12px; border-radius: 6px; font-size: 12px;
+            color: var(--sculk-accent); text-align: center; font-weight: bold;
+            text-shadow: 0 0 5px var(--sculk-dim);
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.5);
         }
-
-        .status.success {
-            background: rgba(0, 217, 255, 0.2);
-            border-color: #00d9ff;
-        }
-
-        .status.error {
-            background: rgba(255, 0, 0, 0.1);
-            border-color: #ff0000;
-            color: #ff0000;
-        }
-
-        .preset-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        .preset-buttons button {
-            padding: 8px;
-            font-size: 11px;
-        }
-
-        @media (max-width: 1024px) {
-            .container {
-                flex-direction: column;
-            }
-
-            .controls-section {
-                flex: none;
-                max-height: none;
-            }
-
-            #skinViewer {
-                height: 400px;
-            }
-        }
+        .status.success { border-color: var(--sculk-accent); background: rgba(0, 255, 162, 0.1); }
+        .status.error { border-color: #ff3333; color: #ff3333; background: rgba(255, 51, 51, 0.1); text-shadow: 0 0 5px #ff3333; }
 
         .info-box {
-            background: rgba(107, 33, 168, 0.2);
-            border-left: 3px solid #00d9ff;
-            padding: 12px;
-            border-radius: 4px;
-            font-size: 11px;
-            line-height: 1.6;
-            color: #a0a0ff;
+            background: rgba(26, 42, 58, 0.9);
+            border: 2px solid var(--sculk-dim);
+            border-left: 5px solid var(--sculk-accent);
+            padding: 15px; border-radius: 6px; font-size: 11px;
+            line-height: 1.8; color: #a0c0d0;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
         }
-
-        .info-box strong {
-            color: #00d9ff;
-        }
-
-        .controls-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .controls-section::-webkit-scrollbar-track {
-            background: rgba(0, 217, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        .controls-section::-webkit-scrollbar-thumb {
-            background: #6b21a8;
-            border-radius: 4px;
-        }
-
-        .controls-section::-webkit-scrollbar-thumb:hover {
-            background: #00d9ff;
-        }
+        .info-box strong { color: var(--sculk-accent); font-size: 13px; text-shadow: var(--text-glow); }
 
         footer {
-            background: rgba(15, 10, 26, 0.9);
-            border-top: 1px solid #6b21a8;
-            padding: 15px;
-            text-align: center;
-            font-size: 11px;
-            color: #6b21a8;
+            background: rgba(5, 10, 15, 0.95); border-top: 3px solid var(--sculk-dim);
+            padding: 20px; text-align: center; font-size: 11px; color: var(--sculk-dim);
+            box-shadow: 0 -10px 20px rgba(0, 255, 162, 0.05);
+        }
+
+        /* Animações */
+        @keyframes pulseSensor {
+            0%, 100% { opacity: 0.5; transform: scaleX(1); }
+            50% { opacity: 1; transform: scaleX(1.05); }
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: flex; flex-direction: column; gap: 20px; }
+
+        /* Scrollbar Personalizada */
+        .controls-section::-webkit-scrollbar { width: 10px; background: var(--void-bg); }
+        .controls-section::-webkit-scrollbar-thumb { background: var(--sculk-dim); border-radius: 5px; border: 2px solid var(--void-bg); }
+        .controls-section::-webkit-scrollbar-thumb:hover { background: var(--sculk-accent); }
+
+        @media (max-width: 1024px) {
+            .container { flex-direction: column; padding: 15px; }
+            .controls-section { flex: none; max-height: none; }
+            .canvas-container { height: 400px; }
+            header h1 { font-size: 28px; }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>⚔️ VEXANIUM ARMOR VIEWER</h1>
-        <p>Painel J.A.V.I.S. - Visualizador de Texturas em Tempo Real</p>
+        <h1>⟁ VEXANIUM VIEWER ⟁</h1>
+        <p>INTERFACE DEEP DARK // PROTOCOLO WARDEN</p>
     </header>
 
     <div class="container">
         <div class="viewer-section">
-            <h2>📺 Visualização 3D</h2>
-            <canvas id="skinViewer"></canvas>
+            <h2>
+                <span>👁‍🗨 CÂMARA DE ESCANEAMENTO</span>
+                <span id="mode-badge">MODO: ARMADURA</span>
+            </h2>
+            <div class="canvas-container">
+                <canvas id="skinViewer"></canvas>
+                <canvas id="gltfViewer" style="display: none;"></canvas>
+            </div>
         </div>
 
         <div class="controls-section">
-            <h2>⚙️ Controles</h2>
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('armor')">🛡️ Armaduras</button>
+                <button class="tab-btn" onclick="switchTab('models')">👾 Entidades</button>
+            </div>
 
-            <div class="control-group">
-                <label>📤 Camada 1 (Capacete, Peito, Botas)</label>
-                <input type="file" id="layer1Upload" accept="image/png" />
+            <!-- MODO ARMADURA (SKINVIEW3D) -->
+            <div id="tab-armor" class="tab-content active">
+                <div class="control-group">
+                    <label>📤 Camada 1 (Capacete, Peito, Botas)</label>
+                    <div class="custom-file-input-wrapper">
+                        <button class="file-upload-btn">Selecionar Arquivo PNG</button>
+                        <input type="file" id="layer1Upload" accept="image/png" onchange="updateFileName(this)" />
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label>📤 Camada 2 (Calças)</label>
+                    <div class="custom-file-input-wrapper">
+                        <button class="file-upload-btn">Selecionar Arquivo PNG</button>
+                        <input type="file" id="layer2Upload" accept="image/png" onchange="updateFileName(this)" />
+                    </div>
+                </div>
+                <div class="info-box">
+                    <strong>💡 Protocolo de Armadura:</strong><br>
+                    Carregue texturas PNG (padrão 64x32 ou HD 2:1) para projetar sobre o hospedeiro padrão.
+                </div>
+            </div>
+
+            <!-- MODO MODELOS 3D (GLTF/GLB) -->
+            <div id="tab-models" class="tab-content">
+                <div class="control-group">
+                    <label>📤 Carregar Modelo (GLTF / GLB)</label>
+                    <div class="custom-file-input-wrapper">
+                        <button class="file-upload-btn">Selecionar Arquivo 3D</button>
+                        <input type="file" id="modelUpload" accept=".gltf,.glb" onchange="updateFileName(this)" />
+                    </div>
+                </div>
+                <div class="info-box">
+                    <strong>💡 Protocolo de Entidade:</strong><br>
+                    Visualize modelos complexos exportados do Blockbench. O sistema centralizará a anomalia automaticamente.
+                </div>
+            </div>
+
+            <!-- CONTROLES GLOBAIS -->
+            <div class="control-group" style="flex-direction: row; align-items: center; justify-content: space-between; background: rgba(0,0,0,0.3); padding: 10px; border-radius: 6px;">
+                <label style="margin: 0;">🔄 Rotação Automática</label>
+                <input type="checkbox" id="autoRotate" checked style="accent-color: var(--sculk-accent); transform: scale(1.2);" />
             </div>
 
             <div class="control-group">
-                <label>📤 Camada 2 (Calças)</label>
-                <input type="file" id="layer2Upload" accept="image/png" />
-            </div>
-
-            <div class="control-group">
-                <label>🔄 Rotação Automática</label>
-                <input type="checkbox" id="autoRotate" checked />
-            </div>
-
-            <div class="control-group">
-                <label>⏱️ Velocidade de Rotação</label>
-                <input type="range" id="rotationSpeed" min="0" max="10" value="3" />
-            </div>
-
-            <div class="preset-buttons">
-                <button onclick="setView(0)">Frente</button>
-                <button onclick="setView(90)">Lado</button>
-                <button onclick="setView(180)">Costas</button>
-                <button onclick="setView(270)">Outro Lado</button>
-            </div>
-
-            <div class="control-group">
-                <label>🔍 Zoom</label>
+                <label>🔍 Zoom / Intensidade</label>
                 <input type="range" id="zoomControl" min="0.5" max="3" step="0.1" value="1" />
             </div>
 
-            <button onclick="resetViewer()">🔄 Resetar Visualizador</button>
+            <button class="action-btn" onclick="resetViewer()">⚠️ REINICIAR SISTEMAS ⚠️</button>
 
-            <div class="status" id="status">Sistemas Online. Aguardando input.</div>
-
-            <div class="info-box">
-                <strong>💡 Nota Técnica J.A.V.I.S:</strong><br>
-                Este motor nativo foi desenhado para skins de jogadores. Armaduras carregadas no corpo podem apresentar distorções de mapeamento, mas as texturas serão lidas com sucesso.
-            </div>
+            <div class="status" id="status">Sensores Sculk Ativos. Aguardando vibração.</div>
         </div>
     </div>
 
     <footer>
-        <p>Vexanium Armor Viewer v1.1 | Powered by Three.js & skinview3d | © 2026</p>
+        <p>Vexanium Deep Dark Interface v2.1 | Powered by Three.js & skinview3d | © 2026</p>
     </footer>
 
     <script>
-        // 1. Inicializa o visualizador com a skin padrão do Steve
-        const canvas = document.getElementById('skinViewer');
+        // Pequena função para atualizar o texto do botão de arquivo
+        function updateFileName(input) {
+            const btn = input.previousElementSibling;
+            if (input.files.length > 0) {
+                btn.textContent = "✅ " + input.files[0].name;
+                btn.style.color = "var(--sculk-accent)";
+                btn.style.borderColor = "#fff";
+            } else {
+                btn.textContent = btn.getAttribute('data-default-text');
+            }
+        }
+        // Salva o texto original dos botões
+        document.querySelectorAll('.file-upload-btn').forEach(btn => btn.setAttribute('data-default-text', btn.textContent));
+
+        // ==========================================
+        // SISTEMA 1: SKINVIEW3D (Armaduras)
+        // ==========================================
+        const skinCanvas = document.getElementById('skinViewer');
         const skinViewer = new skinview3d.SkinViewer({
-            canvas: canvas,
-            width: canvas.offsetWidth,
-            height: canvas.offsetHeight,
+            canvas: skinCanvas,
+            width: skinCanvas.parentElement.offsetWidth,
+            height: skinCanvas.parentElement.offsetHeight,
             skin: 'https://crafatar.com/skins/MHF_Steve'
         });
-
-        // Configurações Iniciais
         skinViewer.controls.autoRotate = true;
-        skinViewer.controls.autoRotateSpeed = 3;
+        skinViewer.controls.autoRotateSpeed = 2; // Um pouco mais lento e ameaçador
 
-        // 2. Leitura de ficheiros do seu computador (Upload)
         let layer1Texture = null;
         let layer2Texture = null;
 
         document.getElementById('layer1Upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
+            if(e.target.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    layer1Texture = event.target.result;
-                    applyTextures();
-                    updateStatus('✓ Camada 1 carregada com sucesso', 'success');
+                reader.onload = function(evt) {
+                    layer1Texture = evt.target.result;
+                    skinViewer.loadSkin(layer1Texture);
+                    updateStatus('✓ Assinatura de Armadura (Camada 1) assimilada.', 'success');
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(e.target.files[0]);
             }
         });
 
         document.getElementById('layer2Upload').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
+            if(e.target.files[0]) {
                 const reader = new FileReader();
-                reader.onload = function(event) {
-                    layer2Texture = event.target.result;
-                    applyTextures();
-                    updateStatus('✓ Camada 2 carregada com sucesso', 'success');
+                reader.onload = function(evt) {
+                    layer2Texture = evt.target.result;
+                    skinViewer.loadCape(layer2Texture); // Usa a capa como "hack" para a segunda camada
+                    updateStatus('✓ Assinatura de Calças (Camada 2) assimilada.', 'success');
                 };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(e.target.files[0]);
             }
         });
 
-        function applyTextures() {
-            // Nota: O skinview3d vai forçar a textura da armadura a cobrir a "pele" e a "capa"
-            if (layer1Texture) {
-                skinViewer.loadSkin(layer1Texture);
+        // ==========================================
+        // SISTEMA 2: THREE.JS GENÉRICO (Entidades/Armas)
+        // ==========================================
+        const gltfCanvas = document.getElementById('gltfViewer');
+        const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true });
+        renderer.setSize(gltfCanvas.parentElement.offsetWidth, gltfCanvas.parentElement.offsetHeight);
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(45, gltfCanvas.parentElement.offsetWidth / gltfCanvas.parentElement.offsetHeight, 0.1, 1000);
+        camera.position.set(0, 0, 5);
+
+        // Iluminação Dramática do Deep Dark
+        const ambientLight = new THREE.AmbientLight(0x00ffa2, 0.4); // Luz ambiente ciano fraca
+        scene.add(ambientLight);
+        
+        const mainLight = new THREE.PointLight(0xffffff, 1, 100);
+        mainLight.position.set(5, 5, 5);
+        scene.add(mainLight);
+        
+        const rimLight = new THREE.PointLight(0x00ffa2, 2, 50); // Luz de borda ciano forte
+        rimLight.position.set(-5, 2, -5);
+        scene.add(rimLight);
+
+        const gltfControls = new THREE.OrbitControls(camera, renderer.domElement);
+        gltfControls.enableDamping = true;
+        gltfControls.dampingFactor = 0.05;
+
+        let currentModel = null;
+        let isAutoRotating = true;
+
+        function animateGltf() {
+            requestAnimationFrame(animateGltf);
+            if (isAutoRotating && currentModel) {
+                currentModel.rotation.y += 0.005; // Rotação lenta e pesada
             }
-            if (layer2Texture) {
-                skinViewer.loadCape(layer2Texture);
+            gltfControls.update();
+            renderer.render(scene, camera);
+        }
+        animateGltf();
+
+        const loader = new THREE.GLTFLoader();
+        document.getElementById('modelUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                updateStatus('⏳ Analisando estrutura molecular...', 'info');
+                const url = URL.createObjectURL(file);
+                
+                loader.load(url, function(gltf) {
+                    if (currentModel) scene.remove(currentModel);
+                    currentModel = gltf.scene;
+                    
+                    const box = new THREE.Box3().setFromObject(currentModel);
+                    const center = box.getCenter(new THREE.Vector3());
+                    const size = box.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 3 / maxDim;
+                    currentModel.scale.set(scale, scale, scale);
+                    currentModel.position.set(-center.x * scale, -center.y * scale, -center.z * scale);
+                    
+                    const group = new THREE.Group();
+                    group.add(currentModel);
+                    currentModel = group;
+                    
+                    scene.add(currentModel);
+                    updateStatus('✓ Entidade manifestada com sucesso.', 'success');
+                }, undefined, function(error) {
+                    console.error(error);
+                    updateStatus('❌ Falha na materialização. Arquivo corrompido ou incompatível.', 'error');
+                });
+            }
+        });
+
+        // ==========================================
+        // CONTROLES GLOBAIS
+        // ==========================================
+        function switchTab(mode) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById('tab-' + mode).classList.add('active');
+            
+            if (mode === 'armor') {
+                skinCanvas.style.display = 'block'; gltfCanvas.style.display = 'none';
+                document.getElementById('mode-badge').innerText = 'MODO: ARMADURA';
+            } else {
+                skinCanvas.style.display = 'none'; gltfCanvas.style.display = 'block';
+                document.getElementById('mode-badge').innerText = 'MODO: ENTIDADE';
             }
         }
 
-        // 3. Controlos de Interface
         document.getElementById('autoRotate').addEventListener('change', function(e) {
             skinViewer.controls.autoRotate = e.target.checked;
-        });
-
-        document.getElementById('rotationSpeed').addEventListener('change', function(e) {
-            skinViewer.controls.autoRotateSpeed = parseFloat(e.target.value);
+            isAutoRotating = e.target.checked;
         });
 
         document.getElementById('zoomControl').addEventListener('change', function(e) {
             const zoom = parseFloat(e.target.value);
-            // Ajusta a distância da câmera baseada no zoom
             skinViewer.camera.position.z = 60 / zoom;
+            camera.position.z = 5 / zoom;
         });
-
-        function setView(angle) {
-            skinViewer.playerObject.rotation.y = (angle * Math.PI) / 180;
-        }
 
         function resetViewer() {
             skinViewer.playerObject.rotation.y = 0;
             skinViewer.camera.position.z = 60;
+            camera.position.set(0, 0, 5);
+            gltfControls.reset();
+            if (currentModel) currentModel.rotation.set(0,0,0);
+            
             document.getElementById('autoRotate').checked = true;
-            document.getElementById('rotationSpeed').value = 3;
-            document.getElementById('zoomControl').value = 1;
             skinViewer.controls.autoRotate = true;
-            updateStatus('Sistemas reiniciados.', 'success');
+            isAutoRotating = true;
+            document.getElementById('zoomControl').value = 1;
+            
+            // Resetar botões de arquivo
+            document.querySelectorAll('.file-upload-btn').forEach(btn => {
+                btn.textContent = btn.getAttribute('data-default-text');
+                btn.style.color = ""; btn.style.borderColor = "";
+            });
+            document.querySelectorAll('input[type="file"]').forEach(input => input.value = "");
+
+            updateStatus('Sistemas reiniciados. Aguardando novo input.', 'success');
         }
 
         function updateStatus(message, type = 'info') {
@@ -422,10 +525,13 @@
             statusEl.className = 'status ' + type;
         }
 
-        // Responsividade do Canvas
         window.addEventListener('resize', () => {
-            skinViewer.width = canvas.parentElement.offsetWidth;
-            skinViewer.height = canvas.parentElement.offsetHeight;
+            const container = skinCanvas.parentElement;
+            skinViewer.width = container.offsetWidth;
+            skinViewer.height = container.offsetHeight;
+            camera.aspect = container.offsetWidth / container.offsetHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.offsetWidth, container.offsetHeight);
         });
     </script>
 </body>
