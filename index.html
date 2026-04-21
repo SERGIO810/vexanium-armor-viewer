@@ -181,7 +181,6 @@
             background-size: 20px 20px; background-position: 0 0, 10px 10px;
         }
 
-        /* CORREÇÃO DO ZOOM: Sem position absolute. O Canvas alinha-se perfeitamente por Flexbox. */
         #workspace-canvas {
             max-width: 100%; 
             max-height: 100%; 
@@ -316,13 +315,16 @@ STATUS DA ARMADURA (VEXANIUM):
                     ✂️ Varinha Mágica (Extrair)
                 </button>
                 <button class="tool-btn" id="tool-slice" onclick="setTool('slice')">
-                    🔪 Corte Manual (Arrastar)
+                    📐 Seleção Manual
                 </button>
                 <button class="tool-btn" id="tool-move" onclick="setTool('move')">
                     🖐️ Mover / Scale
                 </button>
 
-                <div class="slice-category">AÇÕES DA PEÇA SELECIONADA</div>
+                <div class="slice-category">AÇÕES DA PEÇA / SELEÇÃO</div>
+                <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1); margin-bottom: 5px;" onclick="confirmarCorteManual()">
+                    🔪 Recortar Seleção Manual
+                </button>
                 <button class="action-btn" onclick="duplicarPecaAtiva()">
                     🖨️ Duplicar Peça
                 </button>
@@ -464,7 +466,7 @@ STATUS DA ARMADURA (VEXANIUM):
     animate();
 
     // ============================================================================
-    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP)
+    // ESTÚDIO DE MONTAGEM LIVRE (DRAG AND DROP E CORTE MANUAL)
     // ============================================================================
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
@@ -484,6 +486,7 @@ STATUS DA ARMADURA (VEXANIUM):
     let extractedPieces = [];
     let activePieceIndex = -1;
     let nextPieceId = 1;
+    let manualSelection = null; // Variável que guarda o quadro de seleção antes do corte
 
     function abrirFatiadorLivre() {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
@@ -517,6 +520,7 @@ STATUS DA ARMADURA (VEXANIUM):
 
             extractedPieces = [];
             activePieceIndex = -1;
+            manualSelection = null;
             setTool('magic');
             renderFatiador();
         };
@@ -594,6 +598,58 @@ STATUS DA ARMADURA (VEXANIUM):
             activePieceIndex = -1;
             renderFatiador();
         }
+    }
+
+    // Nova Função: Confirma o Corte Manual
+    function confirmarCorteManual() {
+        if (!manualSelection || manualSelection.w <= 2 || manualSelection.h <= 2) {
+            alert("Operador, desenhe a caixa de seleção na imagem (usando a ferramenta 📐 Seleção Manual) antes de confirmar o corte.");
+            return;
+        }
+
+        // Garante coordenadas absolutas inteiras para não extrair imagens invisíveis
+        let rx = Math.max(0, Math.floor(manualSelection.x));
+        let ry = Math.max(0, Math.floor(manualSelection.y));
+        let rw = Math.floor(manualSelection.w);
+        let rh = Math.floor(manualSelection.h);
+
+        // Previne ultrapassar os limites do canvas
+        if (rx + rw > offscreenCanvas.width) rw = offscreenCanvas.width - rx;
+        if (ry + rh > offscreenCanvas.height) rh = offscreenCanvas.height - ry;
+
+        let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
+        
+        // Verifica se a área não está vazia para evitar quadrados flutuantes invisíveis
+        let hasPixels = false;
+        for (let i = 3; i < imgD.data.length; i += 4) {
+            if (imgD.data[i] > 10) { 
+                hasPixels = true;
+                break;
+            }
+        }
+
+        if (!hasPixels) {
+            alert("A área selecionada está vazia ou transparente. Tente focar noutra zona do desenho.");
+            manualSelection = null;
+            renderFatiador();
+            return;
+        }
+
+        // Se tem píxeis, limpa a imagem base e transforma a caixa numa peça móvel!
+        offscreenCtx.clearRect(rx, ry, rw, rh);
+        
+        extractedPieces.push({
+            id: nextPieceId++,
+            imgData: imgD,
+            ox: rx, oy: ry, 
+            x: rx, y: ry,
+            w: rw, h: rh
+        });
+        
+        manualSelection = null; 
+        activePieceIndex = extractedPieces.length - 1;
+        setTool('move'); 
+        renderFatiador();
     }
 
     function desenharMoldeUV() {
@@ -676,6 +732,7 @@ STATUS DA ARMADURA (VEXANIUM):
         desenharMoldeUV();
         wsCtx.drawImage(offscreenCanvas, 0, 0);
 
+        // Renderiza as Peças Extraídas
         extractedPieces.forEach((p, i) => {
             let tempC = document.createElement('canvas');
             tempC.width = p.imgData.width;
@@ -708,17 +765,15 @@ STATUS DA ARMADURA (VEXANIUM):
             }
         });
 
-        if (isDragging && currentTool === 'slice' && rectW !== 0) {
-            let rx = rectW < 0 ? startX + rectW : startX;
-            let ry = rectH < 0 ? startY + rectH : startY;
-            let rw = Math.abs(rectW);
-            let rh = Math.abs(rectH);
-            
+        // Renderiza a Seleção Manual se ela existir
+        if (currentTool === 'slice' && manualSelection && manualSelection.w > 0) {
             wsCtx.strokeStyle = "var(--ai-accent)";
             wsCtx.lineWidth = 2;
             wsCtx.setLineDash([5, 5]);
-            wsCtx.strokeRect(rx, ry, rw, rh);
+            wsCtx.strokeRect(manualSelection.x, manualSelection.y, manualSelection.w, manualSelection.h);
             wsCtx.setLineDash([]);
+            wsCtx.fillStyle = "rgba(255, 0, 255, 0.15)";
+            wsCtx.fillRect(manualSelection.x, manualSelection.y, manualSelection.w, manualSelection.h);
         }
     }
 
@@ -801,7 +856,6 @@ STATUS DA ARMADURA (VEXANIUM):
     wsCanvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(e);
         startX = pos.x; startY = pos.y;
-        rectW = 0; rectH = 0;
 
         if (currentTool === 'move') {
             if (activePieceIndex !== -1) {
@@ -859,6 +913,8 @@ STATUS DA ARMADURA (VEXANIUM):
         }
         else if (currentTool === 'slice') {
             isDragging = true;
+            manualSelection = null; 
+            renderFatiador();
         }
     });
 
@@ -924,8 +980,14 @@ STATUS DA ARMADURA (VEXANIUM):
             renderFatiador();
         } 
         else if (currentTool === 'slice') {
-            rectW = pos.x - startX;
-            rectH = pos.y - startY;
+            let rectW = pos.x - startX;
+            let rectH = pos.y - startY;
+            let rx = Math.floor(rectW < 0 ? startX + rectW : startX);
+            let ry = Math.floor(rectH < 0 ? startY + rectH : startY);
+            let rw = Math.floor(Math.abs(rectW));
+            let rh = Math.floor(Math.abs(rectH));
+            
+            manualSelection = {x: rx, y: ry, w: rw, h: rh};
             renderFatiador();
         }
     });
@@ -961,30 +1023,7 @@ STATUS DA ARMADURA (VEXANIUM):
                 }
                 renderFatiador();
             }
-            else if (currentTool === 'slice') {
-                let rx = rectW < 0 ? startX + rectW : startX;
-                let ry = rectH < 0 ? startY + rectH : startY;
-                let rw = Math.abs(rectW);
-                let rh = Math.abs(rectH);
-
-                if (rw > 5 && rh > 5) {
-                    let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
-                    offscreenCtx.clearRect(rx, ry, rw, rh);
-                    
-                    extractedPieces.push({
-                        id: nextPieceId++,
-                        imgData: imgD,
-                        ox: rx, oy: ry, 
-                        x: rx, y: ry,
-                        w: rw, h: rh
-                    });
-                    
-                    activePieceIndex = extractedPieces.length - 1;
-                    setTool('move'); 
-                }
-                rectW = 0; rectH = 0;
-                renderFatiador();
-            }
+            // Não cortamos em mouseup se a tool for 'slice', apenas deixamos a caixa de seleção pronta
         }
     });
 
