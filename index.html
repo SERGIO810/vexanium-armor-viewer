@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vexanium Viewer - Terminal J.A.V.I.S. (Ecrã Inteiro)</title>
     
-    <!-- Fonte Técnica e Tática -->
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
-
-    <!-- Motores 3D e Ferramentas (JSZip para exportação em massa) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
@@ -30,63 +27,20 @@
             --uplink-accent: #00e5ff;
         }
 
-        body, html { 
-            margin: 0; padding: 0; width: 100vw; height: 100vh; 
-            overflow: hidden; font-family: 'JetBrains Mono', monospace;
-            background: var(--void-bg);
-            user-select: none; color: #fff;
-        }
-
-        #javis-widget-container {
-            width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            position: relative;
-        }
-
-        .viewer-area {
-            flex: 1; position: relative;
-            background: radial-gradient(circle at center, #0a1117 0%, #030508 100%);
-            overflow: hidden;
-            box-shadow: inset 0 0 80px rgba(0,0,0,0.8);
-        }
-
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
+        #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
+        .viewer-area { flex: 1; position: relative; background: radial-gradient(circle at center, #0a1117 0%, #030508 100%); overflow: hidden; box-shadow: inset 0 0 80px rgba(0,0,0,0.8); }
         canvas { width: 100%; height: 100%; cursor: grab; outline: none; }
         canvas:active { cursor: grabbing; }
 
-        #scanning-overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 2px;
-            background: var(--sculk-core);
-            box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core);
-            display: none; z-index: 50;
-            animation: scanMove 2s infinite ease-in-out;
-        }
+        #scanning-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--sculk-core); box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core); display: none; z-index: 50; animation: scanMove 2s infinite ease-in-out; }
+        @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        @keyframes scanMove {
-            0% { top: 0; opacity: 0; }
-            50% { opacity: 1; }
-            100% { top: 100%; opacity: 0; }
-        }
-
-        /* BARRA TÁTICA INFERIOR - DESIGN MINIMALISTA (SÓ ÍCONES) */
-        .control-bar {
-            background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a;
-            padding: 8px 15px; display: flex; justify-content: space-between; align-items: center;
-            gap: 12px; z-index: 10;
-        }
-
+        /* BARRA TÁTICA INFERIOR - DESIGN CLÁSSICO COM TEXTO */
+        .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
         .btn-group { display: flex; gap: 8px; align-items: center; }
-
-        .btn {
-            background: var(--sculk-surface); color: var(--warden-bone);
-            border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; 
-            border-radius: 6px; padding: 10px; font-size: 16px; 
-            cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center;
-            width: 45px; height: 45px; position: relative;
-        }
-
-        .btn span:not(.icon) { display: none; }
-        .btn .icon { font-size: 18px; }
-
+        .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
+        
         .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
         .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
@@ -95,61 +49,22 @@
         .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
         .btn-uplink { border-color: var(--uplink-accent); color: var(--uplink-accent); border-bottom-color: var(--uplink-accent); background: rgba(0, 229, 255, 0.05); }
         .btn-uplink:hover { border-color: #fff; color: #fff; background: rgba(0, 229, 255, 0.2); }
-        
         .btn-save { border-color: #00bcd4; color: #00bcd4; border-bottom-color: #00bcd4; background: rgba(0, 188, 212, 0.05); }
         .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 188, 212, 0.2); }
-
         .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
 
-        /* SISTEMA DE TOOLTIP */
-        .btn::after {
-            content: attr(data-tooltip); position: absolute; bottom: 125%; left: 50%;
-            transform: translateX(-50%); background: #000; color: #fff; padding: 8px 12px;
-            border-radius: 4px; font-size: 11px; font-weight: bold; letter-spacing: 1px;
-            white-space: nowrap; opacity: 0; pointer-events: none; transition: 0.2s;
-            border: 1px solid var(--sculk-core); box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 100;
-        }
-        .btn:hover::after { opacity: 1; bottom: 135%; }
-
-        #javis-branding {
-            font-size: 11px; color: var(--warden-bone-dim); text-decoration: none; 
-            display: flex; align-items: center; gap: 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: auto;
-        }
+        #javis-branding { font-size: 11px; color: var(--warden-bone-dim); text-decoration: none; display: flex; align-items: center; gap: 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: auto; }
         #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
-
         #file-input, #file-input-preset, #file-input-add { display: none; }
 
-        #status-overlay {
-            position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow);
-            pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px;
-            background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core);
-            backdrop-filter: blur(5px);
-        }
+        #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
 
-        .modal {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px;
-            box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1);
-            z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px);
-        }
-
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px); }
         #ai-modal, #gen-modal { width: 85%; max-width: 550px; }
-
-        .modal h3 { 
-            color: var(--sculk-core); margin-top: 0; font-size: 16px; 
-            border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px;
-            display: flex; align-items: center; gap: 10px; letter-spacing: 1px;
-        }
-
-        #ai-response-text {
-            font-size: 13px; line-height: 1.6; margin: 20px 0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main);
-        }
-
-        #gen-prompt-input {
-            width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim);
-            border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px;
-            resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
-        }
+        .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        #ai-response-text { font-size: 13px; line-height: 1.6; margin: 20px 0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main); }
+        
+        #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
         /* ESTÚDIO DE CIRURGIA UV */
@@ -159,20 +74,13 @@
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
 
         .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; }
-
-        .editor-workspace {
-            flex: 1; background-color: #f1f3f4; 
-            background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8);
-            background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box;
-        }
-
+        .editor-workspace { flex: 1; background-color: #f1f3f4; background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8); background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box; }
         #canvas-wrapper { width: 1024px; height: 512px; min-width: 1024px; min-height: 512px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
         #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; }
 
         .pieces-panel { flex: 0 0 300px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; }
         .pieces-header { font-size: 12px; color: var(--calib-accent); font-weight: 800; border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .pieces-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-
         .piece-item { background: rgba(18, 30, 41, 0.8); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.2s; }
         .piece-item:hover { background: rgba(31, 52, 71, 0.9); border-color: var(--calib-accent); }
         .piece-item.selected { background: rgba(255, 170, 0, 0.15); border-color: var(--calib-accent); }
@@ -180,12 +88,10 @@
         .piece-preview img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
         .piece-info { font-size: 10px; color: var(--warden-bone-dim); display: flex; justify-content: space-between; font-weight: bold; }
         .piece-actions { display: flex; gap: 6px; }
-
         .piece-btn { flex: 1; background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim); padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; }
         .piece-btn:hover { background: var(--warden-bone-dim); color: #000; }
         .piece-btn.delete { border-color: #ff5555; color: #ff5555; }
         .piece-btn.delete:hover { background: #ff5555; color: #fff; }
-
         .pieces-footer { border-top: 1px solid var(--warden-bone-dim); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
         .download-btn { background: rgba(0, 188, 212, 0.1); color: #00bcd4; border: 1px solid #00bcd4; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
         .download-btn:hover { background: #00bcd4; color: #000; }
@@ -198,7 +104,6 @@
         .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
         .delete-btn { border-color: #ff5555; color: #ff5555; }
         .delete-btn:hover { background: #ff5555; color: #fff; }
-
         .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
@@ -219,22 +124,6 @@
 </head>
 <body oncontextmenu="return false;">
 
-<script>
-(function() {
-    const allowedDomains = ["sergio810.github.io", "localhost", "127.0.0.1"];
-    const currentDomain = window.location.hostname;
-    if (!allowedDomains.includes(currentDomain) && currentDomain !== "") {
-        document.body.innerHTML = "";
-        document.body.style.backgroundColor = "#000000";
-        const warning = document.createElement("div");
-        warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
-        warning.innerHTML = `<h1>⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1><p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p><p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>`;
-        document.body.appendChild(warning);
-        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada.");
-    }
-})();
-</script>
-
 <div id="javis-widget-container">
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
@@ -244,6 +133,7 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
+    <!-- MODAL IA LORE & ATRIBUTOS -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
@@ -271,6 +161,7 @@
         </div>
     </div>
 
+    <!-- ESTÚDIO DE MONTAGEM E CORTE -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
@@ -283,7 +174,7 @@
                 </div>
                 <div style="display: flex; gap: 5px;">
                     <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="salvarPresetJSON()">💾 Salvar</button>
-                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="document.getElementById('file-input-preset').click()">📂 Abrir</button>
+                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="document.getElementById('file-input-preset').click()">📂 Abrir JSON</button>
                     <input type="file" id="file-input-preset" accept="application/json">
                 </div>
 
@@ -292,8 +183,8 @@
                 <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Nova Imagem</button>
                 <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
                 
-                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo Inteligente</button>
-                <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">✨ 3. Analisar Arte (IA Vision)</button>
+                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo</button>
+                <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">✨ 3. Analisar Arte (Vision)</button>
 
                 <div class="slice-category">FERRAMENTAS DE EXTRAÇÃO</div>
                 <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')">✂️ Varinha Mágica (Extrair)</button>
@@ -301,9 +192,9 @@
                 <button class="tool-btn" id="tool-move" onclick="setTool('move')">🖐️ Mover / Scale</button>
 
                 <div class="slice-category">AÇÕES DA PEÇA / SELEÇÃO</div>
-                <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1); margin-bottom: 5px;" onclick="confirmarCorteManual()">🔪 Recortar Seleção Manual</button>
+                <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1); margin-bottom: 5px;" onclick="confirmarCorteManual()">🔪 Recortar Seleção</button>
                 <button class="action-btn" onclick="duplicarPecaAtiva()">🖨️ Duplicar Peça</button>
-                <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">🗑️ Apagar Peça (Restaurar)</button>
+                <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">🗑️ Apagar (Restaurar)</button>
 
                 <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
                 <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold; margin-bottom:5px;">
@@ -312,10 +203,6 @@
                 <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold;">
                     <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📐 Exibir Molde UV
                 </label>
-
-                <div style="margin-top:auto; font-size:11px; color:#aaa; border-top: 1px solid var(--warden-bone-dim); padding-top: 12px;">
-                    <p><b>Aviso:</b> O Minecraft usa um molde espelhado (64x32). Os braços e as pernas esq/dir partilham o mesmo bloco!</p>
-                </div>
             </div>
 
             <div class="editor-workspace" id="workspace-scroll-area">
@@ -324,7 +211,6 @@
                     <span id="zoom-label" style="font-size:12px; font-weight:bold; width: 45px; text-align:center;">100%</span>
                     <button class="action-btn" style="padding:6px 10px; margin:0;" onclick="ajustarZoom(2.0)">➕</button>
                 </div>
-
                 <div id="canvas-wrapper">
                     <canvas id="workspace-canvas"></canvas>
                 </div>
@@ -336,9 +222,6 @@
                 <div class="pieces-footer">
                     <button class="download-btn" onclick="downloadAllPieces()">📥 Baixar Pacote p/ Backend (ZIP)</button>
                     <button class="download-btn" style="background: rgba(0, 229, 255, 0.1); color: var(--uplink-accent); border-color: var(--uplink-accent);" onclick="downloadAllIndividual()">📥 Baixar Individual</button>
-                    
-                    <!-- NOVO BOTAO COLAB: Exporta o Backend Python + Notebook -->
-                    <button class="download-btn" style="background: rgba(255, 170, 0, 0.1); color: var(--calib-accent); border-color: var(--calib-accent); margin-top: 5px;" onclick="downloadBackendEnv()">🐍 Baixar Ambiente Python (Colab)</button>
                 </div>
             </div>
         </div>
@@ -349,29 +232,30 @@
         </div>
     </div>
 
-    <!-- BARRA TÁTICA INFERIOR - MINIMALISTA -->
+    <!-- BARRA TÁTICA INFERIOR - CLÁSSICA (COM TEXTO) -->
     <div class="control-bar">
         <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="switchMode('armor')" data-tooltip="Modo Armadura"><span class="icon">🛡️</span></button>
-            <button class="btn" id="btn-model" onclick="switchMode('model')" data-tooltip="Modo Entidade (Mob)"><span class="icon">👾</span></button>
+            <button class="btn active" id="btn-armor" onclick="switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
+            <button class="btn" id="btn-model" onclick="switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
         </div>
         <div class="divider"></div>
         <div class="btn-group" id="upload-group">
-            <button class="btn btn-calib" id="btn-upload-l1" onclick="triggerUpload(1)" data-tooltip="Carregar Base L1 (Peito/Botas)"><span class="icon">📥</span></button>
-            <button class="btn btn-calib" id="btn-upload-l2" onclick="triggerUpload(2)" data-tooltip="Carregar Base L2 (Calças)"><span class="icon">📥</span></button>
-            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)" data-tooltip="Importar Malha 3D (.GLTF)"><span class="icon">📥</span></button>
+            <!-- BOTÕES DE UPLOAD CLÁSSICOS (TEXTO VISÍVEL) -->
+            <button class="btn btn-calib" id="btn-upload-l1" onclick="triggerUpload(1)"><span class="icon">📥</span> BASE L1 (C/P/B)</button>
+            <button class="btn btn-calib" id="btn-upload-l2" onclick="triggerUpload(2)"><span class="icon">📥</span> BASE L2 (CALÇAS)</button>
+            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)"><span class="icon">📥</span> IMPORTAR .GLTF</button>
         </div>
         <div class="divider"></div>
         <div class="btn-group">
-            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" data-tooltip="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
-            <button class="btn btn-ai" onclick="generateLore()" data-tooltip="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
-            <button class="btn btn-ai" onclick="gerarAtributos()" data-tooltip="Gerar Atributos Táticos"><span class="icon">📊</span></button>
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" data-tooltip="Estúdio de Montagem Livre"><span class="icon">✂️</span></button>
+            <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Uplink Neural"><span class="icon">📡</span></button>
+            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore"><span class="icon">✨</span></button>
+            <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
+            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Abrir Estúdio"><span class="icon">✂️</span> ESTÚDIO</button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" data-tooltip="Exportar Textura L1 Final"><span class="icon">💾</span></button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" data-tooltip="Exportar Textura L2 Final"><span class="icon">💾</span></button>
+            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
@@ -437,7 +321,6 @@
         resize();
     }
 
-    // Motores 3D
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
         canvas: skinCanvas, width: skinCanvas.parentElement.clientWidth, height: skinCanvas.parentElement.clientHeight
@@ -523,7 +406,6 @@
 
     function abrirFatiadorLivre() {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
-        if (!targetBase && currentMode === 'armor') { } // Abre vazio
         let badge = document.getElementById('slicer-layer-badge'); let hint = document.getElementById('hint-layer-name');
         if (currentEditingLayer === 1) {
             if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
@@ -575,16 +457,12 @@
         const w = offscreenCanvas.width; const h = offscreenCanvas.height;
         const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
         const bgR = data[0]; const bgG = data[1]; const bgB = data[2]; const bgA = data[3];
-
         if (bgA < 10) { alert("O fundo já parece ser transparente."); return; }
         const tolerance = 30; 
-
         for (let i = 0; i < data.length; i += 4) {
             const r = data[i]; const g = data[i+1]; const b = data[i+2];
             if ((Math.abs(r - bgR) <= tolerance && Math.abs(g - bgG) <= tolerance && Math.abs(b - bgB) <= tolerance) ||
-                (r > 230 && g > 230 && b > 230)) {
-                data[i+3] = 0; 
-            }
+                (r > 230 && g > 230 && b > 230)) { data[i+3] = 0; }
         }
         offscreenCtx.putImageData(imgData, 0, 0); renderFatiador(); registrarEstadoMemoria(); 
         if (statusOverlay) statusOverlay.innerText = "✨ FUNDO INTELIGENTE ELIMINADO";
@@ -630,7 +508,6 @@
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
         const f = 16; wsCtx.lineWidth = 1.5; wsCtx.font = "bold 12px JetBrains Mono"; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
-
         const drawBox = (x, y, w, h, color, label, sublabel) => {
             wsCtx.strokeStyle = color; wsCtx.fillStyle = color + "22"; wsCtx.strokeRect(x*f, y*f, w*f, h*f); wsCtx.fillRect(x*f, y*f, w*f, h*f);
             wsCtx.fillStyle = "#000000"; 
@@ -785,9 +662,6 @@
         }
     });
 
-    // ============================================================================
-    // GESTÃO DE PEÇAS E EMPACOTAMENTO (JSON SINCRONIZADO COM BACKEND PYTHON)
-    // ============================================================================
     function updatePiecesList() {
         const list = document.getElementById('pieces-list'); list.innerHTML = '';
         extractedPieces.forEach((p, i) => {
@@ -864,200 +738,6 @@
         });
     }
 
-    // ============================================================================
-    // NOVA FUNÇÃO EXCLUSIVA: DOWNLOAD DO AMBIENTE GOOGLE COLAB / PYTHON
-    // ============================================================================
-    function downloadBackendEnv() {
-        if (statusOverlay) statusOverlay.innerText = `✓ Gerando ambiente Backend Python...`;
-        
-        const zip = new JSZip();
-
-        // 1. O Código Fonte do "smart_mold_engine.py"
-        const smartMoldPy = `import json
-import os
-from PIL import Image
-
-def remover_fundo_magico(image, tolerancia=30):
-    image = image.convert("RGBA")
-    data = image.getdata()
-    bg_color = data[0]
-    nova_imagem = []
-    for item in data:
-        if (abs(item[0] - bg_color[0]) < tolerancia and abs(item[1] - bg_color[1]) < tolerancia and abs(item[2] - bg_color[2]) < tolerancia):
-            nova_imagem.append((255, 255, 255, 0))
-        else:
-            nova_imagem.append(item)
-    image.putdata(nova_imagem)
-    return image
-
-def extrair_e_centralizar_peca(img_limpa, exp_x, exp_y, w, h, margem=30):
-    radar_x1 = max(0, exp_x - margem)
-    radar_y1 = max(0, exp_y - margem)
-    radar_x2 = min(img_limpa.width, exp_x + w + margem)
-    radar_y2 = min(img_limpa.height, exp_y + h + margem)
-    area_radar = img_limpa.crop((radar_x1, radar_y1, radar_x2, radar_y2))
-    caixa_real = area_radar.getbbox()
-    if not caixa_real: return Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    desenho_real = area_radar.crop(caixa_real)
-    if desenho_real.width > w or desenho_real.height > h:
-        fator = min(w / desenho_real.width, h / desenho_real.height)
-        desenho_real = desenho_real.resize((int(desenho_real.width * fator), int(desenho_real.height * fator)), Image.Resampling.NEAREST)
-    peca_perfeita = Image.new("RGBA", (w, h), (0, 0, 0, 0))
-    offset_x = (w - desenho_real.width) // 2
-    offset_y = (h - desenho_real.height) // 2
-    peca_perfeita.paste(desenho_real, (offset_x, offset_y), desenho_real)
-    return peca_perfeita
-
-def processar_auto_ajuste(input_path, config_json_path, output_path):
-    print(f"\\n📡 [J.A.V.I.S] Iniciando Smart Detect em: {input_path}")
-    with open(config_json_path, 'r') as f: mold = json.load(f)
-    img_bruta = Image.open(input_path)
-    img_limpa = remover_fundo_magico(img_bruta)
-    canvas_final = Image.new("RGBA", (mold["canvas"]["width"], mold["canvas"]["height"]), (0, 0, 0, 0))
-    
-    for nome, cfg in mold["pieces"].items():
-        ai_x, ai_y = cfg.get("ai_x", cfg["x"]), cfg.get("ai_y", cfg["y"])
-        mc_x, mc_y = cfg.get("mc_x", cfg["x"]), cfg.get("mc_y", cfg["y"])
-        peca = extrair_e_centralizar_peca(img_limpa, ai_x, ai_y, cfg["w"], cfg["h"])
-        canvas_final.paste(peca, (mc_x, mc_y), peca)
-        print(f"   🎯 Peça {nome} realocada para MC({mc_x},{mc_y})")
-        
-    canvas_final.save(output_path, "PNG")
-    print(f"✅ Finalizado! Salvo em: {output_path}\\n")
-
-if __name__ == "__main__":
-    if os.path.exists("ai_bruta.png"):
-        processar_auto_ajuste("ai_bruta.png", "armor_mold_config.json", "layer1_oficial.png")
-    else:
-        print("⚠️ Imagem 'ai_bruta.png' não encontrada.")
-`;
-        zip.file("smart_mold_engine.py", smartMoldPy);
-
-        // 2. O Código Fonte do "armor_packager.py"
-        const packagerPy = `import os
-import json
-import zipfile
-from datetime import datetime
-
-def empacotar_armadura_pronta(nome_armadura, path_layer1, path_layer2, config_metadata_path=None):
-    print(f"\\n📦 [J.A.V.I.S] Iniciando Fase 4: Empacotamento de '{nome_armadura}'")
-    pasta_saida = "vexanium_builds"
-    os.makedirs(pasta_saida, exist_ok=True)
-    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    nome_arquivo_zip = os.path.join(pasta_saida, f"{nome_armadura.lower().replace(' ', '_')}_{timestamp}.zip")
-    
-    try:
-        with zipfile.ZipFile(nome_arquivo_zip, 'w', zipfile.ZIP_DEFLATED) as zipf:
-            if os.path.exists(path_layer1):
-                zipf.write(path_layer1, arcname=f"assets/moduloiaavancada/textures/models/armor/parasita_layer_1.png")
-                print(f"   ✓ Layer 1 compactada.")
-            if os.path.exists(path_layer2):
-                zipf.write(path_layer2, arcname=f"assets/moduloiaavancada/textures/models/armor/parasita_layer_2.png")
-                print(f"   ✓ Layer 2 compactada.")
-            if config_metadata_path and os.path.exists(config_metadata_path):
-                zipf.write(config_metadata_path, arcname="metadata.json")
-                print(f"   ✓ Metadados incluídos.")
-
-            mcmeta = { "pack": { "pack_format": 34, "description": f"Texturas HD Vexanium: {nome_armadura}" } }
-            zipf.writestr("pack.mcmeta", json.dumps(mcmeta, indent=2))
-            
-        print(f"✅ [J.A.V.I.S] Empacotamento concluído com SUCESSO! Salvo em: {nome_arquivo_zip}\\n")
-    except Exception as e:
-        print(f"❌ ERRO CRÍTICO no Empacotamento: {e}")
-
-if __name__ == "__main__":
-    empacotar_armadura_pronta("Simbionte_IA", "layer1_oficial.png", "layer2_oficial.png", "metadata.json")
-`;
-        zip.file("armor_packager.py", packagerPy);
-
-        // 3. O Mestre Supremo "armor_mold_config.json"
-        const configJson = `{
-  "canvas": {"width": 1024, "height": 512},
-  "pieces": {
-    "helmet_top":    {"ai_x": 128, "ai_y": 0,   "mc_x": 128, "mc_y": 0,   "w": 128, "h": 128, "face": "top"},
-    "helmet_bottom": {"ai_x": 256, "ai_y": 0,   "mc_x": 256, "mc_y": 0,   "w": 128, "h": 128, "face": "bottom"},
-    "helmet_right":  {"ai_x": 0,   "ai_y": 128, "mc_x": 0,   "mc_y": 128, "w": 128, "h": 128, "face": "right"},
-    "helmet_front":  {"ai_x": 128, "ai_y": 128, "mc_x": 128, "mc_y": 128, "w": 128, "h": 128, "face": "front"},
-    "helmet_left":   {"ai_x": 256, "ai_y": 128, "mc_x": 256, "mc_y": 128, "w": 128, "h": 128, "face": "left"},
-    "helmet_back":   {"ai_x": 384, "ai_y": 128, "mc_x": 384, "mc_y": 128, "w": 128, "h": 128, "face": "back"},
-    "chest_front":   {"ai_x": 0,   "ai_y": 256, "mc_x": 320, "mc_y": 320, "w": 128, "h": 192, "face": "front"},
-    "chest_back":    {"ai_x": 128, "ai_y": 256, "mc_x": 512, "mc_y": 320, "w": 128, "h": 192, "face": "back"},
-    "arm_side":      {"ai_x": 256, "ai_y": 256, "mc_x": 640, "mc_y": 320, "w": 64,  "h": 192, "face": "right"},
-    "arm_front":     {"ai_x": 320, "ai_y": 256, "mc_x": 704, "mc_y": 320, "w": 64,  "h": 192, "face": "front"},
-    "boot_side":     {"ai_x": 384, "ai_y": 256, "mc_x": 0,   "mc_y": 320, "w": 64,  "h": 192, "face": "right"},
-    "boot_front":    {"ai_x": 448, "ai_y": 256, "mc_x": 64,  "mc_y": 320, "w": 64,  "h": 192, "face": "front"}
-  }
-}`;
-        zip.file("armor_mold_config.json", configJson);
-
-        // 4. O Notebook para Google Colab (.ipynb)
-        const colabNotebook = `{
-  "nbformat": 4,
-  "nbformat_minor": 0,
-  "metadata": {
-    "colab": {
-      "provenance": []
-    },
-    "kernelspec": {
-      "name": "python3",
-      "display_name": "Python 3"
-    },
-    "language_info": {
-      "name": "python"
-    }
-  },
-  "cells": [
-    {
-      "cell_type": "markdown",
-      "source": [
-        "# 🐍 Vexanium Backend Engine - J.A.V.I.S.\\n",
-        "Bem-vindo ao Google Colab! Aqui o servidor da Google roda o seu código Python de graça.\\n",
-        "\\n",
-        "### Passo 1: Preparar o Ambiente\\n",
-        "Execute a célula abaixo (Shift + Enter) para garantir que temos o processador de imagens \`Pillow\` instalado."
-      ],
-      "metadata": {}
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {},
-      "outputs": [],
-      "source": [
-        "!pip install Pillow"
-      ]
-    },
-    {
-      "cell_type": "markdown",
-      "source": [
-        "### Passo 2: Carregar a Imagem da IA\\n",
-        "Vá ao menu lateral esquerdo do Colab (ícone de Pasta 📁) e faça o upload da imagem gerada pela IA, nomeando-a como \`ai_bruta.png\`."
-      ],
-      "metadata": {}
-    },
-    {
-      "cell_type": "code",
-      "execution_count": null,
-      "metadata": {},
-      "outputs": [],
-      "source": [
-        "!python smart_mold_engine.py\\n",
-        "!python armor_packager.py"
-      ]
-    }
-  ]
-}`;
-        zip.file("Vexanium_Colab_Backend.ipynb", colabNotebook);
-
-        // 5. Baixar Tudo
-        zip.generateAsync({type: "blob"}).then((blob) => {
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; 
-            a.download = `vexanium_backend_env_${new Date().getTime()}.zip`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            if (statusOverlay) statusOverlay.innerText = `✓ Ambiente Backend (Colab) baixado com sucesso!`;
-        });
-    }
-
     async function salvarPresetJSON() {
         if (extractedPieces.length === 0) { alert("Não existem peças extraídas para salvar."); return; }
         const preset = {
@@ -1077,6 +757,13 @@ if __name__ == "__main__":
         reader.onload = async (evt) => {
             try {
                 const preset = JSON.parse(evt.target.result);
+                
+                // TRAVA DE SEGURANÇA: Se o usuário carregou o 'metadata.json' por engano
+                if (preset.armor_name || preset.pieces_coordinates) {
+                    alert("⚠️ AVISO: Você tentou carregar o arquivo 'metadata.json' (do pacote final ZIP). Para restaurar a sua extração, você deve carregar o arquivo 'Preset' (o JSON que você salva no botão 💾 Salvar).");
+                    return;
+                }
+
                 if(preset.layer !== currentEditingLayer) alert(`Aviso: Este Preset foi gravado para a Camada ${preset.layer}, mas o estúdio está na Camada ${currentEditingLayer}.`);
                 const img = new Image();
                 img.onload = async () => {
@@ -1139,14 +826,22 @@ if __name__ == "__main__":
         fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg"; fileInput.click(); 
     }
 
+    // CARREGAMENTO DE IMAGEM CORRIGIDO (Abre o Estúdio Automaticamente!)
     fileInput.onchange = (e) => {
         const file = e.target.files[0]; if (!file) return;
         const url = URL.createObjectURL(file);
-        if (currentMode === 'armor' && (file.type === "image/png" || file.type === "image/jpeg")) {
+        
+        if (currentMode === 'armor' && file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                if (uploadTarget === 1) { baseImageL1 = evt.target.result; if (statusOverlay) statusOverlay.innerText = "✓ BASE L1 CARREGADA (Aceda ao Estúdio para Fatiar)"; } 
-                else if (uploadTarget === 2) { baseImageL2 = evt.target.result; if (statusOverlay) statusOverlay.innerText = "✓ BASE L2 CARREGADA (Aceda ao Estúdio para Fatiar)"; }
+                if (uploadTarget === 1) { 
+                    baseImageL1 = evt.target.result; 
+                    abrirFatiadorLivre(); // Abre o Estúdio automaticamente
+                } 
+                else if (uploadTarget === 2) { 
+                    baseImageL2 = evt.target.result; 
+                    abrirFatiadorLivre(); // Abre o Estúdio automaticamente
+                }
             }; reader.readAsDataURL(file);
         } else if (currentMode === 'model') {
             new THREE.GLTFLoader().load(url, (gltf) => {
@@ -1183,7 +878,6 @@ if __name__ == "__main__":
         } return null;
     }
 
-    // FASE 1: Geração de Imagem Sincronizada
     async function executarGeracaoIA() {
         const promptInput = document.getElementById('gen-prompt-input');
         const tema = promptInput ? promptInput.value : "";
@@ -1223,4 +917,42 @@ if __name__ == "__main__":
 
     async function analisarArteBase() {
         if (!originalImageObj || !originalImageObj.src || originalImageObj.src === "") { alert("Operador, necessita de carregar ou gerar uma Imagem Base primeiro."); return; }
-        const base64Data = original
+        const base64Data = originalImageObj.src.split(',')[1]; let mimeType = "image/png";
+        if(originalImageObj.src.startsWith("data:image/jpeg")) mimeType = "image/jpeg";
+
+        showModal("ai-modal", "✨ ANÁLISE VISUAL DE ARTE (VISION)", "A processar padrões visuais e biologia da armadura...");
+        const prompt = "Aja como J.A.V.I.S., uma IA tática de engenharia biomecânica. Analise visualmente esta textura de armadura de Minecraft. Descreva de forma técnica e sombria a paleta de cores, a biologia aparente e como estas peças se enquadram na temática do 'Vexanium' (um mod de parasitas espaciais e tecnologia alienígena nas profundezas do Deep Dark).";
+
+        const payload = { contents: [{ role: "user", parts: [ { text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } } ] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português com formatação clara e tática." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    async function gerarAtributos() {
+        showModal("ai-modal", "✨ FORJA DE ATRIBUTOS TÁTICOS", "A calcular integridade estrutural e sinergia do hospedeiro...");
+        const prompt = currentMode === 'armor' ? "Gere uma lista técnica de atributos de combate para o Minecraft (Armor, Toughness, Knockback Resistance, Habilidades Especiais Passivas, Maldições/Debuffs) para uma Armadura Parasita do tipo Vexanium. Equilibre para ser incrivelmente poderosa no late-game, mas com custos biológicos para o hospedeiro." : "Gere uma lista de atributos técnicos e estatísticas (HP, Dano Base, Velocidade de Movimento, Padrão de Ataque, Habilidades Especiais) para um Mob Hostil Biomecânico implacável do mod Vexanium. Crie uma mecânica de ataque única e aterrorizante.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português usando pontos táticos e liste os valores como se fossem variáveis de código do Minecraft." }] } };
+        const data = await callGemini(payload); const stats = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = stats;
+    }
+
+    async function generateLore() {
+        showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
+        const prompt = currentMode === 'armor' ? "Gere um fragmento de diário de pesquisa (Lore) intenso e sombrio sobre a descoberta de uma Armadura Parasita Alienígena no Minecraft." : "Descreva as origens sombrias e os horrores de um Mob biomecânico que habita o vácuo profundo do mod Vexanium.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português. Mantenha o tom sombrio, de ficção científica de terror." }] } };
+        const data = await callGemini(payload); const lore = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = lore;
+    }
+
+    async function processarTelemetriaInGame() {
+        const telemetriaInput = document.getElementById('jarvis-telemetry-input'); const telemetria = telemetriaInput ? telemetriaInput.value : "";
+        if (!telemetria || telemetria.trim() === '') { alert("Operador, por favor insira os dados de telemetria do jogo na caixa de texto primeiro."); return; }
+        closeModal('ingame-modal'); showModal("ai-modal", "📡 PROCESSANDO TELEMETRIA DO JOGO", "A estabelecer conexão com a MekaSuit...");
+        const prompt = `Aqui está o relatório de telemetria atual do mundo do jogador no Minecraft:\n\n${telemetria}\n\nCom base nestes dados exatos, aja como a IA J.A.V.I.S., faça um diagnóstico da situação, avise o jogador sobre o estado da armadura, ameaças no radar e condições ambientais. Seja imersivo, tático e aja como se estivesse a falar diretamente para o visor da armadura do Operador.`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+</script>
+</body>
+</html>
