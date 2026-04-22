@@ -67,7 +67,7 @@
         #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
-        /* ESTÚDIO DE CIRURGIA UV - 1024x512 CLÁSSICO */
+        /* ESTÚDIO DE CIRURGIA UV - MESA DE TRABALHO GIGANTE (1920x1088) */
         #slicer-modal { width: 98vw; height: 95vh; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
         #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
@@ -75,7 +75,9 @@
 
         .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
         .editor-workspace { flex: 1; background-color: #f1f3f4; background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8); background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box; }
-        #canvas-wrapper { width: 1024px; height: 512px; min-width: 1024px; min-height: 512px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
+        
+        /* O CANVAS DA MESA AGORA É FULL HD COM ALTURA AJUSTADA PARA SNAP PERFEITO */
+        #canvas-wrapper { width: 1920px; height: 1088px; min-width: 1920px; min-height: 1088px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
         #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; }
 
         .pieces-panel { flex: 0 0 300px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
@@ -177,7 +179,7 @@
         </div>
     </div>
 
-    <!-- ESTÚDIO DE MONTAGEM E CORTE (RESTAURO PARA O PADRÃO CLÁSSICO DE 512px) -->
+    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
@@ -217,7 +219,7 @@
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
                 <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold;">
-                    <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📐 Exibir Molde UV
+                    <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📐 Exibir Zona de Exportação
                 </label>
             </div>
 
@@ -297,6 +299,14 @@
     const scanner = document.getElementById('scanning-overlay');
     const statusOverlay = document.getElementById('status-overlay');
     const fileInput = document.getElementById('file-input');
+
+    // ============================================================================
+    // CONSTANTES DA MESA DE TRABALHO GIGANTE (WORKBENCH)
+    // ============================================================================
+    const WORKBENCH_W = 1920;
+    const WORKBENCH_H = 1088; // 1088 é múltiplo de 16, garantindo o Snap Perfeito!
+    const OFFSET_X = 448;     // Distância do centro
+    const OFFSET_Y = 288;     // Distância do topo
 
     function showModal(modalId, title, message) {
         const modal = document.getElementById(modalId);
@@ -383,7 +393,7 @@
     let layerStates = { 1: null, 2: null };
 
     function salvarEstadoDaLayerAtual() {
-        let offCopy = document.createElement('canvas'); offCopy.width = 1024; offCopy.height = 512;
+        let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
         offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
         let piecesCopy = extractedPieces.map(p => {
             return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
@@ -394,7 +404,7 @@
     function carregarEstadoDaLayer(layer) {
         let state = layerStates[layer];
         if (!state) return false;
-        offscreenCtx.clearRect(0, 0, 1024, 512);
+        offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
         offscreenCtx.drawImage(state.offscreen, 0, 0);
         extractedPieces = state.pieces.map(p => {
             return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
@@ -405,26 +415,39 @@
     }
 
     function iniciarStudioDoZero(targetBase) {
+        wsCanvas.width = WORKBENCH_W; wsCanvas.height = WORKBENCH_H; 
+        offscreenCanvas.width = WORKBENCH_W; offscreenCanvas.height = WORKBENCH_H;
+        offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+
         if(targetBase) {
             originalImageObj.onload = () => {
-                wsCanvas.width = 1024; wsCanvas.height = 512; offscreenCanvas.width = 1024; offscreenCanvas.height = 512;
-                offscreenCtx.clearRect(0, 0, 1024, 512);
-                let scale = Math.min(1024 / originalImageObj.width, 512 / originalImageObj.height);
-                offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width * scale, originalImageObj.height * scale);
+                // Inteligência de Posicionamento:
+                // Se o utilizador upou uma imagem exatamente no formato do molde Minecraft (2:1), encaixamos no centro.
+                // Se upou uma imagem caótica ou gigante, espalhamos pela mesa de trabalho toda!
+                let aspect = originalImageObj.width / originalImageObj.height;
+                if (Math.abs(aspect - 2.0) < 0.05) {
+                    offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                } else {
+                    let scale = Math.min(WORKBENCH_W / originalImageObj.width, WORKBENCH_H / originalImageObj.height);
+                    let nW = originalImageObj.width * scale;
+                    let nH = originalImageObj.height * scale;
+                    let nX = (WORKBENCH_W - nW) / 2;
+                    let nY = (WORKBENCH_H - nH) / 2;
+                    offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, nX, nY, nW, nH);
+                }
+
                 extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
                 setTool('magic'); renderFatiador(); registrarEstadoMemoria(); updatePiecesList();
             };
             originalImageObj.src = targetBase;
         } else {
-            wsCanvas.width = 1024; wsCanvas.height = 512; offscreenCanvas.width = 1024; offscreenCanvas.height = 512;
-            offscreenCtx.clearRect(0, 0, 1024, 512); extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
+            extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
             setTool('magic'); renderFatiador(); registrarEstadoMemoria(); updatePiecesList();
         }
     }
 
-    // RESTAURANDO AS MEMÓRIAS PARA 512px DE ALTURA
     function registrarEstadoMemoria() {
-        const offCopy = document.createElement('canvas'); offCopy.width = 1024; offCopy.height = 512;
+        const offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
         offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
         const piecesCopy = extractedPieces.map(p => {
             const idata = new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height);
@@ -436,13 +459,13 @@
 
     function desfazerEstado() {
         if (historyUndo.length <= 1) return; 
-        const currOffCopy = document.createElement('canvas'); currOffCopy.width = 1024; currOffCopy.height = 512;
+        const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
         currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
         const currPiecesCopy = extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
         historyRedo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
         historyUndo.pop();
         const prevState = historyUndo[historyUndo.length - 1]; 
-        offscreenCtx.clearRect(0,0,1024,512); offscreenCtx.drawImage(prevState.offscreen, 0, 0);
+        offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(prevState.offscreen, 0, 0);
         extractedPieces = prevState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
         nextPieceId = prevState.nextId; activePieceIndex = -1; manualSelection = null; renderFatiador(); updatePiecesList();
     }
@@ -450,19 +473,19 @@
     function refazerEstado() {
         if (historyRedo.length === 0) return;
         const nextState = historyRedo.pop();
-        const currOffCopy = document.createElement('canvas'); currOffCopy.width = 1024; currOffCopy.height = 512;
+        const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
         currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
         const currPiecesCopy = extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
         historyUndo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
-        offscreenCtx.clearRect(0,0,1024,512); offscreenCtx.drawImage(nextState.offscreen, 0, 0);
+        offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(nextState.offscreen, 0, 0);
         extractedPieces = nextState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
         nextPieceId = nextState.nextId; activePieceIndex = -1; manualSelection = null; renderFatiador(); updatePiecesList();
     }
 
     function ajustarZoom(fator) {
         if (fator === 1) currentZoom = 1.0;
-        else currentZoom = Math.max(0.5, Math.min(currentZoom * fator, 4.0)); 
-        const newW = 1024 * currentZoom; const newH = 512 * currentZoom;
+        else currentZoom = Math.max(0.3, Math.min(currentZoom * fator, 4.0)); 
+        const newW = WORKBENCH_W * currentZoom; const newH = WORKBENCH_H * currentZoom;
         canvasWrapper.style.width = `${newW}px`; canvasWrapper.style.height = `${newH}px`;
         canvasWrapper.style.minWidth = `${newW}px`; canvasWrapper.style.minHeight = `${newH}px`;
         document.getElementById('zoom-label').innerText = `${Math.round(currentZoom * 100)}%`;
@@ -478,22 +501,20 @@
             if (badge) { badge.innerText = "L2 (CALÇAS)"; badge.style.background = "#00ffaa"; }
             if (hint) hint.innerText = "Camada 2 (Exclusivo para Calças/Cintura)";
         }
-        showModal('slicer-modal'); ajustarZoom(1); 
         
-        // 1. MAGIA DA PERSISTÊNCIA: Se não for upload novo e for a mesma layer, não apaga nada!
+        showModal('slicer-modal'); 
+        
+        // Inicia com um zoom levemente menor para que o Operador veja a imensidão da Mesa de Trabalho
+        ajustarZoom(0.70); 
+        
         if (!forceReload && currentEditingLayer === lastEditingLayer) {
             renderFatiador(); updatePiecesList();
             return;
         }
 
-        // 2. Se mudou de Layer (Ex: clicou para editar L2), guarda a L1 na memória antes de limpar.
-        if (currentEditingLayer !== lastEditingLayer) {
-            salvarEstadoDaLayerAtual();
-        }
-
+        if (currentEditingLayer !== lastEditingLayer) salvarEstadoDaLayerAtual();
         lastEditingLayer = currentEditingLayer;
 
-        // 3. Verifica se tem de criar um estúdio novo do zero ou puxar do cache.
         if (forceReload) {
             iniciarStudioDoZero(targetBase);
         } else {
@@ -509,8 +530,15 @@
         const file = e.target.files[0]; if (!file) return;
         const url = URL.createObjectURL(file); const img = new Image();
         img.onload = () => {
-            let scale = Math.min(1024 / img.width, 512 / img.height);
-            offscreenCtx.drawImage(img, 0, 0, img.width * scale, img.height * scale);
+            let aspect = img.width / img.height;
+            if (Math.abs(aspect - 2.0) < 0.05) {
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
+            } else {
+                let scale = Math.min(WORKBENCH_W / img.width, WORKBENCH_H / img.height);
+                let nW = img.width * scale; let nH = img.height * scale;
+                let nX = (WORKBENCH_W - nW) / 2; let nY = (WORKBENCH_H - nH) / 2;
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, nX, nY, nW, nH);
+            }
             renderFatiador(); registrarEstadoMemoria(); 
             if (statusOverlay) statusOverlay.innerText = "✓ NOVA IMAGEM ADICIONADA À MESA";
         };
@@ -579,15 +607,39 @@
 
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
-        const f = 16; wsCtx.lineWidth = 1.5; wsCtx.font = "bold 12px JetBrains Mono"; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
+        
+        // Desenha as Fronteiras Laranja da "Zona de Exportação"
+        wsCtx.strokeStyle = "#ffaa00";
+        wsCtx.lineWidth = 2;
+        wsCtx.setLineDash([8, 8]);
+        wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512);
+        wsCtx.setLineDash([]);
+        wsCtx.fillStyle = "#ffaa00";
+        wsCtx.font = "bold 14px JetBrains Mono";
+        wsCtx.textAlign = "left";
+        wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 10);
+
+        const f = 16; wsCtx.lineWidth = 1.5; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
         const drawBox = (x, y, w, h, color, label, sublabel) => {
-            wsCtx.strokeStyle = color; wsCtx.fillStyle = color + "22"; wsCtx.strokeRect(x*f, y*f, w*f, h*f); wsCtx.fillRect(x*f, y*f, w*f, h*f);
+            let px = OFFSET_X + (x * f);
+            let py = OFFSET_Y + (y * f);
+            let pw = w * f;
+            let ph = h * f;
+
+            wsCtx.strokeStyle = color; wsCtx.fillStyle = color + "22"; 
+            wsCtx.strokeRect(px, py, pw, ph); 
+            wsCtx.fillRect(px, py, pw, ph);
             wsCtx.fillStyle = "#000000"; 
-            if (sublabel) { wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2 - 6); wsCtx.font = "bold 9px JetBrains Mono"; wsCtx.fillText(sublabel, (x*f) + (w*f)/2, (y*f) + (h*f)/2 + 6); wsCtx.font = "bold 12px JetBrains Mono"; } 
-            else { wsCtx.fillText(label, (x*f) + (w*f)/2, (y*f) + (h*f)/2); }
+            if (sublabel) { 
+                wsCtx.fillText(label, px + pw/2, py + ph/2 - 6); 
+                wsCtx.font = "bold 9px JetBrains Mono"; 
+                wsCtx.fillText(sublabel, px + pw/2, py + ph/2 + 6); 
+                wsCtx.font = "bold 12px JetBrains Mono"; 
+            } else { 
+                wsCtx.fillText(label, px + pw/2, py + ph/2); 
+            }
         };
 
-        // RESTAURO DOS MOLDES CLÁSSICOS (Espelhamento subentendido na palavra 'BRAÇOS' e 'BOTAS')
         if (currentEditingLayer === 1) {
             drawBox(8, 0, 8, 8, "#9c27b0", "TOPO", "CAPACETE");
             drawBox(16, 0, 8, 8, "#9c27b0", "FUNDO", "CAPACETE");
@@ -752,8 +804,22 @@
         if (isResizing) {
             isResizing = false; resizeHandle = '';
             if (document.getElementById('snap-grid').checked && activePieceIndex !== -1) {
-                let p = extractedPieces[activePieceIndex]; let right = Math.round((p.x + p.w) / 16) * 16; let bottom = Math.round((p.y + p.h) / 16) * 16;
-                p.x = Math.round(p.x / 16) * 16; p.y = Math.round(p.y / 16) * 16; p.w = Math.max(16, right - p.x); p.h = Math.max(16, bottom - p.y);
+                let p = extractedPieces[activePieceIndex]; 
+                
+                // Snap funciona subtraindo a margem morta para alinhar os pixeis
+                let relX = p.x - OFFSET_X;
+                let relY = p.y - OFFSET_Y;
+                
+                let right = Math.round((relX + p.w) / 16) * 16; 
+                let bottom = Math.round((relY + p.h) / 16) * 16;
+                
+                relX = Math.round(relX / 16) * 16; 
+                relY = Math.round(relY / 16) * 16;
+                
+                p.x = OFFSET_X + relX; 
+                p.y = OFFSET_Y + relY; 
+                p.w = Math.max(16, right - relX); 
+                p.h = Math.max(16, bottom - relY);
             }
             renderFatiador(); registrarEstadoMemoria(); return;
         }
@@ -762,7 +828,16 @@
             if (currentTool === 'move' && activePieceIndex !== -1) {
                 wsCanvas.style.cursor = 'grab';
                 if (document.getElementById('snap-grid').checked) {
-                    let p = extractedPieces[activePieceIndex]; p.x = Math.round(p.x / 16) * 16; p.y = Math.round(p.y / 16) * 16;
+                    let p = extractedPieces[activePieceIndex]; 
+                    
+                    let relX = p.x - OFFSET_X;
+                    let relY = p.y - OFFSET_Y;
+                    
+                    relX = Math.round(relX / 16) * 16; 
+                    relY = Math.round(relY / 16) * 16;
+                    
+                    p.x = OFFSET_X + relX; 
+                    p.y = OFFSET_Y + relY; 
                 }
                 renderFatiador(); registrarEstadoMemoria(); 
             }
@@ -831,11 +906,11 @@
             imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
         });
 
-        // RESTAURO DO TAMANHO DA IMAGEM OFICIAL DO JOGO (1024x512)
+        // O FICHEIRO FINAL EXPORTA APENAS O CORTE DO TAMANHO MINECRAFT (1024x512)
         const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-            outCtx.drawImage(temp, p.x, p.y, p.w, p.h);
+            outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
         });
         const layerBase64 = outCanvas.toDataURL('image/png').split(',')[1];
         imagesFolder.file(`parasita_layer_${currentEditingLayer}_compiled.png`, layerBase64, {base64: true});
@@ -847,7 +922,7 @@
             "pieces_count": extractedPieces.length,
             "format": "1024x512 HD Scaled",
             "pieces_coordinates": extractedPieces.map(p => ({
-                "id": p.id, "mc_x": p.x, "mc_y": p.y, "w": p.w, "h": p.h
+                "id": p.id, "mc_x": p.x - OFFSET_X, "mc_y": p.y - OFFSET_Y, "w": p.w, "h": p.h
             }))
         };
         folder.file("metadata.json", JSON.stringify(metadata, null, 2));
@@ -885,7 +960,7 @@
                 if(preset.layer !== currentEditingLayer) alert(`Aviso: Este Preset foi gravado para a Camada ${preset.layer}, mas o estúdio está na Camada ${currentEditingLayer}. Recomenda-se cancelar a extração e abrir a camada correta.`);
                 const img = new Image();
                 img.onload = async () => {
-                    offscreenCtx.clearRect(0,0,1024,512); offscreenCtx.drawImage(img, 0, 0);
+                    offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(img, 0, 0);
                     extractedPieces = [];
                     for (let p of preset.pieces) {
                         await new Promise(r => {
@@ -908,7 +983,7 @@
         const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-            outCtx.drawImage(temp, p.x, p.y, p.w, p.h);
+            outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
         });
         const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
         if (currentEditingLayer === 1) { finalImageL1 = finalArmaduraBase64; if (statusOverlay) statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!"; } 
@@ -926,9 +1001,6 @@
         pCtx.fillStyle = "#111111"; pCtx.fillRect(0, 0, 32*f, 16*f); pCtx.fillRect(16*f, 16*f, 24*f, 16*f); pCtx.fillRect(40*f, 16*f, 16*f, 16*f); pCtx.fillRect(32*f, 48*f, 16*f, 16*f); pCtx.fillRect(0, 16*f, 16*f, 16*f); pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
 
         Promise.all([loadImage(finalImageL1), loadImage(finalImageL2)]).then(([imgL1, imgL2]) => {
-            
-            // CORREÇÃO GEOMÉTRICA: Espelhamento automático restaurado! 
-            // O que o utilizador coloca no braço/perna direito, o motor J.A.V.I.S copia secretamente para o esquerdo.
             if (imgL2) { 
                 copyRegion(imgL2, 16, 16, 24, 16, 16, 16); // Torso L2
                 copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   // Perna Direita L2
@@ -1049,12 +1121,19 @@
             const base64Image = data.predictions[0].bytesBase64Encoded;
             const imageUrl = `data:image/png;base64,${base64Image}`;
             
+            const img = new Image();
+            img.onload = () => {
+                offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
+                // Coloca a arte gerada pela IA perfeitamente dentro da Zona de Exportação!
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                renderFatiador(); registrarEstadoMemoria(); 
+                if (statusOverlay) statusOverlay.innerText = "✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!";
+            }; img.src = imageUrl;
+            
             if (currentEditingLayer === 1) baseImageL1 = imageUrl; else baseImageL2 = imageUrl;
             originalImageObj.src = imageUrl;
             
-            // FORÇA O RECARREGAMENTO DO ESTÚDIO QUANDO A IA ENTREGA UMA IMAGEM NOVA
             abrirFatiadorLivre(true);
-            if (statusOverlay) statusOverlay.innerText = "✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!";
         } else {
             alert("Falha na Forja. A IA não conseguiu gerar a armadura.");
             if (statusOverlay) statusOverlay.innerText = "SISTEMAS: ARMOR // AGUARDANDO COMANDOS";
