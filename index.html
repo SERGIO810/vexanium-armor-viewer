@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Ecrã Inteiro)</title>
+    <title>J.A.V.I.S. 3D AI Widget</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -27,8 +27,9 @@
             --uplink-accent: #00e5ff;
         }
 
-        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
-        #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; }
+        /* OTIMIZAÇÃO WIDGET: Respeita o tamanho do container (100%) sem forçar tamanho da janela */
+        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
+        #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; border: 1px solid var(--warden-bone-dim); box-sizing: border-box; }
         .viewer-area { flex: 1; position: relative; background: radial-gradient(circle at center, #0a1117 0%, #030508 100%); overflow: hidden; box-shadow: inset 0 0 80px rgba(0,0,0,0.8); }
         canvas { width: 100%; height: 100%; cursor: grab; outline: none; }
         canvas:active { cursor: grabbing; }
@@ -59,16 +60,17 @@
 
         #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
 
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px); }
-        #ai-modal, #gen-modal { width: 85%; max-width: 550px; }
+        /* MODAIS OTIMIZADOS PARA WIDGET (Usando %) */
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
+        #ai-modal, #gen-modal { width: 90%; max-width: 550px; }
         .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
         #ai-response-text { font-size: 13px; line-height: 1.6; margin: 20px 0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main); }
         
         #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
-        /* ESTÚDIO DE CIRURGIA UV - MESA DE TRABALHO GIGANTE (1920x1088) */
-        #slicer-modal { width: 98vw; height: 95vh; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
+        /* ESTÚDIO DE CIRURGIA UV - MESA GIGANTE (WIDGET ADAPTATIVE) */
+        #slicer-modal { width: 98%; height: 95%; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
         #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
@@ -76,7 +78,7 @@
         .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
         .editor-workspace { flex: 1; background-color: #f1f3f4; background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8); background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box; }
         
-        /* O CANVAS DA MESA AGORA É FULL HD COM ALTURA AJUSTADA PARA SNAP PERFEITO */
+        /* WORKBENCH DIMENSIONS */
         #canvas-wrapper { width: 1920px; height: 1088px; min-width: 1920px; min-height: 1088px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
         #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; }
 
@@ -112,7 +114,7 @@
 
         .zoom-bar { position: absolute; top: 15px; right: 35px; background: rgba(10,17,23, 0.9); border: 1px solid var(--warden-bone-dim); padding: 8px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; z-index: 10; }
 
-        #ingame-modal { width: 85%; max-width: 600px; border-color: var(--uplink-accent); }
+        #ingame-modal { width: 90%; max-width: 600px; border-color: var(--uplink-accent); }
         #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
         #jarvis-telemetry-input { width: 100%; height: 180px; background: #050505; color: var(--uplink-accent); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #jarvis-telemetry-input:focus { outline: none; border-color: var(--uplink-accent); }
@@ -301,12 +303,12 @@
     const fileInput = document.getElementById('file-input');
 
     // ============================================================================
-    // CONSTANTES DA MESA DE TRABALHO GIGANTE (WORKBENCH)
+    // CONSTANTES DA MESA DE TRABALHO GIGANTE E CORTE 1024x512
     // ============================================================================
     const WORKBENCH_W = 1920;
-    const WORKBENCH_H = 1088; // 1088 é múltiplo de 16, garantindo o Snap Perfeito!
-    const OFFSET_X = 448;     // Distância do centro
-    const OFFSET_Y = 288;     // Distância do topo
+    const WORKBENCH_H = 1088; 
+    const OFFSET_X = 448;     
+    const OFFSET_Y = 288;     
 
     function showModal(modalId, title, message) {
         const modal = document.getElementById(modalId);
@@ -388,7 +390,6 @@
     const canvasWrapper = document.getElementById('canvas-wrapper');
     let historyUndo = []; let historyRedo = [];
 
-    // NOVO SISTEMA DE MEMÓRIA PERSISTENTE
     let lastEditingLayer = 1;
     let layerStates = { 1: null, 2: null };
 
@@ -421,9 +422,6 @@
 
         if(targetBase) {
             originalImageObj.onload = () => {
-                // Inteligência de Posicionamento:
-                // Se o utilizador upou uma imagem exatamente no formato do molde Minecraft (2:1), encaixamos no centro.
-                // Se upou uma imagem caótica ou gigante, espalhamos pela mesa de trabalho toda!
                 let aspect = originalImageObj.width / originalImageObj.height;
                 if (Math.abs(aspect - 2.0) < 0.05) {
                     offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
@@ -503,8 +501,6 @@
         }
         
         showModal('slicer-modal'); 
-        
-        // Inicia com um zoom levemente menor para que o Operador veja a imensidão da Mesa de Trabalho
         ajustarZoom(0.70); 
         
         if (!forceReload && currentEditingLayer === lastEditingLayer) {
@@ -608,36 +604,23 @@
     function desenharMoldeUV() {
         if (!document.getElementById('show-grid').checked) return;
         
-        // Desenha as Fronteiras Laranja da "Zona de Exportação"
-        wsCtx.strokeStyle = "#ffaa00";
-        wsCtx.lineWidth = 2;
-        wsCtx.setLineDash([8, 8]);
-        wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512);
-        wsCtx.setLineDash([]);
-        wsCtx.fillStyle = "#ffaa00";
-        wsCtx.font = "bold 14px JetBrains Mono";
-        wsCtx.textAlign = "left";
+        wsCtx.strokeStyle = "#ffaa00"; wsCtx.lineWidth = 2; wsCtx.setLineDash([8, 8]);
+        wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); wsCtx.setLineDash([]);
+        wsCtx.fillStyle = "#ffaa00"; wsCtx.font = "bold 14px JetBrains Mono"; wsCtx.textAlign = "left";
         wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 10);
 
         const f = 16; wsCtx.lineWidth = 1.5; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
         const drawBox = (x, y, w, h, color, label, sublabel) => {
-            let px = OFFSET_X + (x * f);
-            let py = OFFSET_Y + (y * f);
-            let pw = w * f;
-            let ph = h * f;
-
+            let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
             wsCtx.strokeStyle = color; wsCtx.fillStyle = color + "22"; 
-            wsCtx.strokeRect(px, py, pw, ph); 
-            wsCtx.fillRect(px, py, pw, ph);
+            wsCtx.strokeRect(px, py, pw, ph); wsCtx.fillRect(px, py, pw, ph);
             wsCtx.fillStyle = "#000000"; 
             if (sublabel) { 
                 wsCtx.fillText(label, px + pw/2, py + ph/2 - 6); 
                 wsCtx.font = "bold 9px JetBrains Mono"; 
                 wsCtx.fillText(sublabel, px + pw/2, py + ph/2 + 6); 
                 wsCtx.font = "bold 12px JetBrains Mono"; 
-            } else { 
-                wsCtx.fillText(label, px + pw/2, py + ph/2); 
-            }
+            } else { wsCtx.fillText(label, px + pw/2, py + ph/2); }
         };
 
         if (currentEditingLayer === 1) {
@@ -668,6 +651,20 @@
             drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
             drawBox(8, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
             drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
+
+            drawBox(36, 48, 4, 4, "#4caf50", "TOPO", "BRAÇO ESQ.");
+            drawBox(40, 48, 4, 4, "#4caf50", "BASE", "BRAÇO ESQ.");
+            drawBox(32, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
+            drawBox(36, 52, 4, 12, "#4caf50", "FRENTE", "BRAÇO ESQ.");
+            drawBox(40, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
+            drawBox(44, 52, 4, 12, "#4caf50", "COSTAS", "BRAÇO ESQ.");
+
+            drawBox(20, 48, 4, 4, "#ff9800", "TOPO", "BOTA ESQ.");
+            drawBox(24, 48, 4, 4, "#ff9800", "BASE", "BOTA ESQ.");
+            drawBox(16, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
+            drawBox(20, 52, 4, 12, "#ff9800", "FRENTE", "BOTA ESQ.");
+            drawBox(24, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
+            drawBox(28, 52, 4, 12, "#ff9800", "COSTAS", "BOTA ESQ.");
         } else if (currentEditingLayer === 2) {
             drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
             drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
@@ -676,12 +673,19 @@
             drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
             drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
 
-            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNAS");
-            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNAS");
-            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
-            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNAS");
-            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
-            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNAS");
+            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNA DIR.");
+            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNA DIR.");
+            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
+            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNA DIR.");
+            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
+            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNA DIR.");
+
+            drawBox(20, 48, 4, 4, "#ffd700", "TOPO", "PERNA ESQ.");
+            drawBox(24, 48, 4, 4, "#ffd700", "BASE", "PERNA ESQ.");
+            drawBox(16, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
+            drawBox(20, 52, 4, 12, "#ffd700", "FRENTE", "PERNA ESQ.");
+            drawBox(24, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
+            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS", "PERNA ESQ.");
         }
     }
 
@@ -805,21 +809,10 @@
             isResizing = false; resizeHandle = '';
             if (document.getElementById('snap-grid').checked && activePieceIndex !== -1) {
                 let p = extractedPieces[activePieceIndex]; 
-                
-                // Snap funciona subtraindo a margem morta para alinhar os pixeis
-                let relX = p.x - OFFSET_X;
-                let relY = p.y - OFFSET_Y;
-                
-                let right = Math.round((relX + p.w) / 16) * 16; 
-                let bottom = Math.round((relY + p.h) / 16) * 16;
-                
-                relX = Math.round(relX / 16) * 16; 
-                relY = Math.round(relY / 16) * 16;
-                
-                p.x = OFFSET_X + relX; 
-                p.y = OFFSET_Y + relY; 
-                p.w = Math.max(16, right - relX); 
-                p.h = Math.max(16, bottom - relY);
+                let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
+                let right = Math.round((relX + p.w) / 16) * 16; let bottom = Math.round((relY + p.h) / 16) * 16;
+                relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
+                p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; p.w = Math.max(16, right - relX); p.h = Math.max(16, bottom - relY);
             }
             renderFatiador(); registrarEstadoMemoria(); return;
         }
@@ -829,15 +822,9 @@
                 wsCanvas.style.cursor = 'grab';
                 if (document.getElementById('snap-grid').checked) {
                     let p = extractedPieces[activePieceIndex]; 
-                    
-                    let relX = p.x - OFFSET_X;
-                    let relY = p.y - OFFSET_Y;
-                    
-                    relX = Math.round(relX / 16) * 16; 
-                    relY = Math.round(relY / 16) * 16;
-                    
-                    p.x = OFFSET_X + relX; 
-                    p.y = OFFSET_Y + relY; 
+                    let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
+                    relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
+                    p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; 
                 }
                 renderFatiador(); registrarEstadoMemoria(); 
             }
@@ -868,20 +855,12 @@
     }
 
     function downloadPiece(piece) {
-        const tempCanvas = document.createElement('canvas'); 
-        tempCanvas.width = piece.imgData.width; tempCanvas.height = piece.imgData.height; 
-        tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
-        
+        const tempCanvas = document.createElement('canvas'); tempCanvas.width = piece.imgData.width; tempCanvas.height = piece.imgData.height; tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
         tempCanvas.toBlob((blob) => {
             if(!blob) return;
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a'); 
-            a.href = url; 
-            a.download = `peça_${piece.id}.png`;
-            document.body.appendChild(a); 
-            a.click(); 
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+            a.href = url; a.download = `peça_${piece.id}.png`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
             if (statusOverlay) statusOverlay.innerText = `✓ Peça #${piece.id} baixada!`;
         }, 'image/png');
     }
@@ -906,8 +885,15 @@
             imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
         });
 
-        // O FICHEIRO FINAL EXPORTA APENAS O CORTE DO TAMANHO MINECRAFT (1024x512)
-        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
+        // =========================================================================================
+        // A TRAVA DE 1024x512: O ficheiro final exporta apenas o que está na ZONA LARANJA.
+        // O que estiver nos moldes do "Braço Esquerdo" ou fora da área é descartado pela matemática!
+        // =========================================================================================
+        const outCanvas = document.createElement('canvas'); 
+        outCanvas.width = 1024; 
+        outCanvas.height = 512; 
+        const outCtx = outCanvas.getContext('2d');
+        
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
             outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
@@ -979,8 +965,15 @@
     };
 
     function aplicarMontagemUVLivre() {
-        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
-        const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
+        // =========================================================================================
+        // A TRAVA DE 1024x512 (Visualização WebGL): Exporta apenas o que está na ZONA LARANJA.
+        // =========================================================================================
+        const outCanvas = document.createElement('canvas'); 
+        outCanvas.width = 1024; 
+        outCanvas.height = 512;
+        const outCtx = outCanvas.getContext('2d'); 
+        outCtx.imageSmoothingEnabled = false; 
+        
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
             outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
@@ -1002,19 +995,18 @@
 
         Promise.all([loadImage(finalImageL1), loadImage(finalImageL2)]).then(([imgL1, imgL2]) => {
             if (imgL2) { 
-                copyRegion(imgL2, 16, 16, 24, 16, 16, 16); // Torso L2
-                copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   // Perna Direita L2
-                copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  // Perna Esquerda L2 (Cópia da Direita!)
+                copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
+                copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
+                copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
             }
             if (imgL1) { 
-                copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    // Capacete L1
-                copyRegion(imgL1, 16, 16, 24, 16, 16, 32); // Peitoral L1
-                copyRegion(imgL1, 40, 16, 16, 16, 40, 32); // Braço Direito L1
-                copyRegion(imgL1, 40, 16, 16, 16, 48, 48); // Braço Esquerdo L1 (Cópia do Direito!)
-                copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   // Bota Direita L1
-                copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   // Bota Esquerda L1 (Cópia da Direita!)
+                copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
+                copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
+                copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
+                copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
+                copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
+                copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
             }
-            
             skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => {
                 console.error("Erro ao processar preview WebGL:", err);
             });
@@ -1033,13 +1025,8 @@
         fetch(imageData)
             .then(res => res.blob())
             .then(blob => {
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a'); 
-                a.href = url; 
-                a.download = fileName; 
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a);
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+                a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 URL.revokeObjectURL(url);
                 if (statusOverlay) statusOverlay.innerText = `✓ SUCESSO: Arquivo ${fileName} gerado!`;
             })
@@ -1060,7 +1047,6 @@
         if (currentMode === 'armor' && file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                // FORÇA O RECARREGAMENTO ZERO AO SUBIR ARQUIVO NOVO
                 if (uploadTarget === 1) { baseImageL1 = evt.target.result; abrirFatiadorLivre(true); } 
                 else if (uploadTarget === 2) { baseImageL2 = evt.target.result; abrirFatiadorLivre(true); }
             }; reader.readAsDataURL(file);
@@ -1107,7 +1093,6 @@
         closeModal('gen-modal');
         if (statusOverlay) statusOverlay.innerText = "⏳ INICIANDO FORJA IA (GERANDO TEXTURA)...";
 
-        // RESTAURO DO PROMPT CLÁSSICO PARA A IA (Formato 2:1)
         const layoutInstructions = currentEditingLayer === 1
             ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)."
             : "Leggings/Pants: Waist Front(0,256), Waist Back(128,256), Leg Side(256,256), Leg Front(320,256).";
@@ -1124,7 +1109,6 @@
             const img = new Image();
             img.onload = () => {
                 offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
-                // Coloca a arte gerada pela IA perfeitamente dentro da Zona de Exportação!
                 offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
                 renderFatiador(); registrarEstadoMemoria(); 
                 if (statusOverlay) statusOverlay.innerText = "✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!";
