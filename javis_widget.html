@@ -27,7 +27,7 @@
             --uplink-accent: #00e5ff;
         }
 
-        /* OTIMIZAÇÃO WIDGET: Respeita o tamanho do container (100%) sem forçar tamanho da janela */
+        /* OTIMIZAÇÃO WIDGET: Respeita o tamanho do container (100%) */
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
         #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; border: 1px solid var(--warden-bone-dim); box-sizing: border-box; }
         .viewer-area { flex: 1; position: relative; background: radial-gradient(circle at center, #0a1117 0%, #030508 100%); overflow: hidden; box-shadow: inset 0 0 80px rgba(0,0,0,0.8); }
@@ -37,11 +37,9 @@
         #scanning-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--sculk-core); box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core); display: none; z-index: 50; animation: scanMove 2s infinite ease-in-out; }
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        /* BARRA TÁTICA INFERIOR - DESIGN CLÁSSICO COM TEXTO */
         .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
         .btn-group { display: flex; gap: 8px; align-items: center; }
         .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
-        
         .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
         .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
@@ -58,9 +56,9 @@
         #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
         #file-input, #file-input-preset, #file-input-add { display: none; }
 
-        #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
+        #status-overlay { position: absolute; top: 15px; left: 15px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 8px 12px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
 
-        /* MODAIS OTIMIZADOS PARA WIDGET (Usando %) */
+        /* MODAIS WIDGET (Usando %) */
         .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
         #ai-modal, #gen-modal { width: 90%; max-width: 550px; }
         .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
@@ -137,14 +135,19 @@
         document.body.style.backgroundColor = "#000000";
         const warning = document.createElement("div");
         warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
-        warning.innerHTML = `<h1>⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1><p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p><p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>`;
+        warning.innerHTML = `
+            <h1 style="font-size: 30px;">⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1>
+            <p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p>
+            <p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>
+        `;
         document.body.appendChild(warning);
-        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada.");
+        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada. Domínio não autorizado.");
     }
 })();
 </script>
 
 <div id="javis-widget-container">
+    
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
     <div class="viewer-area">
@@ -153,19 +156,17 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAL IA LORE & ATRIBUTOS -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <!-- MODAL GERADOR FASE 1 -->
-    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff;">
-        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3);">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
-        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
-        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..."></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
+        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
+        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
             <button class="close-modal" style="background: transparent;" onclick="closeModal('gen-modal')">Cancelar</button>
             <button class="close-modal" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 Iniciar Geração</button>
         </div>
@@ -181,7 +182,6 @@
         </div>
     </div>
 
-    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
@@ -253,7 +253,6 @@
         </div>
     </div>
 
-    <!-- BARRA TÁTICA INFERIOR - CLÁSSICA (COM TEXTO) -->
     <div class="control-bar">
         <div class="btn-group">
             <button class="btn active" id="btn-armor" onclick="switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
@@ -269,13 +268,13 @@
         <div class="btn-group">
             <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
             <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
-            <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
+            <button class="btn btn-ai" onclick="gerarAtributos()" title="Gerar Atributos Táticos (Estatísticas)"><span class="icon">📊</span></button>
             <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
+            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" title="Exportar Textura L1 Final"><span class="icon">💾</span> EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" title="Exportar Textura L2 Final"><span class="icon">💾</span> EXPORTAR L2</button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
@@ -287,6 +286,9 @@
 <input type="file" id="file-input">
 
 <script>
+    // ============================================================================
+    // GESTÃO DE ESTADO (LAYERS E CONFIG)
+    // ============================================================================
     const apiKey = ""; 
     let currentMode = 'armor';
     let baseImageL1 = null; 
@@ -390,6 +392,7 @@
     const canvasWrapper = document.getElementById('canvas-wrapper');
     let historyUndo = []; let historyRedo = [];
 
+    // MEMÓRIA PERSISTENTE ENTRE LAYERS
     let lastEditingLayer = 1;
     let layerStates = { 1: null, 2: null };
 
@@ -427,13 +430,10 @@
                     offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
                 } else {
                     let scale = Math.min(WORKBENCH_W / originalImageObj.width, WORKBENCH_H / originalImageObj.height);
-                    let nW = originalImageObj.width * scale;
-                    let nH = originalImageObj.height * scale;
-                    let nX = (WORKBENCH_W - nW) / 2;
-                    let nY = (WORKBENCH_H - nH) / 2;
+                    let nW = originalImageObj.width * scale; let nH = originalImageObj.height * scale;
+                    let nX = (WORKBENCH_W - nW) / 2; let nY = (WORKBENCH_H - nH) / 2;
                     offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, nX, nY, nW, nH);
                 }
-
                 extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
                 setTool('magic'); renderFatiador(); registrarEstadoMemoria(); updatePiecesList();
             };
@@ -651,20 +651,6 @@
             drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
             drawBox(8, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
             drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
-
-            drawBox(36, 48, 4, 4, "#4caf50", "TOPO", "BRAÇO ESQ.");
-            drawBox(40, 48, 4, 4, "#4caf50", "BASE", "BRAÇO ESQ.");
-            drawBox(32, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
-            drawBox(36, 52, 4, 12, "#4caf50", "FRENTE", "BRAÇO ESQ.");
-            drawBox(40, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
-            drawBox(44, 52, 4, 12, "#4caf50", "COSTAS", "BRAÇO ESQ.");
-
-            drawBox(20, 48, 4, 4, "#ff9800", "TOPO", "BOTA ESQ.");
-            drawBox(24, 48, 4, 4, "#ff9800", "BASE", "BOTA ESQ.");
-            drawBox(16, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
-            drawBox(20, 52, 4, 12, "#ff9800", "FRENTE", "BOTA ESQ.");
-            drawBox(24, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
-            drawBox(28, 52, 4, 12, "#ff9800", "COSTAS", "BOTA ESQ.");
         } else if (currentEditingLayer === 2) {
             drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
             drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
@@ -673,19 +659,12 @@
             drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
             drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
 
-            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNA DIR.");
-            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNA DIR.");
-            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
-            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNA DIR.");
-            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
-            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNA DIR.");
-
-            drawBox(20, 48, 4, 4, "#ffd700", "TOPO", "PERNA ESQ.");
-            drawBox(24, 48, 4, 4, "#ffd700", "BASE", "PERNA ESQ.");
-            drawBox(16, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
-            drawBox(20, 52, 4, 12, "#ffd700", "FRENTE", "PERNA ESQ.");
-            drawBox(24, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
-            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS", "PERNA ESQ.");
+            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNAS");
+            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNAS");
+            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
+            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNAS");
+            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
+            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNAS");
         }
     }
 
@@ -885,15 +864,7 @@
             imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
         });
 
-        // =========================================================================================
-        // A TRAVA DE 1024x512: O ficheiro final exporta apenas o que está na ZONA LARANJA.
-        // O que estiver nos moldes do "Braço Esquerdo" ou fora da área é descartado pela matemática!
-        // =========================================================================================
-        const outCanvas = document.createElement('canvas'); 
-        outCanvas.width = 1024; 
-        outCanvas.height = 512; 
-        const outCtx = outCanvas.getContext('2d');
-        
+        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
             outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
@@ -965,15 +936,8 @@
     };
 
     function aplicarMontagemUVLivre() {
-        // =========================================================================================
-        // A TRAVA DE 1024x512 (Visualização WebGL): Exporta apenas o que está na ZONA LARANJA.
-        // =========================================================================================
-        const outCanvas = document.createElement('canvas'); 
-        outCanvas.width = 1024; 
-        outCanvas.height = 512;
-        const outCtx = outCanvas.getContext('2d'); 
-        outCtx.imageSmoothingEnabled = false; 
-        
+        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
+        const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
         extractedPieces.forEach(p => {
             const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
             outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
@@ -1069,9 +1033,6 @@
     }
     window.addEventListener('resize', resize); setTimeout(resize, 200);
 
-    // ============================================================================
-    // API GEMINI (UPLINK J.A.V.I.S., IA VISION & GERADOR IMAGEN)
-    // ============================================================================
     async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
         if (loader) loader.style.display = 'block'; if (scanner) scanner.style.display = 'block';
         let retries = 0; const maxRetries = 5;
