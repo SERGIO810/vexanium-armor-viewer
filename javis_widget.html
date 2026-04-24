@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>J.A.V.I.S. 3D AI Widget</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Ecrã Inteiro)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -27,8 +27,7 @@
             --uplink-accent: #00e5ff;
         }
 
-        /* OTIMIZAÇÃO WIDGET: Respeita o tamanho do container (100%) */
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
+        body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
         #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; border: 1px solid var(--warden-bone-dim); box-sizing: border-box; }
         .viewer-area { flex: 1; position: relative; background: radial-gradient(circle at center, #0a1117 0%, #030508 100%); overflow: hidden; box-shadow: inset 0 0 80px rgba(0,0,0,0.8); }
         canvas { width: 100%; height: 100%; cursor: grab; outline: none; }
@@ -37,9 +36,11 @@
         #scanning-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--sculk-core); box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core); display: none; z-index: 50; animation: scanMove 2s infinite ease-in-out; }
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
+        /* BARRA TÁTICA INFERIOR */
         .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
         .btn-group { display: flex; gap: 8px; align-items: center; }
         .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
+        
         .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
         .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
@@ -56,19 +57,25 @@
         #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
         #file-input, #file-input-preset, #file-input-add { display: none; }
 
-        #status-overlay { position: absolute; top: 15px; left: 15px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 8px 12px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
+        #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
 
-        /* MODAIS WIDGET (Usando %) */
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
-        #ai-modal, #gen-modal { width: 90%; max-width: 550px; }
+        /* NOVO PAINEL DE DIAGNÓSTICO (STATUS) */
+        .status-panel { position: absolute; top: 20px; right: 20px; background: rgba(10, 17, 23, 0.8); border: 1px solid var(--warden-bone-dim); padding: 15px; border-radius: 4px; font-size: 11px; color: var(--warden-bone); backdrop-filter: blur(5px); z-index: 10; pointer-events: none; border-right: 3px solid var(--warden-bone-dim); text-transform: uppercase; }
+        .status-panel div { margin-bottom: 5px; }
+        .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
+        .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
+
+        /* MODAIS ECRÃO INTEIRO - CORREÇÃO GLOBAL: flex-direction: column adicionado */
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; flex-direction: column; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
+        #ai-modal, #gen-modal { width: 85vw; max-width: 550px; }
         .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
         #ai-response-text { font-size: 13px; line-height: 1.6; margin: 20px 0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main); }
         
         #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
-        /* ESTÚDIO DE CIRURGIA UV - MESA GIGANTE (WIDGET ADAPTATIVE) */
-        #slicer-modal { width: 98%; height: 95%; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
+        /* ESTÚDIO DE CIRURGIA UV - MESA GIGANTE (1920x1088) */
+        #slicer-modal { width: 98vw; height: 95vh; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
         #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
@@ -112,7 +119,7 @@
 
         .zoom-bar { position: absolute; top: 15px; right: 35px; background: rgba(10,17,23, 0.9); border: 1px solid var(--warden-bone-dim); padding: 8px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; z-index: 10; }
 
-        #ingame-modal { width: 90%; max-width: 600px; border-color: var(--uplink-accent); }
+        #ingame-modal { width: 85vw; max-width: 600px; border-color: var(--uplink-accent); }
         #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
         #jarvis-telemetry-input { width: 100%; height: 180px; background: #050505; color: var(--uplink-accent); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #jarvis-telemetry-input:focus { outline: none; border-color: var(--uplink-accent); }
@@ -135,34 +142,41 @@
         document.body.style.backgroundColor = "#000000";
         const warning = document.createElement("div");
         warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
-        warning.innerHTML = `
-            <h1 style="font-size: 30px;">⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1>
-            <p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p>
-            <p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>
-        `;
+        warning.innerHTML = `<h1>⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1><p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p><p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>`;
         document.body.appendChild(warning);
-        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada. Domínio não autorizado.");
+        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada.");
     }
 })();
 </script>
 
 <div id="javis-widget-container">
-    
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
+    <!-- NOVO PAINEL DE DIAGNÓSTICO LATERAL -->
+    <div class="status-panel" id="diagnostic-panel">
+        <div class="status-header">DIAGNÓSTICO DE COMPILAÇÃO</div>
+        <div><strong>L1 (C/P/B):</strong> <span id="status-l1" style="color: #ff5555;">Ausente</span></div>
+        <div><strong>L2 (Calças):</strong> <span id="status-l2" style="color: #ff5555;">Ausente</span></div>
+        <div style="margin-top: 5px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 5px;">
+            <strong>Motor 3D:</strong> <span style="color: #00e5ff;">Ativo & Sincronizado</span>
+        </div>
+    </div>
+
     <div class="viewer-area">
         <div id="scanning-overlay"></div>
         <canvas id="skinViewer"></canvas>
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
+    <!-- MODAL IA LORE & ATRIBUTOS -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
         <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
+    <!-- MODAL GERADOR FASE 1 -->
+    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff;">
         <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
         <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
         <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
@@ -182,6 +196,7 @@
         </div>
     </div>
 
+    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
@@ -253,11 +268,19 @@
         </div>
     </div>
 
+    <!-- BARRA TÁTICA INFERIOR - ATUALIZADA COM NOVOS RECURSOS -->
     <div class="control-bar">
         <div class="btn-group">
             <button class="btn active" id="btn-armor" onclick="switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
             <button class="btn" id="btn-model" onclick="switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
         </div>
+        
+        <!-- NOVOS BOTÕES TÁTICOS 3D -->
+        <div class="btn-group" style="margin-left: 5px;">
+            <button class="btn btn-calib" id="btn-rotate" onclick="toggleRotation()" title="Pausar/Retomar Rotação" style="padding: 8px; width: 35px; justify-content: center;"><span class="icon">⏸️</span></button>
+            <button class="btn btn-calib" id="btn-screenshot" onclick="takeScreenshot()" title="Capturar Foto 3D" style="padding: 8px; width: 35px; justify-content: center; background: rgba(255, 170, 0, 0.1);"><span class="icon">📸</span></button>
+        </div>
+        
         <div class="divider"></div>
         <div class="btn-group" id="upload-group">
             <button class="btn btn-calib" id="btn-upload-l1" onclick="triggerUpload(1)"><span class="icon">📥</span> BASE L1 (C/P/B)</button>
@@ -268,13 +291,13 @@
         <div class="btn-group">
             <button class="btn btn-uplink" onclick="showModal('ingame-modal')" title="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
             <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
-            <button class="btn btn-ai" onclick="gerarAtributos()" title="Gerar Atributos Táticos (Estatísticas)"><span class="icon">📊</span></button>
+            <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
             <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)" title="Exportar Textura L1 Final"><span class="icon">💾</span> EXPORTAR L1</button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)" title="Exportar Textura L2 Final"><span class="icon">💾</span> EXPORTAR L2</button>
+            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
@@ -286,9 +309,6 @@
 <input type="file" id="file-input">
 
 <script>
-    // ============================================================================
-    // GESTÃO DE ESTADO (LAYERS E CONFIG)
-    // ============================================================================
     const apiKey = ""; 
     let currentMode = 'armor';
     let baseImageL1 = null; 
@@ -328,6 +348,20 @@
         if (scanner) scanner.style.display = 'none'; 
     }
 
+    // GESTÃO DE PAINEL DE STATUS
+    function updateDiagnosticPanel() {
+        let elL1 = document.getElementById('status-l1');
+        let elL2 = document.getElementById('status-l2');
+        
+        if (finalImageL1) { elL1.innerText = "COMPILADA"; elL1.style.color = "#00ffaa"; }
+        else if (baseImageL1) { elL1.innerText = "BRUTA (Aguardando Edição)"; elL1.style.color = "#ffaa00"; }
+        else { elL1.innerText = "Ausente"; elL1.style.color = "#ff5555"; }
+
+        if (finalImageL2) { elL2.innerText = "COMPILADA"; elL2.style.color = "#00ffaa"; }
+        else if (baseImageL2) { elL2.innerText = "BRUTA (Aguardando Edição)"; elL2.style.color = "#ffaa00"; }
+        else { elL2.innerText = "Ausente"; elL2.style.color = "#ff5555"; }
+    }
+
     function switchMode(mode) {
         currentMode = mode;
         document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
@@ -348,9 +382,55 @@
         document.getElementById('div-export').style.display = isArmor ? "block" : "none";
         
         if (statusOverlay) statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
+        
+        // Atualiza botão de rotação para refletir o estado correto de cada motor
+        let btnRot = document.getElementById('btn-rotate');
+        if(currentMode === 'armor') {
+            btnRot.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+        } else {
+            btnRot.innerHTML = autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+        }
         resize();
     }
 
+    // CONTROLO DE ROTAÇÃO E SCREENSHOT
+    let autoRotateGltf = true;
+
+    function toggleRotation() {
+        let btn = document.getElementById('btn-rotate');
+        if (currentMode === 'armor') {
+            skinViewer.controls.autoRotate = !skinViewer.controls.autoRotate;
+            btn.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            btn.style.borderColor = skinViewer.controls.autoRotate ? "var(--calib-accent)" : "var(--sculk-core)";
+        } else {
+            autoRotateGltf = !autoRotateGltf;
+            btn.innerHTML = autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            btn.style.borderColor = autoRotateGltf ? "var(--calib-accent)" : "var(--sculk-core)";
+        }
+    }
+
+    function takeScreenshot() {
+        if (currentMode === 'armor') {
+            // Forçar Render para garantir que o buffer tem a imagem limpa
+            skinViewer.renderer.render(skinViewer.scene, skinViewer.camera);
+            const dataUrl = skinCanvas.toDataURL('image/png');
+            downloadVisualFile(dataUrl, `vexanium_armor_snapshot_${new Date().getTime()}.png`);
+        } else {
+            renderer.render(scene, camera);
+            const dataUrl = gltfCanvas.toDataURL('image/png');
+            downloadVisualFile(dataUrl, `vexanium_entity_snapshot_${new Date().getTime()}.png`);
+        }
+        if (statusOverlay) statusOverlay.innerText = "📸 DIAGNÓSTICO VISUAL CAPTURADO!";
+    }
+
+    function downloadVisualFile(dataUrl, filename) {
+        const link = document.createElement('a');
+        link.href = dataUrl;
+        link.download = filename;
+        link.click();
+    }
+
+    // Motores 3D 
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
         canvas: skinCanvas, 
@@ -362,7 +442,8 @@
     skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
 
     const gltfCanvas = document.getElementById('gltfViewer');
-    const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true });
+    // Adicionado preserveDrawingBuffer para permitir Screenshots do GlTF
+    const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
     const scene = new THREE.Scene();
     const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
     camera.position.set(0, 0, 5);
@@ -374,7 +455,7 @@
 
     function animate() {
         requestAnimationFrame(animate);
-        if (currentMode === 'model' && currentModel) currentModel.rotation.y += 0.005;
+        if (currentMode === 'model' && currentModel && autoRotateGltf) currentModel.rotation.y += 0.005;
         controls.update(); renderer.render(scene, camera);
     }
     animate();
@@ -491,13 +572,12 @@
 
     function abrirFatiadorLivre(forceReload = false) {
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
-        let badge = document.getElementById('slicer-layer-badge'); let hint = document.getElementById('hint-layer-name');
+        let badge = document.getElementById('slicer-layer-badge'); 
+        
         if (currentEditingLayer === 1) {
             if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
-            if (hint) hint.innerText = "Camada 1 (Capacete, Peito, Botas)";
         } else {
             if (badge) { badge.innerText = "L2 (CALÇAS)"; badge.style.background = "#00ffaa"; }
-            if (hint) hint.innerText = "Camada 2 (Exclusivo para Calças/Cintura)";
         }
         
         showModal('slicer-modal'); 
@@ -651,6 +731,20 @@
             drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
             drawBox(8, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
             drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
+
+            drawBox(36, 48, 4, 4, "#4caf50", "TOPO", "BRAÇO ESQ.");
+            drawBox(40, 48, 4, 4, "#4caf50", "BASE", "BRAÇO ESQ.");
+            drawBox(32, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
+            drawBox(36, 52, 4, 12, "#4caf50", "FRENTE", "BRAÇO ESQ.");
+            drawBox(40, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
+            drawBox(44, 52, 4, 12, "#4caf50", "COSTAS", "BRAÇO ESQ.");
+
+            drawBox(20, 48, 4, 4, "#ff9800", "TOPO", "BOTA ESQ.");
+            drawBox(24, 48, 4, 4, "#ff9800", "BASE", "BOTA ESQ.");
+            drawBox(16, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
+            drawBox(20, 52, 4, 12, "#ff9800", "FRENTE", "BOTA ESQ.");
+            drawBox(24, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
+            drawBox(28, 52, 4, 12, "#ff9800", "COSTAS", "BOTA ESQ.");
         } else if (currentEditingLayer === 2) {
             drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
             drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
@@ -659,12 +753,19 @@
             drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
             drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
 
-            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNAS");
-            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNAS");
-            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
-            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNAS");
-            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNAS");
-            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNAS");
+            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNA DIR.");
+            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNA DIR.");
+            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
+            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNA DIR.");
+            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
+            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNA DIR.");
+
+            drawBox(20, 48, 4, 4, "#ffd700", "TOPO", "PERNA ESQ.");
+            drawBox(24, 48, 4, 4, "#ffd700", "BASE", "PERNA ESQ.");
+            drawBox(16, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
+            drawBox(20, 52, 4, 12, "#ffd700", "FRENTE", "PERNA ESQ.");
+            drawBox(24, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
+            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS", "PERNA ESQ.");
         }
     }
 
@@ -945,7 +1046,10 @@
         const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
         if (currentEditingLayer === 1) { finalImageL1 = finalArmaduraBase64; if (statusOverlay) statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 1 (L1) ATUALIZADA!"; } 
         else { finalImageL2 = finalArmaduraBase64; if (statusOverlay) statusOverlay.innerText = "✓ SIMBIOSE NEURAL: CAMADA 2 (L2) ATUALIZADA!"; }
-        atualizarPreview3D(); closeModal('slicer-modal');
+        
+        updateDiagnosticPanel();
+        atualizarPreview3D(); 
+        closeModal('slicer-modal');
     }
 
     function atualizarPreview3D() {
@@ -1011,8 +1115,8 @@
         if (currentMode === 'armor' && file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                if (uploadTarget === 1) { baseImageL1 = evt.target.result; abrirFatiadorLivre(true); } 
-                else if (uploadTarget === 2) { baseImageL2 = evt.target.result; abrirFatiadorLivre(true); }
+                if (uploadTarget === 1) { baseImageL1 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); } 
+                else if (uploadTarget === 2) { baseImageL2 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); }
             }; reader.readAsDataURL(file);
         } else if (currentMode === 'model') {
             new THREE.GLTFLoader().load(url, (gltf) => {
@@ -1078,6 +1182,7 @@
             if (currentEditingLayer === 1) baseImageL1 = imageUrl; else baseImageL2 = imageUrl;
             originalImageObj.src = imageUrl;
             
+            updateDiagnosticPanel();
             abrirFatiadorLivre(true);
         } else {
             alert("Falha na Forja. A IA não conseguiu gerar a armadura.");
