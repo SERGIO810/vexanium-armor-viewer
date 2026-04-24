@@ -1,56 +1,54 @@
-# ⟁ Vexanium Viewer - Laboratório J.A.V.I.S.
+⟁ Vexanium Viewer - Laboratório J.A.V.I.S.
 
 O Visualizador 3D definitivo para texturas e entidades do mod Vexanium. Renderize, inspecione e valide suas criações de armadura e modelos 3D em tempo real, direto do seu navegador, impulsionado por Three.js e skinview3d.
 
-🔗 Acesse o Laboratório Online: Laboratório Vexanium
+🌐 Acesse o Laboratório Online
 
-🦠 O que é o Vexanium?
+https://sergio810.github.io/vexanium-armor-viewer/
+
+🌑 O que é o Vexanium?
 
 Vexanium é um mod NeoForge revolucionário que introduz a Armadura Parasita Alienígena e a inteligência de silício J.A.V.I.S. — uma fusão letal de tecnologia militar avançada com matéria orgânica extraterrestre do Deep Dark.
 
-Este laboratório web foi construído para a comunidade e os desenvolvedores testarem rapidamente os recursos visuais antes de implementá-los no motor do Minecraft.
+Este laboratório web foi construído para a comunidade e desenvolvedores testarem rapidamente recursos visuais antes de implementá-los no motor do Minecraft.
 
-🗺️ Mapa do Laboratório (Interface Tática)
+✨ Recursos Exclusivos do Laboratório
 
-O terminal está dividido em sistemas modulares. Aqui está o que cada parte faz:
+Para garantir a melhor experiência de design, o nosso terminal foi equipado com tecnologia de ponta:
 
-🖥️ Visor 3D Central: O palco principal onde a sua MekaSuit (armadura) ou entidade .gltf é renderizada. Reage em tempo real às alterações.
+👁‍🗨 Renderização 360° em Tempo Real
 
-📊 Painel de Diagnóstico (Canto Superior Direito): Monitoriza o estado de compilação das suas texturas (Ausente, Bruta ou Compilada) e o sincronismo do Motor 3D.
+Inspecione cada pixel da sua armadura ou entidade com controles de órbita fluidos, pausa de rotação, captura de ecrã (screenshot) e zoom de precisão.
 
-⚙️ Barra de Controle (Inferior):
+🛡️ Modo Armadura e Estúdio UV
 
-🛡️ ARMADURA / 👾 ENTIDADE: Alterna o motor gráfico entre visualizar uma Skin do Minecraft ou um modelo 3D próprio.
+Suporte completo para moldes padrão e HD (High Definition). Possui um Bloco Operatório (Estúdio Livre) integrado com IA para recortar imagens, remover fundos mágicos e alinhar as peças (Snap Magnético) diretamente no navegador.
 
-⏸️ e 📸: Pausa a rotação do boneco e tira um Screenshot limpo (com fundo transparente) do seu trabalho.
+👾 Modo Entidade e Armas (GLTF/GLB)
 
-📥 BASE L1 / 📥 BASE L2: Importa texturas ou artes brutas do seu PC para o sistema.
+Trouxemos a bancada do Blockbench para a web! Faça upload de modelos 3D de novas armas ou monstros e o sistema ajustará a escala e iluminação automaticamente.
 
-📡, ✨, 📊: Ferramentas de conexão com a IA (Geração de Lore, Telemetria In-Game e Status Táticos).
-
-✂️ ESTÚDIO: Abre o Bloco Operatório (Uma mesa de trabalho gigante) para recortar, escalar e montar as peças da armadura.
-
-💾 EXPORTAR: Baixa o arquivo de textura final, perfeitamente recortado e dimensionado para o Minecraft (1024x512).
-
-📖 Manual de Operação (Como Forjar sua Armadura)
+📖 Manual de Operação (Forjando Armaduras)
 
 Siga estes passos táticos para construir a sua primeira simbiose visual:
 
-Iniciação: Abra o Laboratório e clique em 📥 BASE L1 (C/P/B) para enviar a sua arte base. Alternativamente, vá direto ao ✂️ ESTÚDIO e use o botão ✨ 0. Gerar Arte Base (IA) para que a Rede Neural crie uma textura do zero baseada no seu texto.
+Iniciação: Abra o Laboratório e vá ao ✂️ ESTÚDIO.
 
-Limpeza: Na mesa de trabalho do Estúdio, caso a sua imagem tenha um fundo sólido não desejado, clique em ✨ 2. Remover Fundo Inteligente.
+Arte Base: Faça upload de uma imagem do seu PC ou use o botão ✨ 0. Gerar Arte Base (IA) para que a Rede Neural crie uma textura do zero baseada no seu texto.
 
-Fatiamento: Use a ✂️ Varinha Mágica ou a 📐 Seleção Manual para isolar e extrair peças específicas da sua arte (como partes do Capacete, Peito, Botas).
+Limpeza: Caso a sua imagem tenha um fundo sólido indesejado, clique em ✨ 2. Remover Fundo Inteligente.
 
-Montagem UV: Arraste e posicione as peças limpas rigorosamente para dentro da Zona Laranja de Exportação (1024x512), alinhando com as guias verdes. Mantenha o 🧲 Snap Magnético ativado para um encaixe perfeito nos pixels.
+Fatiamento: Use a ✂️ Varinha Mágica ou a 📐 Seleção Manual para isolar e extrair peças específicas (Capacete, Peito, Botas, Calças).
 
-Simbiose: Clique no botão verde ✅ Fundir Textura Final ao 3D. A janela fechará e o manequim 3D vestirá a sua criação instantaneamente.
+Montagem UV: Arraste e posicione as peças rigorosamente para dentro da Zona Laranja de Exportação (1024x512), alinhando com as guias verdes.
 
-Empacotamento: Se o resultado estiver assustadoramente perfeito, clique em 💾 EXPORTAR L1 na barra inferior para baixar a imagem oficial.
+Simbiose: Clique no botão verde ✅ Fundir Textura Final ao 3D. O manequim vestirá a sua criação instantaneamente.
+
+Empacotamento: Na aba principal, clique em 💾 EXPORTAR L1/L2 para baixar a imagem perfeita, ou baixe o ZIP completo no Estúdio.
 
 🧩 Como Integrar o Widget no Seu Site ou Fórum
 
-Quer disponibilizar o terminal J.A.V.I.S. diretamente no site da sua comunidade de jogadores, num Wiki ou num fórum do mod? Criámos uma versão compacta e adaptável (javis_widget.html) que funciona perfeitamente de forma incorporada.
+Quer disponibilizar o terminal J.A.V.I.S. diretamente no site da sua comunidade de jogadores, num Wiki ou num fórum do mod? Criámos uma versão compacta e adaptável.
 
 Basta copiar e colar o seguinte código HTML no seu site:
 
@@ -64,12 +62,101 @@ Basta copiar e colar o seguinte código HTML no seu site:
 </iframe>
 
 
-⚙️ Dicas de Integração Web:
-
-O width="100%" garante que o widget se ajusta automaticamente ao layout do seu site, quer seja num ecrã largo de PC ou num telemóvel.
-
-Pode alterar o height="750px" para o tamanho que melhor se encaixar na sua página.
-
 Nota de Segurança: O nosso sistema possui proteção anti-clone. Para que o widget funcione em domínios fora do localhost ou github.io, o desenvolvedor principal precisa de adicionar o seu site à lista de allowedDomains no código genético.
 
-Dica de Operador: A linguagem está alinhada com o estilo "Cyberpunk/Sombrio" da MekaSuit e do projeto Vexanium. Mantenha os seus sistemas atualizados!
+📐 Especificações de Textura (Armaduras)
+
+Para que a armadura se encaixe perfeitamente, a zona de exportação respeita as regras rigorosas do Minecraft:
+
+Especificação
+
+Valor
+
+Formato de Saída
+
+.PNG ou pacote .ZIP com metadata.json
+
+Proporção
+
+Estritamente 2:1 (A largura deve ser o dobro da altura)
+
+Resolução Exportada
+
+1024x512 pixels (HD Scaled)
+
+Estrutura
+
+Camada 1: Capacete, Peitoral, Botas 
+
+
+
+ Camada 2: Calças
+
+🌐 Comunidade e Conexões
+
+Junte-se à iniciativa Vexanium. Compartilhe os seus designs de armadura, sugira ideias para o mod e interaja com os desenvolvedores:
+
+Plataforma
+
+Link
+
+🎮 CurseForge
+
+[Aguardando Link]
+
+💬 Discord Oficial
+
+[Aguardando Link]
+
+📺 YouTube
+
+[Aguardando Link]
+
+💜 Apoie o Projeto (Patreon)
+
+[Aguardando Link]
+
+🙏 Tecnologias e Créditos
+
+O Laboratório J.A.V.I.S. foi construído com arquitetura de código aberto:
+
+Three.js — O poderoso motor WebGL que dá vida aos modelos 3D
+
+skinview3d — Renderizador perfeito da anatomia do Minecraft
+
+OpenCV / JSZip — Motores e bibliotecas de fatiamento e compactação
+
+Vexanium Team — Pelos conceitos e design de interface
+
+"A carne alienígena é forte, mas o silício é perfeito." — Dr. Aldrich
+
+🚀 Desenvolvimento Local
+
+Para testar o visualizador localmente no seu computador:
+
+# 1. Clone o repositório
+git clone [https://github.com/seu-usuario/vexanium-armor-viewer.git](https://github.com/seu-usuario/vexanium-armor-viewer.git)
+cd vexanium-armor-viewer
+
+# 2. Abra o arquivo index.html em um navegador
+# Opção A: Duplo clique no arquivo
+# Opção B: Use um servidor local (recomendado)
+python -m http.server 8000
+# Acesse no navegador: http://localhost:8000
+
+
+🔮 Roadmap Futuro
+
+[x] Mesa de Trabalho Gigante (Full HD)
+
+[x] Integração com IA Generativa via Base64
+
+[x] Sistema Anti-Clone por Domínio
+
+[ ] Suporte para animações de modelos 3D
+
+[ ] Editor de cores em tempo real (Paleta HSL)
+
+[ ] Integração nativa com a API do CurseForge
+
+Desenvolvido com ⚔️ para a comunidade Vexanium
