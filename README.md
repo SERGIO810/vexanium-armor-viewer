@@ -1,34 +1,42 @@
-⟁ Vexanium Viewer - Laboratório J.A.V.I.S.
+##⟁ Vexanium Viewer - Laboratório J.A.V.I.S.
 
 O Visualizador 3D definitivo para texturas e entidades do mod Vexanium. Renderize, inspecione e valide suas criações de armadura e modelos 3D em tempo real, direto do seu navegador, impulsionado por Three.js e skinview3d.
 
-🌐 Acesse o Laboratório Online
+---
+
+##🌐 Acesse o Laboratório Online
 
 https://sergio810.github.io/vexanium-armor-viewer/
 
-🌑 O que é o Vexanium?
+---
+
+##🌑 O que é o Vexanium?
 
 Vexanium é um mod NeoForge revolucionário que introduz a Armadura Parasita Alienígena e a inteligência de silício J.A.V.I.S. — uma fusão letal de tecnologia militar avançada com matéria orgânica extraterrestre do Deep Dark.
 
 Este laboratório web foi construído para a comunidade e desenvolvedores testarem rapidamente recursos visuais antes de implementá-los no motor do Minecraft.
 
-✨ Recursos Exclusivos do Laboratório
+---
+
+### ✨ Recursos Exclusivos do Laboratório
 
 Para garantir a melhor experiência de design, o nosso terminal foi equipado com tecnologia de ponta:
 
-👁‍🗨 Renderização 360° em Tempo Real
+### 👁‍🗨 Renderização 360° em Tempo Real
 
 Inspecione cada pixel da sua armadura ou entidade com controles de órbita fluidos, pausa de rotação, captura de ecrã (screenshot) e zoom de precisão.
 
-🛡️ Modo Armadura e Estúdio UV
+### 🛡️ Modo Armadura e Estúdio UV
 
 Suporte completo para moldes padrão e HD (High Definition). Possui um Bloco Operatório (Estúdio Livre) integrado com IA para recortar imagens, remover fundos mágicos e alinhar as peças (Snap Magnético) diretamente no navegador.
 
-👾 Modo Entidade e Armas (GLTF/GLB)
+### 👾 Modo Entidade e Armas (GLTF/GLB)
 
 Trouxemos a bancada do Blockbench para a web! Faça upload de modelos 3D de novas armas ou monstros e o sistema ajustará a escala e iluminação automaticamente.
 
-📖 Manual de Operação (Forjando Armaduras)
+## 📖 Manual de Operação (Forjando Armaduras)
+
+---
 
 Siga estes passos táticos para construir a sua primeira simbiose visual:
 
@@ -46,7 +54,9 @@ Simbiose: Clique no botão verde ✅ Fundir Textura Final ao 3D. O manequim vest
 
 Empacotamento: Na aba principal, clique em 💾 EXPORTAR L1/L2 para baixar a imagem perfeita, ou baixe o ZIP completo no Estúdio.
 
-🧩 Como Integrar o Widget no Seu Site ou Fórum
+---
+
+##🧩 Como Integrar o Widget no Seu Site ou Fórum
 
 Quer disponibilizar o terminal J.A.V.I.S. diretamente no site da sua comunidade de jogadores, num Wiki ou num fórum do mod? Criámos uma versão compacta e adaptável.
 
@@ -61,11 +71,14 @@ Basta copiar e colar o seguinte código HTML no seu site:
     allowfullscreen>
 </iframe>
 
+---
 
 Nota de Segurança: O nosso sistema possui proteção anti-clone. Para que o widget funcione em domínios fora do localhost ou github.io, o desenvolvedor principal precisa de adicionar o seu site à lista de allowedDomains no código genético.
 
-📐 Especificações de Textura (Armaduras)
+---
 
+##📐 Especificações de Textura (Armaduras)
+---
 Para que a armadura se encaixe perfeitamente, a zona de exportação respeita as regras rigorosas do Minecraft:
 
 Especificação
@@ -88,11 +101,11 @@ Estrutura
 
 Camada 1: Capacete, Peitoral, Botas 
 
+Camada 2: Calças
 
+---
 
- Camada 2: Calças
-
-🌐 Comunidade e Conexões
+##🌐 Comunidade e Conexões
 
 Junte-se à iniciativa Vexanium. Compartilhe os seus designs de armadura, sugira ideias para o mod e interaja com os desenvolvedores:
 
@@ -100,23 +113,27 @@ Plataforma
 
 Link
 
-🎮 CurseForge
+---
+
+##🎮 CurseForge
 
 [Aguardando Link]
 
-💬 Discord Oficial
+##💬 Discord Oficial
 
 [Aguardando Link]
 
-📺 YouTube
+##📺 YouTube
 
 [Aguardando Link]
 
-💜 Apoie o Projeto (Patreon)
+##💜 Apoie o Projeto (Patreon)
 
 [Aguardando Link]
 
-🙏 Tecnologias e Créditos
+##🙏 Tecnologias e Créditos
+
+---
 
 O Laboratório J.A.V.I.S. foi construído com arquitetura de código aberto:
 
@@ -130,7 +147,11 @@ Vexanium Team — Pelos conceitos e design de interface
 
 "A carne alienígena é forte, mas o silício é perfeito." — Dr. Aldrich
 
-🚀 Desenvolvimento Local
+---
+
+##🚀 Desenvolvimento Local
+
+---
 
 Para testar o visualizador localmente no seu computador:
 
@@ -144,8 +165,9 @@ cd vexanium-armor-viewer
 python -m http.server 8000
 # Acesse no navegador: http://localhost:8000
 
+---
 
-🔮 Roadmap Futuro
+##🔮 Roadmap Futuro
 
 [x] Mesa de Trabalho Gigante (Full HD)
 
@@ -158,5 +180,7 @@ python -m http.server 8000
 [ ] Editor de cores em tempo real (Paleta HSL)
 
 [ ] Integração nativa com a API do CurseForge
+
+---
 
 Desenvolvido com ⚔️ para a comunidade Vexanium
