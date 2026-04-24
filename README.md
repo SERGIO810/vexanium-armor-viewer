@@ -60,3 +60,16 @@ Basta copiar e colar o seguinte código HTML no seu site:
     allow="clipboard-write"
     allowfullscreen>
 </iframe>
+
+##⚙️ Dicas de Integração Web:
+
+O width="100%" garante que o widget se ajusta automaticamente ao layout do seu site, quer seja num ecrã largo de PC ou num telemóvel.
+
+Pode alterar o height="750px" para o tamanho que melhor se encaixar na sua página.
+
+Nota de Segurança: O nosso sistema possui proteção anti-clone. Para que o widget funcione em domínios fora do localhost ou github.io, o desenvolvedor principal precisa de adicionar o seu site à lista de allowedDomains no código genético.
+
+
+***
+
+**Dica de Operador:** A linguagem está alinhada com o estilo "Cyberpunk/Sombrio" d
