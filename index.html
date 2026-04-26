@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Blindado)</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Ecrã Inteiro)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -30,24 +30,79 @@
         body, html { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; font-family: 'JetBrains Mono', monospace; background: var(--void-bg); user-select: none; color: #fff; }
         #javis-widget-container { width: 100%; height: 100%; display: flex; flex-direction: column; position: relative; border: 1px solid var(--warden-bone-dim); box-sizing: border-box; }
         .viewer-area { flex: 1; position: relative; background: radial-gradient(circle at center, #0a1117 0%, #030508 100%); overflow: hidden; box-shadow: inset 0 0 80px rgba(0,0,0,0.8); }
+        canvas { width: 100%; height: 100%; cursor: grab; outline: none; }
+        canvas:active { cursor: grabbing; }
+
+        #scanning-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--sculk-core); box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core); display: none; z-index: 50; animation: scanMove 2s infinite ease-in-out; }
+        @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        /* BARRA TÁTICA INFERIOR */
+        .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
+        .btn-group { display: flex; gap: 8px; align-items: center; }
+        .btn { background: transparent; color: var(--warden-bone); border: none; border-radius: 6px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
         
-        #slicer-modal { width: 98vw; height: 95vh; max-width: 1950px; border-color: var(--calib-accent); }
+        .btn:hover { background: rgba(19, 201, 201, 0.1); transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
+        .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
+        
+        .btn-ai { color: var(--sculk-core); }
+        .btn-ai:hover { background: rgba(19, 201, 201, 0.12); }
+        .btn-calib { color: var(--calib-accent); }
+        .btn-calib:hover { background: rgba(255, 170, 0, 0.1); }
+        .btn-uplink { color: var(--uplink-accent); }
+        .btn-uplink:hover { background: rgba(0, 229, 255, 0.1); }
+        .btn-save { color: #00bcd4; }
+        .btn-save:hover { background: rgba(0, 188, 212, 0.1); }
+        .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
+
+        #javis-branding { font-size: 11px; color: var(--warden-bone-dim); text-decoration: none; display: flex; align-items: center; gap: 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: auto; }
+        #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
+        #file-input, #file-input-preset, #file-input-add { display: none; }
+
+        #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
+
+        .status-panel { position: absolute; top: 20px; right: 20px; background: rgba(10, 17, 23, 0.8); border: 1px solid var(--warden-bone-dim); padding: 15px; border-radius: 4px; font-size: 11px; color: var(--warden-bone); backdrop-filter: blur(5px); z-index: 10; pointer-events: none; border-right: 3px solid var(--warden-bone-dim); text-transform: uppercase; }
+        .status-panel div { margin-bottom: 5px; }
+        .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
+        .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
+
+        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; flex-direction: column; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
+        #ai-modal, #gen-modal { width: 85vw; max-width: 550px; }
+        .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
+        #ai-response-text { font-size: 13px; line-height: 1.6; margin: 20px 0; max-height: 400px; overflow-y: auto; white-space: pre-wrap; color: var(--text-main); }
+        
+        #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
+
+        /* ESTÚDIO DE CIRURGIA UV: 1920x1080 FULL HD */
+        #slicer-modal { width: 98vw; height: 95vh; max-width: 1950px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
+        #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
+        .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
+
         .editor-toolbar { flex: 0 0 250px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
         
-        .editor-workspace-wrapper { flex: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; border-radius: 6px; background-color: #030508; border: 1px solid #222; }
-        .editor-workspace { flex: 1; display: flex; overflow: auto; position: relative; padding: 20px; box-sizing: border-box; }
+        /* WORKBENCH EXACT 1920x1080 - SEPARAÇÃO DA ÁREA DE SCROLL */
+        .editor-workspace-wrapper { flex: 1; position: relative; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--warden-bone-dim); border-radius: 6px; background-color: #030508; }
+        .editor-workspace { flex: 1; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); position: relative; padding: 20px; box-sizing: border-box; }
         
         #canvas-wrapper { 
             width: 1920px; height: 1080px; min-width: 1920px; min-height: 1080px; 
-            margin: auto; background-color: #0d141c; box-shadow: 0 0 30px rgba(0,0,0,0.5); 
-            position: relative; transform-origin: center center;
+            margin: auto; 
+            background-color: #0d141c; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+            position: relative;
+            transform-origin: center center;
+            transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; 
         }
 
         #workspace-canvas, #grid-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; image-rendering: pixelated; }
         #workspace-canvas { cursor: crosshair; z-index: 10; }
         #grid-canvas { pointer-events: none; z-index: 15; }
 
+        /* ============================================
+            FLOATING TOOLBAR MATRYOSHKA
+            ============================================ */
         .floating-toolbar {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000;
             background: rgba(10, 17, 23, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -58,6 +113,7 @@
 
         @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
 
+        /* ZONAS MATRYOSHKA */
         .zones-container { display: flex; gap: 4px; align-items: center; }
         .zone-btn {
             width: 36px; height: 36px; border: 1px solid rgba(19, 201, 201, 0.2); background: rgba(19, 201, 201, 0.03);
@@ -83,10 +139,17 @@
             background: rgba(5, 10, 15, 0.95); border: 1px solid var(--sculk-core); color: var(--sculk-core); padding: 6px 10px; border-radius: 4px;
             font-size: 11px; font-weight: bold; white-space: nowrap; pointer-events: none; opacity: 0; transition: all 0.2s ease; z-index: 1000; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
         }
-        .toolbar-btn:hover::after, .zone-btn:hover::after { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toolbar-btn::before, .zone-btn::before {
+            content: ''; position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--sculk-core);
+            opacity: 0; transition: all 0.2s ease; z-index: 1000; pointer-events: none;
+        }
+        .toolbar-btn:hover::after, .toolbar-btn:hover::before, .zone-btn:hover::after, .zone-btn:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toolbar-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; transition: all 0.3s ease; }
         .toolbar-btn:hover svg { stroke-width: 2.5; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));}
 
+        /* ============================================
+            SISTEMA DE NOTIFICAÇÕES POP-UP
+            ============================================ */
         .notification {
             position: fixed; top: 20px; right: 20px; background: rgba(19, 201, 201, 0.9); border-left: 4px solid #fff;
             color: #fff; padding: 14px 20px; border-radius: 4px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); animation: slideInRight 0.3s ease;
@@ -96,25 +159,12 @@
         .notification.error { background: rgba(255, 51, 51, 0.9); border-left-color: rgba(255, 51, 51, 1); }
         .notification.warning { background: rgba(255, 170, 0, 0.9); border-left-color: rgba(255, 170, 0, 1); }
 
-        .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
-        .btn-group { display: flex; gap: 8px; align-items: center; }
-        .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
-        .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
-        .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
-        .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
-
-        .status-panel { position: absolute; top: 20px; right: 20px; background: rgba(10, 17, 23, 0.8); border: 1px solid var(--warden-bone-dim); padding: 15px; border-radius: 4px; font-size: 11px; color: var(--warden-bone); backdrop-filter: blur(5px); z-index: 10; pointer-events: none; border-right: 3px solid var(--warden-bone-dim); text-transform: uppercase; }
-        .status-panel div { margin-bottom: 5px; }
-        .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
-        .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
-
-        .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; flex-direction: column; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
-        .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
-
         .pieces-panel { flex: 0 0 260px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
         .pieces-header { font-size: 12px; color: var(--calib-accent); font-weight: 800; border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .pieces-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .piece-item { background: rgba(18, 30, 41, 0.8); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.2s; }
+        .piece-item:hover { background: rgba(31, 52, 71, 0.9); border-color: var(--calib-accent); }
+        .piece-item.selected { background: rgba(255, 170, 0, 0.15); border-color: var(--calib-accent); }
         .piece-preview { width: 100%; height: 70px; background: #000; border: 1px solid var(--warden-bone-dim); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background-image: linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222); background-size: 10px 10px; background-position: 0 0, 5px 5px; }
         .piece-preview img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
         .piece-info { font-size: 10px; color: var(--warden-bone-dim); display: flex; justify-content: space-between; font-weight: bold; }
@@ -122,12 +172,26 @@
         .slice-category { font-size: 11px; color: var(--warden-bone-dim); font-weight: 800; margin-top: 12px; border-bottom: 1px solid #222; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; }
         .action-btn { background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; }
         .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
+        .delete-btn { border-color: #ff5555; color: #ff5555; }
+        .delete-btn:hover { background: #ff5555; color: #fff; }
+        
         .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
+
+        .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
+        .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
+        .close-modal:hover { background: #1f3447; border-color: #fff; }
+
+        #ingame-modal { width: 85vw; max-width: 600px; border-color: var(--uplink-accent); }
+        #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
+        #jarvis-telemetry-input { width: 100%; height: 180px; background: #050505; color: var(--uplink-accent); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
+        #jarvis-telemetry-input:focus { outline: none; border-color: var(--uplink-accent); }
 
         ::-webkit-scrollbar { width: 8px; height: 8px; }
         ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
+        .loader { width: 20px; height: 20px; border: 3px solid var(--sculk-core); border-top-color: transparent; border-radius: 50%; animation: spin 1s linear infinite; display: none; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -145,20 +209,22 @@
     </div>
 
     <div class="viewer-area">
+        <div id="scanning-overlay"></div>
         <canvas id="skinViewer"></canvas>
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
+    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1080) -->
     <div id="slicer-modal" class="modal" style="display: none;">
-        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge" style="background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto;">L1 (CORPO)</span></h3>
+        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
         <div class="editor-layout">
             <div class="editor-toolbar">
                 <div class="slice-category">MEMÓRIA E PRESETS</div>
                 <div style="display: flex; gap: 5px;">
-                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="MemoryManager.salvarPresetJSON()">💾 Salvar</button>
+                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="StudioCanvas.salvarPresetJSON()">💾 Salvar</button>
                     <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="document.getElementById('file-input-preset').click()">📂 Abrir</button>
-                    <input type="file" id="file-input-preset" accept="application/json" style="display:none">
+                    <input type="file" id="file-input-preset" accept="application/json">
                 </div>
 
                 <div class="slice-category">PREPARAÇÃO DE ARTE</div>
@@ -192,16 +258,14 @@
                     <input type="checkbox" id="show-grid-1x1" onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade de Pixel (1x1)
                 </label>
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-grid-16x16" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
+                    <input type="checkbox" id="show-grid-16x16" onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
                 </label>
 
-                <div class="slice-category" style="margin-top: 15px;">ZONAS DE EXPORTAÇÃO</div>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--calib-accent); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-export-zone" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> Molde Principal (Laranja)
-                </label>
             </div>
 
+            <!-- AMBIENTE CENTRAL (WORKSPACE) - COM WRAPPER PARA ISOLAR A BARRA -->
             <div class="editor-workspace-wrapper">
+                <!-- ÁREA DE SCROLL INDEPENDENTE DO CANVAS -->
                 <div class="editor-workspace" id="workspace-scroll-area">
                     <div id="canvas-wrapper">
                         <canvas id="grid-canvas" width="1920" height="1080"></canvas>
@@ -209,17 +273,22 @@
                     </div>
                 </div>
                 
+                <!-- FLOATING TOOLBAR MATRYOSHKA -->
                 <div class="floating-toolbar">
+                    <!-- ZONAS MATRYOSHKA -->
                     <div class="zones-container">
                         <span style="font-size: 10px; color: var(--warden-bone-dim); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;">Zones:</span>
                         <button class="zone-btn active" data-zone="1" data-tooltip="Mestre: 1024x512" onclick="StudioCanvas.switchZone(1)">Z1</button>
                         <button class="zone-btn" data-zone="2" data-tooltip="Interna 1: 512x256" onclick="StudioCanvas.switchZone(2)">Z2</button>
                         <button class="zone-btn" data-zone="3" data-tooltip="Interna 2: 256x128" onclick="StudioCanvas.switchZone(3)">Z3</button>
                         <button class="zone-btn" data-zone="4" data-tooltip="Interna 3: 128x64" onclick="StudioCanvas.switchZone(4)">Z4</button>
+                        <button class="zone-btn" data-zone="5" data-tooltip="Interna 4: 64x32" onclick="StudioCanvas.switchZone(5)">Z5</button>
+                        <button class="zone-btn" data-zone="6" data-tooltip="Interna 5: 32x16" onclick="StudioCanvas.switchZone(6)">Z6</button>
                     </div>
 
                     <div class="toolbar-divider"></div>
 
+                    <!-- UNDO / REDO -->
                     <button class="toolbar-btn" data-tooltip="Desfazer" onclick="MemoryManager.desfazerEstado()">
                         <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                     </button>
@@ -229,11 +298,12 @@
                     
                     <div class="toolbar-divider"></div>
 
+                    <!-- FERRAMENTAS PRINCIPAIS -->
                     <button class="toolbar-btn" id="tool-btn-move" data-tooltip="Mover" onclick="ToolManager.setTool('move')">
                         <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M6 14v-1a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M18 11a4 4 0 0 1 4 4v2a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8v-3.5"/></svg>
                     </button>
                     <button class="toolbar-btn active" id="tool-btn-magic" data-tooltip="Varinha Mágica" onclick="ToolManager.setTool('magic')">
-                        <svg viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
                     </button>
                     <button class="toolbar-btn" id="tool-btn-slice" data-tooltip="Corte" onclick="ToolManager.setTool('slice')">
                         <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
@@ -245,15 +315,19 @@
                         <svg viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
                     </button>
                     <button class="toolbar-btn" id="tool-btn-eyedropper" data-tooltip="Conta Gotas" onclick="ToolManager.setTool('eyedropper')">
-                        <svg viewBox="0 0 24 24"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9"/></svg>
+                        <svg viewBox="0 0 24 24"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg>
                     </button>
 
                     <div class="toolbar-divider"></div>
 
+                    <!-- ZOOM -->
+                    <button class="toolbar-btn" data-tooltip="Ajustar e Limpar" onclick="StudioCanvas.ajustarZoom(1.0)">
+                        <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                    </button>
                     <button class="toolbar-btn" data-tooltip="Zoom Out" onclick="StudioCanvas.ajustarZoom('out')">
                         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                     </button>
-                    <span id="zoom-label" style="font-size:11px; font-weight:bold; width: 35px; text-align:center; color: var(--calib-accent);">100%</span>
+                    <span id="zoom-label" style="font-size:11px; font-weight:bold; width: 35px; text-align:center; color: var(--calib-accent); font-family: 'JetBrains Mono', monospace;">100%</span>
                     <button class="toolbar-btn" data-tooltip="Zoom In" onclick="StudioCanvas.ajustarZoom('in')">
                         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                     </button>
@@ -267,125 +341,166 @@
                     <button class="action-btn" style="border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="ToolManager.removerFundoBranco()">✨ Remover Fundo (IA)</button>
                     <div style="display:flex; gap:5px;">
                         <button class="action-btn" style="flex:1;" onclick="ToolManager.duplicarPecaAtiva()">🖨️ Duplicar</button>
-                        <button class="action-btn" style="flex:1; border-color:#ff5555; color:#ff5555;" onclick="ToolManager.apagarPecaAtiva()">🗑️ Apagar</button>
+                        <button class="action-btn delete-btn" style="flex:1;" onclick="ToolManager.apagarPecaAtiva()">🗑️ Apagar</button>
                     </div>
                 </div>
                 <div class="pieces-list" id="pieces-list"></div>
-                <div class="pieces-footer" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #222;">
-                    <button class="action-btn" style="width:100%; border-color:var(--uplink-accent); color:var(--uplink-accent);" onclick="ExportManager.downloadAllPieces()">📥 BAIXAR PACOTE (ZIP)</button>
+                <div class="pieces-footer">
+                    <button class="download-btn" onclick="ExportManager.downloadAllPieces()" style="width: 100%; padding: 8px; font-size: 11px; background: rgba(0, 229, 255, 0.1); color: #00e5ff; border: 1px solid #00e5ff; border-radius: 4px; cursor: pointer;">📥 Baixar Tudo + JSON (ZIP)</button>
                 </div>
             </div>
         </div>
 
-        <div class="editor-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 15px;">
-            <button class="action-btn" style="padding: 10px 20px; font-size: 13px;" onclick="UIManager.closeModal('slicer-modal')">CANCELAR EDIÇÃO</button>
-            <button class="action-btn" style="padding: 10px 20px; font-size: 13px; border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="ExportManager.aplicarMontagemUVLivre()">✅ FUNDIR AO MODELO 3D (MESTRE)</button>
+        <div class="editor-footer">
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('slicer-modal')">Abortar Extração</button>
+            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="ExportManager.aplicarMontagemUVLivre()">✅ Fundir Textura Final ao 3D</button>
         </div>
     </div>
     
-    <div id="ai-modal" class="modal" style="width: 500px;">
-        <h3 id="modal-title">✨ RELATÓRIO DO SISTEMA J.A.V.I.S.</h3>
-        <div id="ai-response-text" style="color: var(--text-light); font-size: 13px; line-height: 1.6; max-height: 400px; overflow-y: auto;">A extrair dados...</div>
-        <button class="action-btn" style="margin-top: 15px;" onclick="UIManager.closeModal('ai-modal')">FECHAR TERMINAL</button>
+    <!-- MODAL IA -->
+    <div id="ai-modal" class="modal" style="display: none;">
+        <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
+        <div id="ai-response-text">A extrair dados do hospedeiro...</div>
+        <button class="close-modal" onclick="UIManager.closeModal('ai-modal')">Sincronizar e Sair</button>
     </div>
 
-    <div id="gen-modal" class="modal" style="width: 500px; border-color: #ff00ff;">
-        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3);">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
-        <p style="font-size:12px; color:var(--warden-bone-dim); margin-bottom: 15px;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
-        <textarea id="gen-prompt-input" style="width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 10px; font-family: monospace; resize: vertical;" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas..."></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-            <button class="action-btn" onclick="UIManager.closeModal('gen-modal')">CANCELAR</button>
-            <button class="action-btn" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 INICIAR FORJA</button>
+    <!-- MODAL GERADOR FASE 1 -->
+    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
+        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
+        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('gen-modal')">Cancelar</button>
+            <button class="close-modal" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 Iniciar Geração</button>
         </div>
     </div>
 
-    <div id="ingame-modal" class="modal" style="width: 500px; border-color: var(--uplink-accent);">
-        <h3 style="color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3);">📡 UPLINK NEURAL (Dados do Jogo)</h3>
-        <p style="font-size:12px; color:var(--warden-bone-dim); margin-bottom: 15px;">Cole o Relatório Tático gerado pelo JarvisBrain.java para analisar a telemetria da partida.</p>
-        <textarea id="jarvis-telemetry-input" style="width: 100%; height: 100px; background: #050505; color: var(--uplink-accent); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 10px; font-family: monospace; resize: vertical;" placeholder="STATUS DO OPERADOR..."></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 15px;">
-            <button class="action-btn" onclick="UIManager.closeModal('ingame-modal')">DESCONECTAR</button>
-            <button class="action-btn" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 ANALISAR TELEMETRIA</button>
+    <!-- MODAL UPLINK -->
+    <div id="ingame-modal" class="modal" style="display: none;">
+        <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole o Relatório Tático gerado pelo <b>JarvisBrain.java</b> para analisar a telemetria da partida.</p>
+        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('ingame-modal')">Cancelar Conexão</button>
+            <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
         </div>
     </div>
 
+    <!-- BARRA TÁTICA INFERIOR -->
     <div class="control-bar">
         <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="UIManager.switchMode('armor')">🛡️ ARMADURA</button>
-            <button class="btn" id="btn-model" onclick="UIManager.switchMode('model')">👾 ENTIDADE</button>
-            <button class="btn" id="btn-item" onclick="UIManager.switchMode('item')">🪄 ARTEFATO</button>
+            <button class="btn active" id="btn-armor" onclick="UIManager.switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
+            <button class="btn" id="btn-model" onclick="UIManager.switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
+            <button class="btn" id="btn-item" onclick="UIManager.switchMode('item')"><span class="icon">🪄</span> ARTEFATO</button>
+        </div>
+        
+        <div class="btn-group" style="margin-left: 5px;">
+            <button class="btn btn-calib" id="btn-rotate" onclick="UIManager.toggleRotation()" title="Pausar/Retomar Rotação" style="padding: 8px; width: 35px; justify-content: center;"><span class="icon">⏸️</span></button>
+            <button class="btn btn-calib" id="btn-screenshot" onclick="UIManager.takeScreenshot()" title="Capturar Foto 3D" style="padding: 8px; width: 35px; justify-content: center; background: rgba(255, 170, 0, 0.1);"><span class="icon">📸</span></button>
+        </div>
+        
+        <div class="divider"></div>
+        <div class="btn-group" id="upload-group">
+            <button class="btn btn-calib" id="btn-upload-l1" onclick="ExportManager.triggerUpload(1)"><span class="icon">📥</span> BASE L1 (C/P/B)</button>
+            <button class="btn btn-calib" id="btn-upload-l2" onclick="ExportManager.triggerUpload(2)"><span class="icon">📥</span> BASE L2 (CALÇAS)</button>
+            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="ExportManager.triggerUpload(3)"><span class="icon">📥</span> IMPORTAR .GLTF</button>
         </div>
         <div class="divider"></div>
         <div class="btn-group">
-            <button class="btn" onclick="UIManager.toggleRotation()">⏸️ ROTAÇÃO</button>
-            <button class="btn" onclick="UIManager.takeScreenshot()">📸 FOTO 3D</button>
+            <button class="btn btn-uplink" onclick="UIManager.showModal('ingame-modal')" title="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
+            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
+            <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
+            <button class="btn btn-calib" id="btn-calib" onclick="StudioCanvas.abrirEstudio()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
+            
+            <div class="divider" id="div-export"></div>
+
+            <button class="btn btn-save" id="btn-save-l1" onclick="ExportManager.baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="ExportManager.baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
+            
+            <div class="loader" id="ai-loader"></div>
         </div>
-        <div class="divider"></div>
-        <div class="btn-group">
-            <button class="btn" onclick="ExportManager.triggerUpload(1)">📥 CARREGAR L1</button>
-            <button class="btn" onclick="ExportManager.triggerUpload(2)">📥 CARREGAR L2</button>
-            <button class="btn" onclick="ExportManager.triggerUpload(3)">📥 IMPORTAR .GLTF</button>
-        </div>
-        <div class="divider"></div>
-        <div class="btn-group">
-            <button class="btn" style="color:var(--uplink-accent); border-color:var(--uplink-accent);" onclick="UIManager.showModal('ingame-modal')">📡 UPLINK</button>
-            <button class="btn" style="color:var(--ai-accent); border-color:var(--ai-accent);" onclick="generateLore()">✨ LORE</button>
-            <button class="btn" style="color:var(--ai-accent); border-color:var(--ai-accent);" onclick="gerarAtributos()">📊 STATS</button>
-            <button class="btn" style="color:var(--calib-accent); border-color:var(--calib-accent);" onclick="StudioCanvas.abrirFatiadorLivre(false)">✂️ ESTÚDIO MATRYOSHKA</button>
-            <button class="btn" onclick="ExportManager.baixarTextura(1)">💾 EXPORTAR L1</button>
-            <button class="btn" onclick="ExportManager.baixarTextura(2)">💾 EXPORTAR L2</button>
-        </div>
-        <a id="javis-branding" href="#">Powered by <b>J.A.V.I.S.</b></a>
+        <div style="flex: 1;"></div>
+        <a id="javis-branding" href="https://sergio810.github.io/vexanium-armor-viewer/" target="_blank"><span>Powered by <b>J.A.V.I.S.</b></span></a>
     </div>
 </div>
 
-<input type="file" id="file-input" style="display:none">
+<input type="file" id="file-input">
 
 <script>
     /* =================================================================================
-       ESCUDO DE INTERCEÇÃO GLOBAL DE ERROS (UNHANDLED REJECTIONS)
-       ================================================================================= */
-    window.addEventListener('unhandledrejection', function(event) {
-        console.warn("🛡️ SISTEMA J.A.V.I.S. // FALHA ASSÍNCRONA INTERCETADA:", event.reason);
-        // Impede que o erro suba para o navegador e congele a página
-        event.preventDefault();
-    });
-
-    /* =================================================================================
-       CORE SYSTEM STATE
+       CORE SYSTEM STATE & CONSTANTS
+       A Regra de Ouro: O molde master tem 1024x512. Ele é imutável na exportação.
        ================================================================================= */
     const STATE = {
-        apiKey: "", currentMode: 'armor', baseImageL1: null, baseImageL2: null, finalImageL1: null, finalImageL2: null,
-        uploadTarget: 1, currentEditingLayer: 1, extractedPieces: [], activePieceIndex: -1, nextPieceId: 1,
-        currentZoom: 1.0, historyUndo: [], historyRedo: [], layerStates: { 1: null, 2: null }, lastEditingLayer: 1,
-        currentTool: 'magic', isDragging: false, startX: 0, startY: 0, manualSelection: null, isResizing: false, resizeHandle: '', origP: {x:0, y:0, w:0, h:0},
-        isPainting: false, currentPaintColor: "#a855f7", autoRotateGltf: true,
+        apiKey: "", 
+        currentMode: 'armor',
+        baseImageL1: null, 
+        baseImageL2: null, 
+        finalImageL1: null, 
+        finalImageL2: null, 
+        uploadTarget: 1, 
+        currentEditingLayer: 1, 
+        originalImageObj: new Image(),
+        currentPaintColor: "#a855f7",
+        isPainting: false,
+        autoRotateGltf: true,
+        extractedPieces: [], 
+        activePieceIndex: -1, 
+        nextPieceId: 1,
+        currentZoom: 1.0,
+        historyUndo: [], 
+        historyRedo: [],
+        lastEditingLayer: 1,
+        layerStates: { 1: null, 2: null },
+        
+        // Tool State variables
+        currentTool: 'magic', 
+        isDragging: false, 
+        startX: 0, 
+        startY: 0, 
+        manualSelection: null, 
+        isResizing: false, 
+        resizeHandle: '', 
+        origP: {x:0, y:0, w:0, h:0},
+        
+        // Matryoshka Zones Logic
         currentMatryoshkaZone: 1,
         matryoshkaZones: {
-            1: { w: 1024, h: 512, zoom: 0.7 },
-            2: { w: 512,  h: 256, zoom: 1.3 },
-            3: { w: 256,  h: 128, zoom: 2.6 },
-            4: { w: 128,  h: 64,  zoom: 4.0 }
+            1: { w: 1024, h: 512, zoom: 1.0 },
+            2: { w: 512,  h: 256, zoom: 1.8 },
+            3: { w: 256,  h: 128, zoom: 3.0 },
+            4: { w: 128,  h: 64,  zoom: 4.0 },
+            5: { w: 64,   h: 32,  zoom: 4.0 },
+            6: { w: 32,   h: 16,  zoom: 4.0 }
         }
     };
 
-    const WORKBENCH_W = 1920; const WORKBENCH_H = 1080; 
-    const OFFSET_X = 448; const OFFSET_Y = 284; 
+    // Constantes Arquiteturais do Workspace (Dimensões Full HD do Studio)
+    const WORKBENCH_W = 1920;
+    const WORKBENCH_H = 1080; 
+    
+    // Regra de Ouro: Posição do Molde Imutável 1024x512 no centro da tela
+    const OFFSET_X = 448;  // (1920 - 1024) / 2
+    const OFFSET_Y = 284;  // (1080 - 512) / 2
 
+    // DOM Elements Cached
     const DOM = {
+        loader: document.getElementById('ai-loader'),
+        scanner: document.getElementById('scanning-overlay'),
+        statusOverlay: document.getElementById('status-overlay'),
+        fileInput: document.getElementById('file-input'),
         wsCanvas: document.getElementById('workspace-canvas'),
         gridCanvas: document.getElementById('grid-canvas'),
-        canvasWrapper: document.getElementById('canvas-wrapper'),
-        fileInput: document.getElementById('file-input')
+        canvasWrapper: document.getElementById('canvas-wrapper')
     };
 
     const wsCtx = DOM.wsCanvas.getContext('2d', { willReadFrequently: true });
     const gCtx = DOM.gridCanvas.getContext('2d');
-    let offscreenCanvas = document.createElement('canvas'); offscreenCanvas.width = WORKBENCH_W; offscreenCanvas.height = WORKBENCH_H;
+    let offscreenCanvas = document.createElement('canvas');
     let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
     /* =================================================================================
-       UI MANAGER
+       UI MANAGER (Notificações, Modais e Rotação)
        ================================================================================= */
     const UIManager = {
         showNotification: function(message, type = 'success') {
@@ -398,487 +513,985 @@
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
         },
-        showModal: function(modalId) { document.getElementById(modalId).style.display = 'flex'; },
-        closeModal: function(modalId) { document.getElementById(modalId).style.display = 'none'; },
-        updateDiagnosticPanel: function() {
-            document.getElementById('status-l1').innerText = STATE.finalImageL1 ? "COMPILADA" : "Ausente";
-            document.getElementById('status-l1').style.color = STATE.finalImageL1 ? "#00ffaa" : (STATE.baseImageL1 ? "#ffaa00" : "#ff5555");
-            document.getElementById('status-l2').innerText = STATE.finalImageL2 ? "COMPILADA" : "Ausente";
-            document.getElementById('status-l2').style.color = STATE.finalImageL2 ? "#00ffaa" : (STATE.baseImageL2 ? "#ffaa00" : "#ff5555");
+
+        showModal: function(modalId, title, message) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            const titleEl = modal.querySelector('h3');
+            const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
+            if (titleEl && title) titleEl.innerText = title;
+            if (textEl && message) textEl.innerText = message;
+            modal.style.display = 'flex';
         },
+
+        closeModal: function(modalId) { 
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none'; 
+            if (DOM.scanner) DOM.scanner.style.display = 'none'; 
+        },
+
+        updateDiagnosticPanel: function() {
+            let elL1 = document.getElementById('status-l1');
+            let elL2 = document.getElementById('status-l2');
+            
+            if (STATE.finalImageL1) { elL1.innerText = "COMPILADA"; elL1.style.color = "#00ffaa"; }
+            else if (STATE.baseImageL1) { elL1.innerText = "BRUTA (Aguardando Edição)"; elL1.style.color = "#ffaa00"; }
+            else { elL1.innerText = "Ausente"; elL1.style.color = "#ff5555"; }
+
+            if (STATE.finalImageL2) { elL2.innerText = "COMPILADA"; elL2.style.color = "#00ffaa"; }
+            else if (STATE.baseImageL2) { elL2.innerText = "BRUTA (Aguardando Edição)"; elL2.style.color = "#ffaa00"; }
+            else { elL2.innerText = "Ausente"; elL2.style.color = "#ff5555"; }
+        },
+
         switchMode: function(mode) {
             STATE.currentMode = mode;
-            document.querySelectorAll('.control-bar .btn-group:first-child .btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('btn-' + mode).classList.add('active');
+            document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
+            document.getElementById('btn-model').classList.toggle('active', mode === 'model');
+            document.getElementById('btn-item').classList.toggle('active', mode === 'item');
             
-            document.getElementById('skinViewer').style.display = mode === 'armor' ? 'block' : 'none';
-            document.getElementById('gltfViewer').style.display = (mode === 'model' || mode === 'item') ? 'block' : 'none';
+            skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
+            gltfCanvas.style.display = (mode === 'model' || mode === 'item') ? 'block' : 'none';
             
-            if (mode === 'item') { scene.add(cajadoGroup); if (currentModel) scene.remove(currentModel); } 
-            else if (mode === 'model') { scene.remove(cajadoGroup); if (currentModel) scene.add(currentModel); }
+            const isArmor = mode === 'armor';
+            document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
+            
+            document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
+            
+            document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
+            document.getElementById('div-export').style.display = isArmor ? "block" : "none";
+            
+            if (DOM.statusOverlay) DOM.statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
+            
+            if (mode === 'item') {
+                scene.add(cajadoGroup);
+                if (currentModel) scene.remove(currentModel);
+            } else if (mode === 'model') {
+                scene.remove(cajadoGroup);
+                if (currentModel) scene.add(currentModel);
+            }
+
+            let btnRot = document.getElementById('btn-rotate');
+            if(STATE.currentMode === 'armor') {
+                btnRot.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            } else {
+                btnRot.innerHTML = STATE.autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            }
             resize();
         },
+
         toggleRotation: function() {
-            STATE.autoRotateGltf = !STATE.autoRotateGltf;
-            skinViewer.controls.autoRotate = STATE.autoRotateGltf;
-            this.showNotification(`ROTAÇÃO ${STATE.autoRotateGltf ? 'LIGADA' : 'DESLIGADA'}`);
+            let btn = document.getElementById('btn-rotate');
+            if (STATE.currentMode === 'armor') {
+                skinViewer.controls.autoRotate = !skinViewer.controls.autoRotate;
+                btn.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+                btn.style.borderColor = skinViewer.controls.autoRotate ? "var(--calib-accent)" : "var(--sculk-core)";
+            } else {
+                STATE.autoRotateGltf = !STATE.autoRotateGltf;
+                btn.innerHTML = STATE.autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+                btn.style.borderColor = STATE.autoRotateGltf ? "var(--calib-accent)" : "var(--sculk-core)";
+            }
         },
+
         takeScreenshot: function() {
             if (STATE.currentMode === 'armor') {
                 skinViewer.renderer.render(skinViewer.scene, skinViewer.camera);
-                const link = document.createElement('a'); link.href = document.getElementById('skinViewer').toDataURL('image/png'); link.download = `vexanium_snapshot.png`; link.click();
+                const dataUrl = skinCanvas.toDataURL('image/png');
+                downloadVisualFile(dataUrl, `vexanium_armor_snapshot_${new Date().getTime()}.png`);
             } else {
                 renderer.render(scene, camera);
-                const link = document.createElement('a'); link.href = document.getElementById('gltfViewer').toDataURL('image/png'); link.download = `vexanium_snapshot.png`; link.click();
+                const dataUrl = gltfCanvas.toDataURL('image/png');
+                downloadVisualFile(dataUrl, `vexanium_${STATE.currentMode}_snapshot_${new Date().getTime()}.png`);
             }
-            this.showNotification("📸 DIAGNÓSTICO VISUAL CAPTURADO");
+            this.showNotification("📸 Diagnóstico visual capturado!");
         }
     };
 
+    function downloadVisualFile(dataUrl, filename) {
+        const link = document.createElement('a'); link.href = dataUrl; link.download = filename; link.click();
+    }
+
     /* =================================================================================
-       MEMORY MANAGER
+       THREE.JS & SKINVIEW 3D INITIALIZATION
+       ================================================================================= */
+    const skinCanvas = document.getElementById('skinViewer');
+    const skinViewer = new skinview3d.SkinViewer({
+        canvas: skinCanvas, width: skinCanvas.parentElement.clientWidth, height: skinCanvas.parentElement.clientHeight, alpha: true 
+    });
+    skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
+    skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
+
+    const gltfCanvas = document.getElementById('gltfViewer');
+    const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(45, 1, 0.1, 1000);
+    camera.position.set(0, 0, 5);
+    scene.add(new THREE.AmbientLight(0x0c8a8c, 0.6));
+    const l1 = new THREE.PointLight(0xd1d5b4, 1.2, 100); l1.position.set(5, 8, 5); scene.add(l1);
+    const purpleLight = new THREE.PointLight(0xa855f7, 2, 10); purpleLight.position.set(0, 2, 0); scene.add(purpleLight);
+
+    const controls = new THREE.OrbitControls(camera, gltfCanvas);
+    controls.enableDamping = true;
+    let currentModel = null;
+
+    const cajadoGroup = new THREE.Group();
+    const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8); const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 }); const bastao = new THREE.Mesh(bastaoGeo, bastaoMat); cajadoGroup.add(bastao);
+    const cristalGeo = new THREE.OctahedronGeometry(0.4, 0); const cristalMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0x6b21a8, metalness: 0.5, roughness: 0.1, transparent: true, opacity: 0.9 }); const cristal = new THREE.Mesh(cristalGeo, cristalMat); cristal.position.y = 2.2; cajadoGroup.add(cristal);
+    const anelGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 4); const ouroMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 1, roughness: 0.2 }); const anel1 = new THREE.Mesh(anelGeo, ouroMat); anel1.position.y = 1.9; anel1.rotation.x = Math.PI / 2; cajadoGroup.add(anel1);
+    cajadoGroup.position.set(0, -1, 0); 
+
+    function animate() {
+        requestAnimationFrame(animate);
+        if (STATE.currentMode === 'model' && currentModel && STATE.autoRotateGltf) {
+            currentModel.rotation.y += 0.005;
+        } else if (STATE.currentMode === 'item') {
+            if (STATE.autoRotateGltf) cajadoGroup.rotation.y += 0.01;
+            cristal.rotation.y += 0.01; cristal.position.y = 2.2 + Math.sin(Date.now() * 0.003) * 0.05;
+        }
+        controls.update(); renderer.render(scene, camera);
+    }
+    animate();
+
+    function resize() {
+        const parent = skinCanvas.parentElement; if (!parent) return;
+        const w = parent.clientWidth; const h = parent.clientHeight;
+        skinViewer.width = w; skinViewer.height = h;
+        renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resize); setTimeout(resize, 200);
+
+    /* =================================================================================
+       MEMORY MANAGER (Undo/Redo)
        ================================================================================= */
     const MemoryManager = {
         salvarEstadoDaLayerAtual: function() {
             let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
-            offCopy.getContext('2d').drawImage(offscreenCanvas, 0, 0);
-            STATE.layerStates[STATE.lastEditingLayer] = { offscreen: offCopy, pieces: JSON.parse(JSON.stringify(STATE.extractedPieces)) };
+            offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            let piecesCopy = STATE.extractedPieces.map(p => {
+                return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+            });
+            STATE.layerStates[STATE.lastEditingLayer] = { offscreen: offCopy, pieces: piecesCopy, nextId: STATE.nextPieceId, undo: STATE.historyUndo.slice(), redo: STATE.historyRedo.slice() };
         },
+
         carregarEstadoDaLayer: function(layer) {
             let state = STATE.layerStates[layer];
             if (!state) return false;
             offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             offscreenCtx.drawImage(state.offscreen, 0, 0);
-            STATE.extractedPieces = state.pieces;
+            STATE.extractedPieces = state.pieces.map(p => {
+                return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+            });
+            STATE.nextPieceId = state.nextId; STATE.historyUndo = state.undo.slice(); STATE.historyRedo = state.redo.slice();
+            STATE.activePieceIndex = -1; STATE.manualSelection = null;
             return true;
         },
+
         registrarEstadoMemoria: function() {
-            let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
-            offCopy.getContext('2d').drawImage(offscreenCanvas, 0, 0);
-            STATE.historyUndo.push({ offscreen: offCopy.toDataURL(), pieces: JSON.parse(JSON.stringify(STATE.extractedPieces)) });
-            if(STATE.historyUndo.length > 15) STATE.historyUndo.shift();
-            STATE.historyRedo = []; StudioCanvas.updatePiecesList();
+            const offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
+            offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const piecesCopy = STATE.extractedPieces.map(p => {
+                const idata = new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height);
+                return { ...p, imgData: idata };
+            });
+            STATE.historyUndo.push({ offscreen: offCopy, pieces: piecesCopy, nextId: STATE.nextPieceId });
+            if(STATE.historyUndo.length > 20) STATE.historyUndo.shift(); STATE.historyRedo = []; StudioCanvas.updatePiecesList();
         },
+
         desfazerEstado: function() {
-            if (STATE.historyUndo.length <= 1) return;
-            STATE.historyUndo.pop(); const prevState = STATE.historyUndo[STATE.historyUndo.length - 1];
-            const img = new Image(); img.onload = () => { offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(img, 0, 0); StudioCanvas.renderFatiador(); }; img.src = prevState.offscreen;
-            STATE.extractedPieces = prevState.pieces; StudioCanvas.updatePiecesList(); UIManager.showNotification("↩️ AÇÃO DESFEITA");
+            if (STATE.historyUndo.length <= 1) return; 
+            const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
+            currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const currPiecesCopy = STATE.extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.historyRedo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: STATE.nextPieceId });
+            STATE.historyUndo.pop();
+            const prevState = STATE.historyUndo[STATE.historyUndo.length - 1]; 
+            offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(prevState.offscreen, 0, 0);
+            STATE.extractedPieces = prevState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.nextPieceId = prevState.nextId; STATE.activePieceIndex = -1; STATE.manualSelection = null; StudioCanvas.renderFatiador(); StudioCanvas.updatePiecesList();
+            UIManager.showNotification("↩️ Ação desfeita");
         },
-        refazerEstado: function() { UIManager.showNotification("Acesso negado: Pilha de Redo vazia", "warning"); }
+
+        refazerEstado: function() {
+            if (STATE.historyRedo.length === 0) return;
+            const nextState = STATE.historyRedo.pop();
+            const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
+            currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const currPiecesCopy = STATE.extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.historyUndo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: STATE.nextPieceId });
+            offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(nextState.offscreen, 0, 0);
+            STATE.extractedPieces = nextState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.nextPieceId = nextState.nextId; STATE.activePieceIndex = -1; STATE.manualSelection = null; StudioCanvas.renderFatiador(); StudioCanvas.updatePiecesList();
+            UIManager.showNotification("↪️ Ação refeita");
+        }
     };
 
     /* =================================================================================
-       STUDIO CANVAS ENGINE (Matryoshka Logic)
+       STUDIO CANVAS ENGINE (Grid, Rendering, Initialization, Matryoshka)
        ================================================================================= */
     const StudioCanvas = {
         iniciarStudioDoZero: function(targetBase) {
             DOM.wsCanvas.width = WORKBENCH_W; DOM.wsCanvas.height = WORKBENCH_H; 
+            offscreenCanvas.width = WORKBENCH_W; offscreenCanvas.height = WORKBENCH_H;
             offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+
             if(targetBase) {
-                const img = new Image(); img.onload = () => {
-                    let aspect = img.width / img.height;
-                    if (Math.abs(aspect - 2.0) < 0.05) { offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512); } 
-                    else {
-                        let scale = Math.min(WORKBENCH_W / img.width, WORKBENCH_H / img.height);
-                        let nW = img.width * scale; let nH = img.height * scale;
-                        offscreenCtx.drawImage(img, 0, 0, img.width, img.height, (WORKBENCH_W - nW) / 2, (WORKBENCH_H - nH) / 2, nW, nH);
+                STATE.originalImageObj.onload = () => {
+                    let aspect = STATE.originalImageObj.width / STATE.originalImageObj.height;
+                    // Encaixa na zona central de exportação Mestre 1024x512
+                    if (Math.abs(aspect - 2.0) < 0.05) {
+                        offscreenCtx.drawImage(STATE.originalImageObj, 0, 0, STATE.originalImageObj.width, STATE.originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                    } else {
+                        let scale = Math.min(WORKBENCH_W / STATE.originalImageObj.width, WORKBENCH_H / STATE.originalImageObj.height);
+                        let nW = STATE.originalImageObj.width * scale; let nH = STATE.originalImageObj.height * scale;
+                        let nX = (WORKBENCH_W - nW) / 2; let nY = (WORKBENCH_H - nH) / 2;
+                        offscreenCtx.drawImage(STATE.originalImageObj, 0, 0, STATE.originalImageObj.width, STATE.originalImageObj.height, nX, nY, nW, nH);
                     }
-                    STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.nextPieceId = 1;
+                    STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.historyUndo = []; STATE.historyRedo = []; STATE.nextPieceId = 1;
                     ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); this.updatePiecesList();
-                }; img.src = targetBase;
+                };
+                STATE.originalImageObj.src = targetBase;
             } else {
-                STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.nextPieceId = 1;
+                STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.historyUndo = []; STATE.historyRedo = []; STATE.nextPieceId = 1;
                 ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); this.updatePiecesList();
             }
         },
 
         ajustarZoom: function(fator) {
-            if (fator === 'in') STATE.currentZoom = Math.min(STATE.currentZoom + 0.2, 4.0);
-            else if (fator === 'out') STATE.currentZoom = Math.max(0.4, STATE.currentZoom - 0.2);
-            else STATE.currentZoom = fator;
+            if (fator === 1.0) {
+                STATE.currentZoom = 1.0;
+            } else if (fator === 'in') {
+                STATE.currentZoom = Math.min(STATE.currentZoom + 0.2, 4.0);
+            } else if (fator === 'out') {
+                STATE.currentZoom = Math.max(0.4, STATE.currentZoom - 0.2);
+            } else {
+                STATE.currentZoom = fator;
+            }
             
-            DOM.canvasWrapper.style.transform = `scale(${STATE.currentZoom})`;
+            const newW = WORKBENCH_W * STATE.currentZoom; const newH = WORKBENCH_H * STATE.currentZoom;
+            DOM.canvasWrapper.style.width = `${newW}px`; DOM.canvasWrapper.style.height = `${newH}px`;
+            DOM.canvasWrapper.style.minWidth = `${newW}px`; DOM.canvasWrapper.style.minHeight = `${newH}px`;
             document.getElementById('zoom-label').innerText = `${Math.round(STATE.currentZoom * 100)}%`;
+            
+            // Tenta centrar o scroll se for muito grande
+            const scrollArea = document.getElementById('workspace-scroll-area');
+            scrollArea.scrollLeft = (newW - scrollArea.clientWidth) / 2;
+            scrollArea.scrollTop = (newH - scrollArea.clientHeight) / 2;
         },
 
         switchZone: function(zoneIndex) {
             STATE.currentMatryoshkaZone = zoneIndex;
+            const config = STATE.matryoshkaZones[zoneIndex];
+
+            // Atualiza Botões UI
             document.querySelectorAll('.zone-btn').forEach(btn => {
                 btn.classList.remove('active');
-                if (parseInt(btn.dataset.zone) === zoneIndex) btn.classList.add('active');
+                if (parseInt(btn.dataset.zone) === zoneIndex) {
+                    btn.classList.add('active');
+                }
             });
-            this.ajustarZoom(STATE.matryoshkaZones[zoneIndex].zoom);
+
+            // Aplica Zoom Específico da Zona para focar o trabalho
+            this.ajustarZoom(config.zoom);
             this.drawGridAndMold();
-            UIManager.showNotification(`🎯 FOCO MATRYOSHKA: ZONA ${zoneIndex}`);
+            UIManager.showNotification(`🎯 Zona ${zoneIndex} ativada: Foco no mapeamento ${config.w}x${config.h}`);
         },
 
         drawGridAndMold: function() {
             gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+            
             const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
-            let zX = OFFSET_X + (1024 - activeZone.w) / 2; let zY = OFFSET_Y + (512 - activeZone.h) / 2;
-            const f = activeZone.w / 64; // Block size for active zone
+            // O Offset e o Fator de escala adaptam-se agora à Zona Ativa
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+            const f = activeZone.w / 64; // Tamanho do Bloco Minecraft para a Zona Ativa
 
-            // Grid 1x1
-            if (document.getElementById('show-grid-1x1').checked) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; gCtx.beginPath();
-                for (let x = 0; x <= activeZone.w; x += 1) { gCtx.moveTo(zX + x, zY); gCtx.lineTo(zX + x, zY + activeZone.h); }
-                for (let y = 0; y <= activeZone.h; y += 1) { gCtx.moveTo(zX, zY + y); gCtx.lineTo(zX + activeZone.w, zY + y); }
+            // Grade de 1px nativa restrita à Zona Ativa
+            const showGrid1x1 = document.getElementById('show-grid-1x1');
+            if (showGrid1x1 && showGrid1x1.checked) {
+                gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; gCtx.lineWidth = 1; gCtx.beginPath();
+                for (let x = 0; x <= activeZone.w; x += 1) { gCtx.moveTo(zOffsetX + x, zOffsetY); gCtx.lineTo(zOffsetX + x, zOffsetY + activeZone.h); }
+                for (let y = 0; y <= activeZone.h; y += 1) { gCtx.moveTo(zOffsetX, zOffsetY + y); gCtx.lineTo(zOffsetX + activeZone.w, zOffsetY + y); }
                 gCtx.stroke();
             }
 
-            // Grid Minecraft 16x16
-            if (document.getElementById('show-grid-16x16').checked) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; gCtx.beginPath();
-                for (let x = 0; x <= activeZone.w; x += f) { gCtx.moveTo(zX + x, zY); gCtx.lineTo(zX + x, zY + activeZone.h); }
-                for (let y = 0; y <= activeZone.h; y += f) { gCtx.moveTo(zX, zY + y); gCtx.lineTo(zX + activeZone.w, zY + y); }
+            // Grade Minecraft (Adaptada ao Fator F da Zona Ativa)
+            const showGrid16x16 = document.getElementById('show-grid-16x16');
+            if (showGrid16x16 && showGrid16x16.checked) {
+                gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; gCtx.lineWidth = 1; gCtx.beginPath();
+                for (let x = 0; x <= activeZone.w; x += f) { gCtx.moveTo(zOffsetX + x, zOffsetY); gCtx.lineTo(zOffsetX + x, zOffsetY + activeZone.h); }
+                for (let y = 0; y <= activeZone.h; y += f) { gCtx.moveTo(zOffsetX, zOffsetY + y); gCtx.lineTo(zOffsetX + activeZone.w, zOffsetY + y); }
                 gCtx.stroke();
             }
 
-            // Master Bound (Always 1024x512)
-            if (document.getElementById('show-export-zone').checked) {
-                gCtx.strokeStyle = "#ffaa00"; gCtx.setLineDash([12, 8]); gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); gCtx.setLineDash([]);
-                gCtx.fillStyle = "#ffaa00"; gCtx.font = "bold 16px 'JetBrains Mono', monospace"; gCtx.fillText("MOLDE MESTRE (1024x512)", OFFSET_X, OFFSET_Y - 5);
+            // Fronteira Mestre de Exportação (Sempre Fixa a 1024x512) - Verifica com optional chaining
+            const showExportZone = document.getElementById('show-export-zone');
+            if (showExportZone && showExportZone.checked) {
+                gCtx.strokeStyle = "#ffaa00"; gCtx.lineWidth = 2; gCtx.setLineDash([12, 8]); gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); gCtx.setLineDash([]);
+                gCtx.fillStyle = "#ffaa00"; gCtx.font = "bold 16px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
+                gCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
             }
             
-            // Active Zone Bound
+            // Fronteira da Zona Matryoshka Ativa
             if (STATE.currentMatryoshkaZone !== 1) {
-                gCtx.strokeStyle = "#00e5ff"; gCtx.setLineDash([4, 4]); gCtx.strokeRect(zX, zY, activeZone.w, activeZone.h); gCtx.setLineDash([]);
+                gCtx.strokeStyle = "#00e5ff"; gCtx.lineWidth = 2; gCtx.setLineDash([4, 4]); gCtx.strokeRect(zOffsetX, zOffsetY, activeZone.w, activeZone.h); gCtx.setLineDash([]);
+                gCtx.fillStyle = "#00e5ff"; gCtx.font = "bold 10px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
+                gCtx.fillText(`Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`, zOffsetX + 2, zOffsetY + activeZone.h - 2);
             }
 
-            // UV Boxes proportionally scaled to Active Zone
+            // Desenha as Caixas UV proporcionais à Zona Ativa (Protegidos)
             const drawBox = (x, y, w, h, label) => {
-                let px = zX + (x * f); let py = zY + (y * f); let pw = w * f; let ph = h * f;
-                gCtx.strokeStyle = "#b0279c"; gCtx.setLineDash([6, 4]); gCtx.strokeRect(px, py, pw, ph); gCtx.setLineDash([]);
+                let px = zOffsetX + (x * f); let py = zOffsetY + (y * f); let pw = w * f; let ph = h * f;
+                
+                gCtx.strokeStyle = "#b0279c"; gCtx.lineWidth = 2; gCtx.setLineDash([6, 4]); gCtx.strokeRect(px, py, pw, ph); gCtx.setLineDash([]);
                 gCtx.fillStyle = "rgba(176, 39, 156, 0.1)"; gCtx.fillRect(px, py, pw, ph);
-                gCtx.fillStyle = "rgba(0,0,0,0.6)"; gCtx.fillRect(px + pw/2 - 20, py + ph/2 - 7, 40, 14);
-                gCtx.fillStyle = "#ffaa00"; gCtx.font = "bold 9px 'JetBrains Mono', monospace"; gCtx.textAlign = "center"; gCtx.textBaseline = "middle"; gCtx.fillText(label, px + pw/2, py + ph/2); 
+                gCtx.font = "bold 10px 'JetBrains Mono', monospace"; 
+                let txtW = gCtx.measureText(label).width + 8;
+                gCtx.fillStyle = "rgba(0,0,0,0.6)"; gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
+                gCtx.fillStyle = "#ffaa00"; gCtx.textAlign = "center"; gCtx.textBaseline = "middle"; gCtx.fillText(label, px + pw/2, py + ph/2); 
             };
 
             if (STATE.currentEditingLayer === 1) {
-                drawBox(8, 0, 8, 8, "CAP.TOP"); drawBox(16, 0, 8, 8, "CAP.BAS"); drawBox(8, 8, 8, 8, "CAP.FRE");
-                drawBox(20, 16, 8, 4, "PEI.TOP"); drawBox(20, 20, 8, 12, "PEI.FRE");
-                drawBox(44, 16, 4, 4, "ARM.TOP"); drawBox(44, 20, 4, 12, "ARM.FRE");
-                drawBox(4, 16, 4, 4, "BOT.TOP"); drawBox(4, 20, 4, 12, "BOT.FRE");
+                const uvHelmet = document.getElementById('uv-helmet');
+                if (uvHelmet && uvHelmet.checked) {
+                    drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
+                    drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
+                    drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
+                }
+                const uvChest = document.getElementById('uv-chest');
+                if (uvChest && uvChest.checked) {
+                    drawBox(20, 16, 8, 4, "PEITO TOPO"); drawBox(28, 16, 8, 4, "PEITO BASE");
+                    drawBox(16, 20, 4, 12, "PEITO DIR"); drawBox(20, 20, 8, 12, "PEITO FRE");
+                    drawBox(28, 20, 4, 12, "PEITO ESQ"); drawBox(32, 20, 8, 12, "PEITO COS");
+                }
+                const uvArms = document.getElementById('uv-arms');
+                if (uvArms && uvArms.checked) {
+                    drawBox(44, 16, 4, 4, "BR.D TOP"); drawBox(48, 16, 4, 4, "BR.D BAS");
+                    drawBox(40, 20, 4, 12, "BR.D DIR"); drawBox(44, 20, 4, 12, "BR.D FRE");
+                    drawBox(48, 20, 4, 12, "BR.D ESQ"); drawBox(52, 20, 4, 12, "BR.D COS");
+
+                    drawBox(36, 48, 4, 4, "BR.E TOP"); drawBox(40, 48, 4, 4, "BR.E BAS");
+                    drawBox(32, 52, 4, 12, "BR.E DIR"); drawBox(36, 52, 4, 12, "BR.E FRE");
+                    drawBox(40, 52, 4, 12, "BR.E ESQ"); drawBox(44, 52, 4, 12, "BR.E COS");
+                }
+                const uvBoots = document.getElementById('uv-boots');
+                if (uvBoots && uvBoots.checked) {
+                    drawBox(4, 16, 4, 4, "BOT.D TOP"); drawBox(8, 16, 4, 4, "BOT.D BAS");
+                    drawBox(0, 20, 4, 12, "BOT.D DIR"); drawBox(4, 20, 4, 12, "BOT.D FRE");
+                    drawBox(8, 20, 4, 12, "BOT.D ESQ"); drawBox(12, 20, 4, 12, "BOT.D COS");
+
+                    drawBox(20, 48, 4, 4, "BOT.E TOP"); drawBox(24, 48, 4, 4, "BOT.E BAS");
+                    drawBox(16, 52, 4, 12, "BOT.E DIR"); drawBox(20, 52, 4, 12, "BOT.E FRE");
+                    drawBox(24, 52, 4, 12, "BOT.E ESQ"); drawBox(28, 52, 4, 12, "BOT.E COS");
+                }
             } else if (STATE.currentEditingLayer === 2) {
-                drawBox(20, 16, 8, 4, "CIN.TOP"); drawBox(20, 20, 8, 12, "CIN.FRE");
-                drawBox(4, 16, 4, 4, "PER.TOP"); drawBox(4, 20, 4, 12, "PER.FRE");
+                const uvWaist = document.getElementById('uv-waist');
+                if (uvWaist && uvWaist.checked) {
+                    drawBox(20, 16, 8, 4, "CINT. TOPO"); drawBox(28, 16, 8, 4, "CINT. BASE");
+                    drawBox(16, 20, 4, 12, "CINT. DIR"); drawBox(20, 20, 8, 12, "CINT. FRE");
+                    drawBox(28, 20, 4, 12, "CINT. ESQ"); drawBox(32, 20, 8, 12, "CINT. COS");
+                }
+                const uvLegs = document.getElementById('uv-legs');
+                if (uvLegs && uvLegs.checked) {
+                    drawBox(4, 16, 4, 4, "PER.D TOP"); drawBox(8, 16, 4, 4, "PER.D BAS");
+                    drawBox(0, 20, 4, 12, "PER.D DIR"); drawBox(4, 20, 4, 12, "PER.D FRE");
+                    drawBox(8, 20, 4, 12, "PER.D ESQ"); drawBox(12, 20, 4, 12, "PER.D COS");
+
+                    drawBox(20, 48, 4, 4, "PER.E TOP"); drawBox(24, 48, 4, 4, "PER.E BAS");
+                    drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
+                    drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
+                }
             }
         },
 
         renderFatiador: function() {
             wsCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             wsCtx.drawImage(offscreenCanvas, 0, 0); 
+            
             STATE.extractedPieces.forEach((p, i) => {
-                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height;
-                temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                wsCtx.imageSmoothingEnabled = false; wsCtx.drawImage(temp, p.x, p.y, p.w, p.h);
+                let tempC = document.createElement('canvas'); tempC.width = p.imgData.width; tempC.height = p.imgData.height; tempC.getContext('2d').putImageData(p.imgData, 0, 0);
+                wsCtx.imageSmoothingEnabled = false; wsCtx.drawImage(tempC, p.x, p.y, p.w, p.h);
                 if (i === STATE.activePieceIndex) {
-                    wsCtx.strokeStyle = "#00e5ff"; wsCtx.lineWidth = 1.5; wsCtx.strokeRect(p.x, p.y, p.w, p.h);
+                    wsCtx.strokeStyle = "#2196F3"; wsCtx.lineWidth = 1.5; wsCtx.setLineDash([]); wsCtx.strokeRect(p.x, p.y, p.w, p.h);
+                    const drawHandle = (hx, hy) => { wsCtx.beginPath(); wsCtx.arc(hx, hy, 4, 0, Math.PI * 2); wsCtx.fillStyle = "#ffffff"; wsCtx.fill(); wsCtx.lineWidth = 1.5; wsCtx.strokeStyle = "#2196F3"; wsCtx.stroke(); };
+                    drawHandle(p.x, p.y); drawHandle(p.x + p.w, p.y); drawHandle(p.x, p.y + p.h); drawHandle(p.x + p.w, p.y + p.h);     
                 }
             });
             if (STATE.currentTool === 'slice' && STATE.manualSelection && STATE.manualSelection.w > 0) {
-                wsCtx.strokeStyle = "#ff00ff"; wsCtx.strokeRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h);
+                wsCtx.strokeStyle = "var(--ai-accent)"; wsCtx.lineWidth = 2; wsCtx.setLineDash([5, 5]); wsCtx.strokeRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h); wsCtx.setLineDash([]); wsCtx.fillStyle = "rgba(255, 0, 255, 0.15)"; wsCtx.fillRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h);
             }
         },
 
         updatePiecesList: function() {
             const list = document.getElementById('pieces-list'); list.innerHTML = '';
             STATE.extractedPieces.forEach((p, i) => {
-                const itemDiv = document.createElement('div'); itemDiv.className = 'piece-item';
+                const itemDiv = document.createElement('div'); itemDiv.className = 'piece-item' + (i === STATE.activePieceIndex ? ' selected' : '');
                 const previewDiv = document.createElement('div'); previewDiv.className = 'piece-preview';
                 previewDiv.onclick = () => { STATE.activePieceIndex = i; this.renderFatiador(); this.updatePiecesList(); };
-                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height;
-                temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                const img = new Image(); img.src = temp.toDataURL(); previewDiv.appendChild(img);
+                const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height;
+                tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+                const img = document.createElement('img'); img.src = tempCanvas.toDataURL('image/png'); previewDiv.appendChild(img);
                 
-                const actionsDiv = document.createElement('div'); actionsDiv.style.display = 'flex'; actionsDiv.style.gap = '5px';
-                const btnDl = document.createElement('button'); btnDl.className = 'action-btn'; btnDl.style.flex = '1'; btnDl.textContent = '📥'; btnDl.onclick = () => ExportManager.downloadPiece(p);
-                const btnDel = document.createElement('button'); btnDel.className = 'action-btn delete-btn'; btnDel.style.flex = '1'; btnDel.textContent = '🗑️'; btnDel.onclick = () => { STATE.activePieceIndex = i; ToolManager.apagarPecaAtiva(); };
+                const infoDiv = document.createElement('div'); infoDiv.className = 'piece-info'; infoDiv.innerHTML = `<span>Peça #${p.id}</span><span>${p.w}x${p.h}</span>`;
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'piece-actions';
                 
-                actionsDiv.appendChild(btnDl); actionsDiv.appendChild(btnDel);
-                itemDiv.appendChild(previewDiv); itemDiv.appendChild(actionsDiv); list.appendChild(itemDiv);
+                const dlBtn = document.createElement('button'); dlBtn.className = 'piece-btn'; dlBtn.textContent = '📥'; dlBtn.onclick = () => ExportManager.downloadPiece(p);
+                const delBtn = document.createElement('button'); delBtn.className = 'piece-btn delete'; delBtn.textContent = '🗑️'; 
+                delBtn.onclick = () => { STATE.activePieceIndex = i; ToolManager.apagarPecaAtiva(); };
+                
+                actionsDiv.appendChild(dlBtn); actionsDiv.appendChild(delBtn);
+                itemDiv.appendChild(previewDiv); itemDiv.appendChild(infoDiv); itemDiv.appendChild(actionsDiv); list.appendChild(itemDiv);
             });
         },
 
         abrirFatiadorLivre: function(forceReload = false) {
             let targetBase = STATE.currentEditingLayer === 1 ? STATE.baseImageL1 : STATE.baseImageL2;
-            document.getElementById('slicer-layer-badge').innerText = STATE.currentEditingLayer === 1 ? "L1 (CORPO)" : "L2 (CALÇAS)";
+            let badge = document.getElementById('slicer-layer-badge'); 
+            
+            // Correção Aplicada: Validação de Nulos
+            const uvToggleL1 = document.getElementById('uv-toggles-l1');
+            if (uvToggleL1) { uvToggleL1.style.display = STATE.currentEditingLayer === 1 ? 'flex' : 'none'; }
+            
+            const uvToggleL2 = document.getElementById('uv-toggles-l2');
+            if (uvToggleL2) { uvToggleL2.style.display = STATE.currentEditingLayer === 2 ? 'flex' : 'none'; }
+
+            if (STATE.currentEditingLayer === 1) {
+                if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
+            } else {
+                if (badge) { badge.innerText = "L2 (CALÇAS)"; badge.style.background = "#00ffaa"; }
+            }
+            
             UIManager.showModal('slicer-modal'); 
+            this.ajustarZoom(0.70); 
             
             if (!forceReload && STATE.currentEditingLayer === STATE.lastEditingLayer) {
-                this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList(); return;
+                this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList();
+                return;
             }
+
             if (STATE.currentEditingLayer !== STATE.lastEditingLayer) MemoryManager.salvarEstadoDaLayerAtual();
             STATE.lastEditingLayer = STATE.currentEditingLayer;
-            
-            if (forceReload || !MemoryManager.carregarEstadoDaLayer(STATE.currentEditingLayer)) {
+
+            if (forceReload) {
                 this.iniciarStudioDoZero(targetBase);
             } else {
-                ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList();
+                if (MemoryManager.carregarEstadoDaLayer(STATE.currentEditingLayer)) {
+                    ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList();
+                } else {
+                    this.iniciarStudioDoZero(targetBase);
+                }
             }
         },
 
-        salvarPresetJSON: function() {
-            if (STATE.extractedPieces.length === 0) { UIManager.showNotification("Não existem peças para salvar.", "warning"); return; }
-            const preset = {
-                layer: STATE.currentEditingLayer, baseImage: offscreenCanvas.toDataURL('image/png'),
-                pieces: STATE.extractedPieces.map(p => {
-                    const temp = document.createElement('canvas'); temp.width = p.w; temp.height = p.h; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                    return { id: p.id, x: p.x, y: p.y, w: p.w, h: p.h, base64: temp.toDataURL('image/png') };
-                })
-            };
-            const blob = new Blob([JSON.stringify(preset)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-            a.download = `vexanium_preset_layer${STATE.currentEditingLayer}.json`; a.click(); UIManager.showNotification("PRESET GUARDADO NO DISCO");
+        abrirEstudio: function() {
+            this.abrirFatiadorLivre(false);
         }
     };
 
     /* =================================================================================
-       TOOL MANAGER
+       TOOL MANAGER (Brush, Move, Magic Wand, Slice, Eyedropper)
        ================================================================================= */
     const ToolManager = {
-        setColor: function(hex) { STATE.currentPaintColor = hex; document.getElementById('color-picker').value = hex; this.setTool('brush'); },
-        setTool: function(tool) {
-            STATE.currentTool = tool;
-            ['move', 'magic', 'slice', 'brush', 'eyedropper'].forEach(t => { const el = document.getElementById('tool-btn-' + t); if(el) el.classList.remove('active'); });
-            const activeEl = document.getElementById('tool-btn-' + tool); if(activeEl) activeEl.classList.add('active');
-            DOM.wsCanvas.style.cursor = (tool === 'brush' || tool === 'eyedropper' || tool === 'magic' || tool === 'slice') ? 'crosshair' : 'grab';
+        setColor: function(hex) {
+            STATE.currentPaintColor = hex;
+            document.getElementById('color-picker').value = hex;
+            this.setTool('brush');
         },
+
+        rgbToHex: function(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+        },
+
         aplicarPincelada: function(pos) {
             let size = parseInt(document.getElementById('brush-size').value) || 2;
+            let px = Math.floor(pos.x); let py = Math.floor(pos.y);
             offscreenCtx.fillStyle = STATE.currentPaintColor;
-            offscreenCtx.fillRect(pos.x - size/2, pos.y - size/2, size, size);
+            offscreenCtx.fillRect(px - Math.floor(size/2), py - Math.floor(size/2), size, size);
             StudioCanvas.renderFatiador();
         },
+
         aplicarContaGotas: function(pos) {
-            let pixel = wsCtx.getImageData(pos.x, pos.y, 1, 1).data;
-            if (pixel[3] > 0) this.setColor("#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).slice(1));
+            let px = Math.floor(pos.x); let py = Math.floor(pos.y);
+            let pixel = wsCtx.getImageData(px, py, 1, 1).data;
+            if (pixel[3] > 0) { this.setColor(this.rgbToHex(pixel[0], pixel[1], pixel[2])); }
         },
+
+        setTool: function(tool) {
+            STATE.currentTool = tool;
+            ['move', 'magic', 'slice', 'brush', 'eyedropper'].forEach(t => {
+                document.getElementById('tool-btn-' + t).classList.remove('active');
+            });
+            document.getElementById('tool-btn-' + tool).classList.add('active');
+            DOM.wsCanvas.style.cursor = (tool === 'brush' || tool === 'eyedropper' || tool === 'magic' || tool === 'slice') ? 'crosshair' : 'grab';
+        },
+
         removerFundoBranco: function() {
-            const imgData = offscreenCtx.getImageData(0, 0, WORKBENCH_W, WORKBENCH_H); const data = imgData.data;
-            if (data[3] < 10) { UIManager.showNotification("Fundo já é transparente.", "warning"); return; }
-            for (let i = 0; i < data.length; i += 4) { if ((Math.abs(data[i]-data[0]) <= 30 && Math.abs(data[i+1]-data[1]) <= 30) || (data[i] > 230 && data[i+1] > 230)) data[i+3] = 0; }
-            offscreenCtx.putImageData(imgData, 0, 0); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); UIManager.showNotification("✨ FUNDO TRANSPARENTE APLICADO");
+            const w = offscreenCanvas.width; const h = offscreenCanvas.height;
+            const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
+            const bgR = data[0]; const bgG = data[1]; const bgB = data[2]; const bgA = data[3];
+            if (bgA < 10) { UIManager.showNotification("O fundo já parece ser transparente.", "warning"); return; }
+            const tolerance = 30; 
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i]; const g = data[i+1]; const b = data[i+2];
+                if ((Math.abs(r - bgR) <= tolerance && Math.abs(g - bgG) <= tolerance && Math.abs(b - bgB) <= tolerance) || (r > 230 && g > 230 && b > 230)) { data[i+3] = 0; }
+            }
+            offscreenCtx.putImageData(imgData, 0, 0); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            UIManager.showNotification("✨ Fundo transparente inteligente aplicado!");
         },
-        confirmarCorteManual: function() {
-            if (!STATE.manualSelection || STATE.manualSelection.w <= 2) { UIManager.showNotification("Desenhe a caixa primeiro.", "warning"); return; }
-            let rx = STATE.manualSelection.x; let ry = STATE.manualSelection.y; let rw = STATE.manualSelection.w; let rh = STATE.manualSelection.h;
-            let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
-            offscreenCtx.clearRect(rx, ry, rw, rh);
-            STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, x: rx, y: ry, w: rw, h: rh });
-            STATE.manualSelection = null; STATE.activePieceIndex = STATE.extractedPieces.length - 1; this.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); UIManager.showNotification("✂️ CORTE EXTRAÍDO");
-        },
+
         duplicarPecaAtiva: function() {
-            if (STATE.activePieceIndex >= 0) {
+            if (STATE.activePieceIndex >= 0 && STATE.activePieceIndex < STATE.extractedPieces.length) {
                 const p = STATE.extractedPieces[STATE.activePieceIndex];
-                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: p.imgData, x: p.x + 20, y: p.y + 20, w: p.w, h: p.h });
+                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: p.imgData, ox: undefined, oy: undefined, x: p.x + 20, y: p.y + 20, w: p.w, h: p.h });
                 STATE.activePieceIndex = STATE.extractedPieces.length - 1; this.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("🖨️ Peça duplicada");
             }
         },
+
         apagarPecaAtiva: function() {
-            if (STATE.activePieceIndex >= 0) {
-                STATE.extractedPieces.splice(STATE.activePieceIndex, 1); STATE.activePieceIndex = -1; StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); UIManager.showNotification("🗑️ PEÇA APAGADA");
+            if (STATE.activePieceIndex >= 0 && STATE.activePieceIndex < STATE.extractedPieces.length) {
+                const p = STATE.extractedPieces[STATE.activePieceIndex];
+                if (p.ox !== undefined && p.oy !== undefined) offscreenCtx.putImageData(p.imgData, p.ox, p.oy);
+                STATE.extractedPieces.splice(STATE.activePieceIndex, 1); STATE.activePieceIndex = -1; StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("🗑️ Peça restaurada/apagada", "warning");
             }
         },
+
+        confirmarCorteManual: function() {
+            if (!STATE.manualSelection || STATE.manualSelection.w <= 2 || STATE.manualSelection.h <= 2) {
+                UIManager.showNotification("Operador, desenhe a caixa de seleção na imagem antes de clicar em Recortar.", "warning"); return;
+            }
+            let rx = Math.max(0, Math.floor(STATE.manualSelection.x)); let ry = Math.max(0, Math.floor(STATE.manualSelection.y));
+            let rw = Math.floor(STATE.manualSelection.w); let rh = Math.floor(STATE.manualSelection.h);
+            if (rx + rw > offscreenCanvas.width) rw = offscreenCanvas.width - rx;
+            if (ry + rh > offscreenCanvas.height) rh = offscreenCanvas.height - ry;
+            if (rw <= 0 || rh <= 0) return;
+
+            let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
+            let hasPixels = false;
+            for (let i = 3; i < imgD.data.length; i += 4) { if (imgD.data[i] > 10) { hasPixels = true; break; } }
+            if (!hasPixels) { UIManager.showNotification("A área selecionada está vazia.", "error"); STATE.manualSelection = null; StudioCanvas.renderFatiador(); return; }
+
+            offscreenCtx.clearRect(rx, ry, rw, rh);
+            STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, ox: rx, oy: ry, x: rx, y: ry, w: rw, h: rh });
+            STATE.manualSelection = null; STATE.activePieceIndex = STATE.extractedPieces.length - 1; this.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            UIManager.showNotification("✂️ Corte manual extraído com sucesso!");
+        },
+
+        selecaoMagica: function(sx, sy) {
+            const w = offscreenCanvas.width; const h = offscreenCanvas.height; const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
+            const startAlpha = data[(sy * w + sx) * 4 + 3]; if (startAlpha === 0) return null; 
+            const visited = new Uint8Array(w * h); const queueX = new Int32Array(w * h); const queueY = new Int32Array(w * h);
+            let head = 0, tail = 0; queueX[tail] = sx; queueY[tail] = sy; tail++; visited[sy * w + sx] = 1;
+            let minX = sx, maxX = sx, minY = sy, maxY = sy;
+            while (head < tail) {
+                const cx = queueX[head]; const cy = queueY[head]; head++;
+                if (cx < minX) minX = cx; if (cx > maxX) maxX = cx; if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue; const nx = cx + dx; const ny = cy + dy;
+                        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                            const idx = ny * w + nx;
+                            if (visited[idx] === 0) { visited[idx] = 1; if (data[idx * 4 + 3] > 30) { queueX[tail] = nx; queueY[tail] = ny; tail++; } }
+                        }
+                    }
+                }
+            }
+            const p = 3; return { x: Math.max(0, minX - p), y: Math.max(0, minY - p), w: Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2)), h: Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2)) };
+        },
+
         getMousePos: function(evt) {
-            const rect = DOM.wsCanvas.getBoundingClientRect();
-            return { x: (evt.clientX - rect.left) * (WORKBENCH_W/rect.width), y: (evt.clientY - rect.top) * (WORKBENCH_H/rect.height) };
+            const rect = DOM.wsCanvas.getBoundingClientRect(); const scaleX = DOM.wsCanvas.width / rect.width; const scaleY = DOM.wsCanvas.height / rect.height;
+            return { x: (evt.clientX - rect.left) * scaleX, y: (evt.clientY - rect.top) * scaleY };
+        },
+
+        getHoverHandle: function(x, y, p) {
+            const hs = 8; 
+            if (Math.abs(x - p.x) < hs && Math.abs(y - p.y) < hs) return 'nw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - p.y) < hs) return 'ne';
+            if (Math.abs(x - p.x) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'sw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'se'; return null;
         }
     };
 
     /* =================================================================================
-       EXPORT & MATRYOSHKA UPSCALE MANAGER
+       MOUSE EVENTS NO CANVAS DE TRABALHO
        ================================================================================= */
-    const ExportManager = {
-        triggerUpload: function(t) { STATE.uploadTarget = t; document.getElementById('file-input').click(); },
-        downloadPiece: function(p) {
-            const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-            const a = document.createElement('a'); a.href = temp.toDataURL(); a.download = `peca_${p.id}.png`; a.click();
-        },
-        downloadAllPieces: function() {
-            if (STATE.extractedPieces.length === 0) { UIManager.showNotification("Aviso: Nenhuma peça extraída.", "error"); return; }
-            UIManager.showNotification(`📦 A CRIAR PACOTE ZIP...`);
-            const zip = new JSZip(); const folder = zip.folder("vexanium_armor");
-            STATE.extractedPieces.forEach(p => {
-                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                folder.file(`peca_${p.id}.png`, temp.toDataURL().split(',')[1], {base64: true});
-            });
-            zip.generateAsync({type: "blob"}).then((blob) => {
-                const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = `vexanium_pack.zip`; a.click();
-            });
-        },
-        aplicarMontagemUVLivre: function() {
-            // A MAGIA DA MATRYOSHKA: Independente da zona em que o utilizador trabalhou (ex: 256x128),
-            // a exportação recorta apenas a área dessa zona e faz o upscale matemático (esticar) 
-            // de volta para a Base Mestre 1024x512 antes de enviar ao modelo 3D.
-            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
-            const zX = OFFSET_X + (1024 - activeZone.w) / 2;
-            const zY = OFFSET_Y + (512 - activeZone.h) / 2;
-
-            // 1. Recortar a Zona Ativa da Mesa de Trabalho
-            const zoneCanvas = document.createElement('canvas'); zoneCanvas.width = activeZone.w; zoneCanvas.height = activeZone.h;
-            const zCtx = zoneCanvas.getContext('2d'); zCtx.imageSmoothingEnabled = false;
-            
-            // Pinta o fundo se tiver (opcional)
-            zCtx.drawImage(offscreenCanvas, zX, zY, activeZone.w, activeZone.h, 0, 0, activeZone.w, activeZone.h);
-            
-            // Pinta as peças extraídas alinhadas com a Zona Ativa
-            STATE.extractedPieces.forEach(p => {
-                const pCanv = document.createElement('canvas'); pCanv.width = p.imgData.width; pCanv.height = p.imgData.height; pCanv.getContext('2d').putImageData(p.imgData, 0, 0);
-                zCtx.drawImage(pCanv, p.x - zX, p.y - zY, p.w, p.h);
-            });
-
-            // 2. UPSCALE PARA A MESTRE 1024x512
-            const masterCanvas = document.createElement('canvas'); masterCanvas.width = 1024; masterCanvas.height = 512;
-            const mCtx = masterCanvas.getContext('2d');
-            mCtx.imageSmoothingEnabled = false; // Garante que não desfoca os pixéis
-            mCtx.drawImage(zoneCanvas, 0, 0, activeZone.w, activeZone.h, 0, 0, 1024, 512);
-
-            const finalBase64 = masterCanvas.toDataURL('image/png');
-            if (STATE.currentEditingLayer === 1) STATE.finalImageL1 = finalBase64; else STATE.finalImageL2 = finalBase64;
-            
-            UIManager.updateDiagnosticPanel();
-            this.atualizarPreview3D();
-            UIManager.showNotification(`✅ SINCRONIZAÇÃO MATRYOSHKA CONCLUÍDA (UPSCALE Z${STATE.currentMatryoshkaZone} -> Z1)`);
-            UIManager.closeModal('slicer-modal');
-        },
-        atualizarPreview3D: function() {
-            const previewCanvas = document.createElement('canvas'); previewCanvas.width = 1024; previewCanvas.height = 1024; 
-            const pCtx = previewCanvas.getContext('2d'); pCtx.imageSmoothingEnabled = false;
-            const loadImage = (b64) => { return new Promise((resolve, reject) => { if (!b64) { resolve(null); return; } const img = new Image(); img.onload = () => resolve(img); img.onerror = reject; img.src = b64; }); };
-
-            Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
-                if (imgL1) pCtx.drawImage(imgL1, 0, 0); // Desenha a metade superior do L1 (simplificado para exemplo)
-                
-                // Proteção contra falhas no SkinViewer com .catch()
-                skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => console.warn("Erro no WebGL:", err));
-            }).catch(err => console.warn("Erro ao carregar texturas geradas:", err));
-        },
-        baixarTextura: function(layer) {
-            let data = layer === 1 ? STATE.finalImageL1 : STATE.finalImageL2;
-            if(!data) { UIManager.showNotification(`A Camada L${layer} não foi compilada no Estúdio.`, "error"); return; }
-            const link = document.createElement('a'); link.href = data; link.download = `vexanium_L${layer}_compiled.png`; link.click();
-        }
-    };
-
-    /* =================================================================================
-       IA & LORE INTEGRATION
-       ================================================================================= */
-    function executarGeracaoIA() { 
-        document.getElementById('ai-loader').style.display = 'block'; 
-        setTimeout(() => { 
-            document.getElementById('ai-loader').style.display = 'none'; 
-            UIManager.showNotification("API KEY NÃO CONFIGURADA PARA LLM", "error"); 
-            UIManager.closeModal('gen-modal'); 
-        }, 1500); 
-    }
-    function generateLore() { UIManager.showModal('ai-modal'); document.getElementById('ai-response-text').innerText = "Analisando a crosta de sculk incrustada no metal da armadura... A biologia parasita sugere uma simbiose forçada nas profundezas do Deep Dark."; }
-    function gerarAtributos() { UIManager.showModal('ai-modal'); document.getElementById('ai-response-text').innerText = "ATRIBUTOS TÁTICOS:\n\n- Armadura Base: 12\n- Tenacidade: 4\n- Resistência a Knockback: +40%\n- Maldição: Dreno passivo de sanidade no Escuro."; }
-    function processarTelemetriaInGame() { UIManager.closeModal('ingame-modal'); UIManager.showModal('ai-modal'); document.getElementById('ai-response-text').innerText = "TELEMETRIA PROCESSADA:\nOperador, detecto níveis de stress térmico na couraça. Recomendo ativação do sistema de purga de fluídos imediatamente."; }
-
-    /* =================================================================================
-       EVENTOS DA MESA DE TRABALHO
-       ================================================================================= */
-    DOM.wsCanvas.onmousedown = (e) => {
+    DOM.wsCanvas.addEventListener('mousedown', (e) => {
         const pos = ToolManager.getMousePos(e); STATE.startX = pos.x; STATE.startY = pos.y;
-        if (STATE.currentTool === 'brush') { STATE.isPainting = true; ToolManager.aplicarPincelada(pos); }
-        else if (STATE.currentTool === 'eyedropper') { ToolManager.aplicarContaGotas(pos); }
-        else if (STATE.currentTool === 'slice') { STATE.isDragging = true; STATE.manualSelection = null; StudioCanvas.renderFatiador(); }
-        else if (STATE.currentTool === 'magic') {
-            const box = ToolManager.selecaoMagica(Math.floor(pos.x), Math.floor(pos.y));
-            if(box && box.w>5) {
-                const imgD = offscreenCtx.getImageData(box.x, box.y, box.w, box.h); offscreenCtx.clearRect(box.x, box.y, box.w, box.h);
-                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, x: box.x, y: box.y, w: box.w, h: box.h });
-                STATE.activePieceIndex = STATE.extractedPieces.length - 1; ToolManager.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria();
+        
+        if (STATE.currentTool === 'brush') { STATE.isPainting = true; ToolManager.aplicarPincelada(pos); return; }
+        if (STATE.currentTool === 'eyedropper') { ToolManager.aplicarContaGotas(pos); return; }
+
+        if (STATE.currentTool === 'move') {
+            if (STATE.activePieceIndex !== -1) {
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; let handle = ToolManager.getHoverHandle(pos.x, pos.y, p);
+                if (handle) { STATE.isResizing = true; STATE.resizeHandle = handle; STATE.origP = {x: p.x, y: p.y, w: p.w, h: p.h}; DOM.wsCanvas.style.cursor = handle + '-resize'; return; }
             }
-        }
-        else if (STATE.currentTool === 'move') {
             STATE.activePieceIndex = -1;
-            for(let i = STATE.extractedPieces.length-1; i>=0; i--) {
-                const p = STATE.extractedPieces[i];
-                if(pos.x >= p.x && pos.x <= p.x+p.w && pos.y >= p.y && pos.y <= p.y+p.h) {
+            for (let i = STATE.extractedPieces.length - 1; i >= 0; i--) {
+                let p = STATE.extractedPieces[i];
+                if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) {
                     STATE.activePieceIndex = i; STATE.isDragging = true; DOM.wsCanvas.style.cursor = 'grabbing';
-                    STATE.extractedPieces.push(STATE.extractedPieces.splice(i,1)[0]); STATE.activePieceIndex = STATE.extractedPieces.length-1; break;
+                    let target = STATE.extractedPieces.splice(i, 1)[0]; STATE.extractedPieces.push(target); STATE.activePieceIndex = STATE.extractedPieces.length - 1; break;
                 }
             }
             StudioCanvas.renderFatiador();
-        }
-    };
+        } else if (STATE.currentTool === 'magic') {
+            let sx = Math.floor(pos.x); let sy = Math.floor(pos.y);
+            sx = Math.max(0, Math.min(offscreenCanvas.width - 1, sx)); sy = Math.max(0, Math.min(offscreenCanvas.height - 1, sy));
+            const box = ToolManager.selecaoMagica(sx, sy);
+            if (box && box.w > 5 && box.h > 5) {
+                let imgD = offscreenCtx.getImageData(box.x, box.y, box.w, box.h); offscreenCtx.clearRect(box.x, box.y, box.w, box.h);
+                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, ox: box.x, oy: box.y, x: box.x, y: box.y, w: box.w, h: box.h });
+                STATE.activePieceIndex = STATE.extractedPieces.length - 1; ToolManager.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            }
+        } else if (STATE.currentTool === 'slice') { STATE.isDragging = true; STATE.manualSelection = null; StudioCanvas.renderFatiador(); }
+    });
 
-    DOM.wsCanvas.onmousemove = (e) => {
+    DOM.wsCanvas.addEventListener('mousemove', (e) => {
         const pos = ToolManager.getMousePos(e);
-        if (STATE.isPainting && STATE.currentTool === 'brush') { ToolManager.aplicarPincelada(pos); }
-        if (STATE.isDragging) {
-            if(STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
-                const p = STATE.extractedPieces[STATE.activePieceIndex]; p.x += pos.x - STATE.startX; p.y += pos.y - STATE.startY; STATE.startX = pos.x; STATE.startY = pos.y; StudioCanvas.renderFatiador();
-            } else if(STATE.currentTool === 'slice') {
-                const w = pos.x - STATE.startX; const h = pos.y - STATE.startY;
-                STATE.manualSelection = { x: w<0?pos.x:STATE.startX, y: h<0?pos.y:STATE.startY, w: Math.abs(w), h: Math.abs(h) }; StudioCanvas.renderFatiador();
+        if (STATE.isPainting && STATE.currentTool === 'brush') { ToolManager.aplicarPincelada(pos); return; }
+
+        if (!STATE.isDragging && !STATE.isResizing && STATE.currentTool === 'move') {
+            let hoveringHandle = false;
+            if (STATE.activePieceIndex !== -1) {
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; let handle = ToolManager.getHoverHandle(pos.x, pos.y, p);
+                if (handle) { DOM.wsCanvas.style.cursor = handle + '-resize'; hoveringHandle = true; }
+            }
+            if (!hoveringHandle) {
+                let hoverPiece = false;
+                for (let i = STATE.extractedPieces.length - 1; i >= 0; i--) {
+                    let p = STATE.extractedPieces[i];
+                    if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) { hoverPiece = true; break; }
+                }
+                DOM.wsCanvas.style.cursor = hoverPiece ? 'grab' : 'default';
             }
         }
-    };
+        if (STATE.isResizing && STATE.activePieceIndex !== -1) {
+            let p = STATE.extractedPieces[STATE.activePieceIndex]; let dx = pos.x - STATE.startX; let dy = pos.y - STATE.startY;
+            if (STATE.resizeHandle === 'se') { p.w = Math.max(5, STATE.origP.w + dx); p.h = Math.max(5, STATE.origP.h + dy); } 
+            else if (STATE.resizeHandle === 'sw') { p.x = STATE.origP.x + dx; p.w = Math.max(5, STATE.origP.w - dx); p.h = Math.max(5, STATE.origP.h + dy); } 
+            else if (STATE.resizeHandle === 'ne') { p.y = STATE.origP.y + dy; p.w = Math.max(5, STATE.origP.w + dx); p.h = Math.max(5, STATE.origP.h - dy); } 
+            else if (STATE.resizeHandle === 'nw') { p.x = STATE.origP.x + dx; p.y = STATE.origP.y + dy; p.w = Math.max(5, STATE.origP.w - dx); p.h = Math.max(5, STATE.origP.h - dy); }
+            StudioCanvas.renderFatiador(); return;
+        }
+        if (!STATE.isDragging) return;
+        
+        if (STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
+            let p = STATE.extractedPieces[STATE.activePieceIndex]; p.x += pos.x - STATE.startX; p.y += pos.y - STATE.startY; STATE.startX = pos.x; STATE.startY = pos.y; StudioCanvas.renderFatiador();
+        } else if (STATE.currentTool === 'slice') {
+            currentRectW = pos.x - STATE.startX; currentRectH = pos.y - STATE.startY;
+            let rx = Math.floor(currentRectW < 0 ? STATE.startX + currentRectW : STATE.startX); let ry = Math.floor(currentRectH < 0 ? STATE.startY + currentRectH : STATE.startY);
+            let rw = Math.floor(Math.abs(currentRectW)); let rh = Math.floor(Math.abs(currentRectH));
+            STATE.manualSelection = {x: rx, y: ry, w: rw, h: rh}; StudioCanvas.renderFatiador();
+        }
+    });
 
-    window.onmouseup = () => {
-        if(STATE.isPainting) { STATE.isPainting = false; MemoryManager.registrarEstadoMemoria(); }
-        if(STATE.isDragging) {
-            STATE.isDragging = false; DOM.wsCanvas.style.cursor = 'crosshair';
-            if(STATE.currentTool === 'move' && document.getElementById('snap-grid').checked && STATE.activePieceIndex !== -1) {
+    DOM.wsCanvas.addEventListener('mouseup', (e) => {
+        if (STATE.isPainting) { STATE.isPainting = false; MemoryManager.registrarEstadoMemoria(); return; }
+
+        if (STATE.isResizing) {
+            STATE.isResizing = false; STATE.resizeHandle = '';
+            if (document.getElementById('snap-grid').checked && STATE.activePieceIndex !== -1) {
                 const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
-                const zX = OFFSET_X + (1024 - activeZone.w) / 2; const zY = OFFSET_Y + (512 - activeZone.h) / 2;
+                let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+                let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
                 const snapF = Math.max(1, activeZone.w / 64);
-                let p = STATE.extractedPieces[STATE.activePieceIndex];
-                p.x = zX + Math.round((p.x - zX) / snapF) * snapF; p.y = zY + Math.round((p.y - zY) / snapF) * snapF;
+                
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; 
+                let relX = p.x - zOffsetX; let relY = p.y - zOffsetY;
+                let right = Math.round((relX + p.w) / snapF) * snapF; let bottom = Math.round((relY + p.h) / snapF) * snapF;
+                relX = Math.round(relX / snapF) * snapF; relY = Math.round(relY / snapF) * snapF;
+                p.x = zOffsetX + relX; p.y = zOffsetY + relY; p.w = Math.max(snapF, right - relX); p.h = Math.max(snapF, bottom - relY);
             }
-            StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria();
+            StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); return;
+        }
+        if (STATE.isDragging) {
+            STATE.isDragging = false;
+            if (STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
+                DOM.wsCanvas.style.cursor = 'grab';
+                if (document.getElementById('snap-grid').checked) {
+                    const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+                    let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+                    let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+                    const snapF = Math.max(1, activeZone.w / 64);
+                    
+                    let p = STATE.extractedPieces[STATE.activePieceIndex]; 
+                    let relX = p.x - zOffsetX; let relY = p.y - zOffsetY;
+                    relX = Math.round(relX / snapF) * snapF; relY = Math.round(relY / snapF) * snapF;
+                    p.x = zOffsetX + relX; p.y = zOffsetY + relY; 
+                }
+                StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            }
+        }
+    });
+
+    /* =================================================================================
+       EXPORT & IMPORT MANAGER (A Regra de Ouro da Exportação 1024x512)
+       ================================================================================= */
+    const ExportManager = {
+        triggerUpload: function(targetId) { 
+            STATE.uploadTarget = targetId; if (targetId === 1 || targetId === 2) STATE.currentEditingLayer = targetId;
+            DOM.fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg"; DOM.fileInput.click(); 
+        },
+
+        downloadPiece: function(piece) {
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = piece.imgData.width; tempCanvas.height = piece.imgData.height; tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
+            tempCanvas.toBlob((blob) => {
+                if(!blob) return;
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+                a.href = url; a.download = `peça_${piece.id}.png`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                UIManager.showNotification(`✓ Peça #${piece.id} baixada!`);
+            }, 'image/png');
+        },
+
+        // EXPORTAÇÃO MESTRE: Imutável para o tamanho 1024x512
+        downloadAllPieces: function() {
+            if (STATE.extractedPieces.length === 0) { UIManager.showNotification("Nenhuma peça extraída para baixar.", "error"); return; }
+            UIManager.showNotification(`✓ Criando pacote Vexanium (ZIP + JSON)...`);
+
+            const zip = new JSZip();
+            const folder = zip.folder("vexanium_armor_pack");
+            const imagesFolder = folder.folder("textures");
+            
+            STATE.extractedPieces.forEach((p) => {
+                const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height; tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+                const base64 = tempCanvas.toDataURL('image/png').split(',')[1];
+                imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
+            });
+
+            // Geração da Camada Final baseada na Zona Ativa com Upscale para 1024x512
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+            
+            const zoneCanvas = document.createElement('canvas'); zoneCanvas.width = activeZone.w; zoneCanvas.height = activeZone.h;
+            const zoneCtx = zoneCanvas.getContext('2d'); zoneCtx.imageSmoothingEnabled = false;
+            
+            STATE.extractedPieces.forEach(p => {
+                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
+                zoneCtx.drawImage(temp, p.x - zOffsetX, p.y - zOffsetY, p.w, p.h);
+            });
+
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
+            outCtx.imageSmoothingEnabled = false;
+            outCtx.drawImage(zoneCanvas, 0, 0, activeZone.w, activeZone.h, 0, 0, 1024, 512);
+
+            const layerBase64 = outCanvas.toDataURL('image/png').split(',')[1];
+            imagesFolder.file(`parasita_layer_${STATE.currentEditingLayer}_compiled.png`, layerBase64, {base64: true});
+
+            const scaleFactor = 1024 / activeZone.w;
+            const metadata = {
+                "armor_name": "Vexanium Base Build",
+                "layer_type": STATE.currentEditingLayer === 1 ? "helmet_chest_boots" : "leggings",
+                "pipeline_phase": "Phase 3/4 (Frontend Export)",
+                "pieces_count": STATE.extractedPieces.length,
+                "format": "1024x512 HD Scaled", 
+                "matryoshka_zone_used": `Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`,
+                "pieces_coordinates": STATE.extractedPieces.map(p => ({
+                    "id": p.id, 
+                    "mc_x_scaled": Math.round((p.x - zOffsetX) * scaleFactor), 
+                    "mc_y_scaled": Math.round((p.y - zOffsetY) * scaleFactor), 
+                    "w_scaled": Math.round(p.w * scaleFactor), 
+                    "h_scaled": Math.round(p.h * scaleFactor)
+                }))
+            };
+            folder.file("metadata.json", JSON.stringify(metadata, null, 2));
+
+            zip.generateAsync({type: "blob"}).then((blob) => {
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `vexanium_armor_pack_${new Date().getTime()}.zip`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                UIManager.showNotification(`✓ Pacote ZIP baixado com sucesso!`);
+            });
+        },
+
+        baixarTextura: function(layer) {
+            let imageData = layer === 1 ? STATE.finalImageL1 : STATE.finalImageL2; 
+            let fileName = layer === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
+            
+            if (!imageData) { 
+                UIManager.showNotification(`A Camada ${layer} ainda não foi gerada no Estúdio.`, "error"); 
+                return; 
+            }
+
+            fetch(imageData).then(res => res.blob()).then(blob => {
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+                a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                UIManager.showNotification(`✓ SUCESSO: Arquivo ${fileName} exportado!`);
+            }).catch(err => { UIManager.showNotification("O sistema falhou ao empacotar a textura HD.", "error"); });
+        },
+
+        aplicarMontagemUVLivre: function() {
+            // Regra de Ouro (1024x512 Mestre com Upscale da Zona Ativa)
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+
+            const zoneCanvas = document.createElement('canvas'); zoneCanvas.width = activeZone.w; zoneCanvas.height = activeZone.h;
+            const zoneCtx = zoneCanvas.getContext('2d'); zoneCtx.imageSmoothingEnabled = false; 
+            STATE.extractedPieces.forEach(p => {
+                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
+                zoneCtx.drawImage(temp, p.x - zOffsetX, p.y - zOffsetY, p.w, p.h);
+            });
+            
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
+            const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false;
+            outCtx.drawImage(zoneCanvas, 0, 0, activeZone.w, activeZone.h, 0, 0, 1024, 512);
+
+            const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
+            if (STATE.currentEditingLayer === 1) { STATE.finalImageL1 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 1 (L1) ATUALIZADA!"); } 
+            else { STATE.finalImageL2 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 2 (L2) ATUALIZADA!"); }
+            
+            UIManager.updateDiagnosticPanel();
+            this.atualizarPreview3D(); 
+            UIManager.closeModal('slicer-modal');
+        },
+
+        atualizarPreview3D: function() {
+            const previewCanvas = document.createElement('canvas'); previewCanvas.width = 1024; previewCanvas.height = 1024; 
+            const pCtx = previewCanvas.getContext('2d'); pCtx.imageSmoothingEnabled = false;
+            const f = 16;
+            const copyRegion = (img, sx, sy, sw, sh, dx, dy) => { pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); };
+            const loadImage = (base64Str) => { return new Promise((resolve) => { if (!base64Str) { resolve(null); return; } const img = new Image(); img.onload = () => resolve(img); img.src = base64Str; }); };
+
+            pCtx.fillStyle = "#111111"; pCtx.fillRect(0, 0, 32*f, 16*f); pCtx.fillRect(16*f, 16*f, 24*f, 16*f); pCtx.fillRect(40*f, 16*f, 16*f, 16*f); pCtx.fillRect(32*f, 48*f, 16*f, 16*f); pCtx.fillRect(0, 16*f, 16*f, 16*f); pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
+
+            Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
+                if (imgL2) { copyRegion(imgL2, 16, 16, 24, 16, 16, 16); copyRegion(imgL2, 0, 16, 16, 16, 0, 16); copyRegion(imgL2, 0, 16, 16, 16, 16, 48); }
+                if (imgL1) { 
+                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0); copyRegion(imgL1, 16, 16, 24, 16, 16, 32); copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
+                    copyRegion(imgL1, 40, 16, 16, 16, 48, 48); copyRegion(imgL1, 0, 16, 16, 16, 0, 32); copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
+                }
+                skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => { console.error("Erro ao processar preview WebGL:", err); });
+            });
         }
     };
 
-    document.getElementById('file-input-preset').onchange = (e) => {
-        const file = e.target.files[0]; if(!file) return;
-        const reader = new FileReader(); reader.onload = (evt) => {
-            const data = JSON.parse(evt.target.result);
-            if(data.armor_name) { UIManager.showNotification("Não selecione o metadata.json do ZIP. Use o ficheiro de PRESET gravado.", "warning"); return; }
-            const img = new Image(); img.onload = () => { offscreenCtx.clearRect(0,0,1920,1080); offscreenCtx.drawImage(img,0,0); STATE.extractedPieces = [];
-                data.pieces.forEach(p => {
-                    const tImg = new Image(); tImg.onload = () => {
-                        const tc = document.createElement('canvas'); tc.width=p.w; tc.height=p.h; tc.getContext('2d').drawImage(tImg,0,0);
-                        STATE.extractedPieces.push({id:p.id, x:p.x, y:p.y, w:p.w, h:p.h, imgData:tc.getContext('2d').getImageData(0,0,p.w,p.h)});
-                        StudioCanvas.renderFatiador();
-                    }; tImg.src = p.base64;
-                });
-            }; img.src = data.baseImage; UIManager.showNotification("PRESET CARREGADO COM SUCESSO");
-        }; reader.readAsText(file); e.target.value = "";
-    };
-
-    /* --- UPLOAD DE ARTE (BASE OU 3D) --- */
     DOM.fileInput.onchange = (e) => {
-        const file = e.target.files[0]; if(!file) return;
+        const file = e.target.files[0]; if (!file) return;
         const url = URL.createObjectURL(file);
         if (STATE.currentMode === 'armor' && file.type.startsWith("image/")) {
-            const reader = new FileReader(); reader.onload = (ev) => {
-                if (STATE.uploadTarget === 1) { STATE.baseImageL1 = ev.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); } 
-                else if (STATE.uploadTarget === 2) { STATE.baseImageL2 = ev.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); }
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                if (STATE.uploadTarget === 1) { STATE.baseImageL1 = evt.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); } 
+                else if (STATE.uploadTarget === 2) { STATE.baseImageL2 = evt.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); }
             }; reader.readAsDataURL(file);
         } else if (STATE.currentMode === 'model' || STATE.currentMode === 'item') {
             new THREE.GLTFLoader().load(url, (gltf) => {
                 if (currentModel) scene.remove(currentModel); currentModel = gltf.scene;
                 const box = new THREE.Box3().setFromObject(currentModel); const size = box.getSize(new THREE.Vector3()); const scale = 3.5 / Math.max(size.x, size.y, size.z);
                 currentModel.scale.set(scale, scale, scale); currentModel.position.set(0, -1, 0); scene.add(currentModel);
-                if(STATE.currentMode === 'item') scene.remove(cajadoGroup);
-                UIManager.showNotification("GEOMETRIA DE ENTIDADE IMPORTADA");
-            }, undefined, (err) => { UIManager.showNotification("Falha ao ler o ficheiro GLTF", "error"); });
+                if(STATE.currentMode === 'item') { scene.remove(cajadoGroup); }
+                UIManager.showNotification("✓ GEOMETRIA DE ENTIDADE IMPORTADA");
+            });
         }
         e.target.value = ""; 
     };
 
-    /* --- INICIALIZAÇÃO RESPONSIVA --- */
-    function resize() {
-        const w = window.innerWidth; const h = window.innerHeight;
-        skinViewer.width = w; skinViewer.height = h;
-        renderer.setSize(w, h); camera.aspect = w/h; camera.updateProjectionMatrix();
+    /* =================================================================================
+       IA & LLM INTEGRATION (Gemini API)
+       ================================================================================= */
+    async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
+        if (DOM.loader) DOM.loader.style.display = 'block'; if (DOM.scanner) DOM.scanner.style.display = 'block';
+        let retries = 0; const maxRetries = 5;
+        while (retries < maxRetries) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${endpoint}?key=${STATE.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Connection failed");
+                const data = await response.json(); return data;
+            } catch (e) { retries++; await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000)); } 
+            finally { if (retries === maxRetries || (DOM.loader && !DOM.loader.style.display)) { if (DOM.loader) DOM.loader.style.display = 'none'; if (DOM.scanner) DOM.scanner.style.display = 'none'; } }
+        } return null;
     }
-    window.onresize = resize;
-    window.onload = () => { resize(); UIManager.showNotification("SISTEMA J.A.V.I.S. TOTALMENTE ONLINE", "success"); };
+
+    async function executarGeracaoIA() {
+        const promptInput = document.getElementById('gen-prompt-input');
+        const tema = promptInput ? promptInput.value : "";
+        if (!tema || tema.trim() === '') { UIManager.showNotification("Operador, descreva o design da armadura antes de iniciar a Forja.", "warning"); return; }
+        UIManager.closeModal('gen-modal');
+        UIManager.showNotification("⏳ INICIANDO FORJA IA (GERANDO TEXTURA)...");
+
+        const layoutInstructions = STATE.currentEditingLayer === 1
+            ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)."
+            : "Leggings/Pants: Waist Front(0,256), Waist Back(128,256), Leg Side(256,256), Leg Front(320,256).";
+        const strictPrompt = `Minecraft armor texture map, flat 2D layout. CRITICAL INSTRUCTION: Generate ONLY Layer ${STATE.currentEditingLayer}. DO NOT draw the background, keep it solid white. Pixel art style. STRICT COORDINATES TO FOLLOW EXACTLY: ${layoutInstructions}. Theme: ${tema} (Must be exactly 2:1 aspect ratio)`;
+        const payload = { instances: { prompt: strictPrompt }, parameters: { sampleCount: 1 } };
+        const data = await callGemini(payload, "imagen-4.0-generate-001:predict");
+
+        if (data && data.predictions && data.predictions.length > 0) {
+            const base64Image = data.predictions[0].bytesBase64Encoded;
+            const imageUrl = `data:image/png;base64,${base64Image}`;
+            const img = new Image();
+            img.onload = () => {
+                offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                StudioCanvas.renderFatiador(); StudioCanvas.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!");
+            }; img.src = imageUrl;
+            if (STATE.currentEditingLayer === 1) STATE.baseImageL1 = imageUrl; else STATE.baseImageL2 = imageUrl;
+            STATE.originalImageObj.src = imageUrl;
+            UIManager.updateDiagnosticPanel(); StudioCanvas.abrirFatiadorLivre(true);
+        } else {
+            UIManager.showNotification("Falha na Forja. A IA não conseguiu gerar a armadura.", "error");
+        }
+    }
+
+    async function analisarArteBase() {
+        if (!STATE.originalImageObj || !STATE.originalImageObj.src || STATE.originalImageObj.src === "") { UIManager.showNotification("Operador, carregue ou gere uma Imagem Base primeiro.", "warning"); return; }
+        const base64Data = STATE.originalImageObj.src.split(',')[1]; let mimeType = "image/png";
+        if(STATE.originalImageObj.src.startsWith("data:image/jpeg")) mimeType = "image/jpeg";
+        UIManager.showModal("ai-modal", "✨ ANÁLISE VISUAL DE ARTE (VISION)", "A processar padrões visuais e biologia da armadura...");
+        const prompt = "Aja como J.A.V.I.S., uma IA tática de engenharia biomecânica. Analise visualmente esta textura de armadura de Minecraft. Descreva de forma técnica e sombria a paleta de cores, a biologia aparente e como estas peças se enquadram na temática do 'Vexanium' (um mod de parasitas espaciais e tecnologia alienígena nas profundezas do Deep Dark).";
+        const payload = { contents: [{ role: "user", parts: [ { text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } } ] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português com formatação clara e tática." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    async function gerarAtributos() {
+        UIManager.showModal("ai-modal", "✨ FORJA DE ATRIBUTOS TÁTICOS", "A calcular integridade estrutural e sinergia do hospedeiro...");
+        const prompt = STATE.currentMode === 'armor' ? "Gere uma lista técnica de atributos de combate para o Minecraft (Armor, Toughness, Knockback Resistance, Habilidades Especiais Passivas, Maldições/Debuffs) para uma Armadura Parasita do tipo Vexanium. Equilibre para ser incrivelmente poderosa no late-game, mas com custos biológicos para o hospedeiro." : "Gere uma lista de atributos técnicos e estatísticas (HP, Dano Base, Velocidade de Movimento, Padrão de Ataque, Habilidades Especiais) para um Mob Hostil Biomecânico implacável do mod Vexanium. Crie uma mecânica de ataque única e aterrorizante.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português usando pontos táticos e liste os valores como se fossem variáveis de código do Minecraft." }] } };
+        const data = await callGemini(payload); const stats = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = stats;
+    }
+
+    async function generateLore() {
+        UIManager.showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
+        const prompt = STATE.currentMode === 'armor' ? "Gere um fragmento de diário de pesquisa (Lore) intenso e sombrio sobre a descoberta de uma Armadura Parasita Alienígena no Minecraft." : "Descreva as origens sombrias e os horrores de um Mob biomecânico que habita o vácuo profundo do mod Vexanium.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português. Mantenha o tom sombrio, de ficção científica de terror." }] } };
+        const data = await callGemini(payload); const lore = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = lore;
+    }
+
+    async function processarTelemetriaInGame() {
+        const telemetriaInput = document.getElementById('jarvis-telemetry-input'); const telemetria = telemetriaInput ? telemetriaInput.value : "";
+        if (!telemetria || telemetria.trim() === '') { UIManager.showNotification("Operador, por favor insira os dados de telemetria na caixa primeiro.", "warning"); return; }
+        UIManager.closeModal('ingame-modal'); UIManager.showModal("ai-modal", "📡 PROCESSANDO TELEMETRIA DO JOGO", "A estabelecer conexão com a MekaSuit...");
+        const prompt = `Aqui está o relatório de telemetria atual do mundo do jogador no Minecraft:\n\n${telemetria}\n\nCom base nestes dados exatos, aja como a IA J.A.V.I.S., faça um diagnóstico da situação, avise o jogador sobre o estado da armadura, ameaças no radar e condições ambientais. Seja imersivo, tático e aja como se estivesse a falar diretamente para o visor da armadura do Operador.`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    // Função para Abrir Studio (Fatiador Livre)
+    function openStudio() {
+        if (!STATE.baseImageL1 && !STATE.baseImageL2) {
+            UIManager.showNotification("Operador, carregue uma imagem antes de abrir o Estúdio.", "warning");
+            return;
+        }
+        StudioCanvas.abrirFatiadorLivre(true);
+        UIManager.showNotification("✂️ ESTÚDIO DE MONTAGEM ATIVADO");
+    }
+
+    // Atalhos de Teclado
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) { e.preventDefault(); StudioCanvas.ajustarZoom('in'); } 
+        else if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); StudioCanvas.ajustarZoom('out'); } 
+        else if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); StudioCanvas.ajustarZoom(1.0); } 
+        else if (e.key === 'Delete') { e.preventDefault(); ToolManager.apagarPecaAtiva(); }
+    });
 
 </script>
 </body>
