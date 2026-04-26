@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Escala Inversa Profissional)</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Motor Gráfico Vectorial)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -99,7 +99,7 @@
         }
 
         /* =================================================================================
-           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE
+           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE (1920x1080)
            ================================================================================= */
         #slicer-modal { 
             width: 98vw; 
@@ -128,7 +128,6 @@
             box-sizing: border-box;
         }
         
-        /* CORREÇÃO: O wrapper volta a ser overflow: hidden para ancorar a barra */
         .editor-workspace-wrapper { 
             flex: 1; 
             position: relative; 
@@ -140,7 +139,6 @@
             border: 1px solid #222; 
         }
 
-        /* CORREÇÃO: A área de scroll volta a ser o seu próprio contentor interno */
         .editor-workspace { 
             flex: 1; 
             display: flex; 
@@ -151,7 +149,6 @@
         }
         
         #canvas-wrapper { 
-            /* Fix: Dimensões fixas base. O redimensionamento é feito via CSS. */
             width: 1920px; 
             height: 1080px; 
             min-width: 1920px; 
@@ -163,7 +160,7 @@
             transform-origin: center center;
         }
 
-        #workspace-canvas, #grid-canvas { 
+        #workspace-canvas, #grid-svg { 
             position: absolute; 
             top: 0; 
             left: 0; 
@@ -177,10 +174,10 @@
             image-rendering: pixelated; 
         }
 
-        #grid-canvas { 
+        #grid-svg { 
             pointer-events: none; 
             z-index: 15; 
-            image-rendering: auto; /* IMPORTANTE: Mantém as linhas da grade finas e nítidas no Zoom */
+            overflow: visible;
         }
 
         /* =================================================================================
@@ -799,8 +796,8 @@
                 <div class="editor-workspace" id="workspace-scroll-area">
                     <div id="canvas-wrapper">
                         <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
-                        <!-- A Grade sobrepõe-se e tem image-rendering auto para manter linhas lisas -->
-                        <canvas id="grid-canvas" width="1920" height="1080"></canvas>
+                        <!-- Nova Grade Vectorial para garantir linhas perfeitas e 0% craches de memória -->
+                        <svg id="grid-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg>
                     </div>
                 </div>
                 
@@ -982,12 +979,12 @@
         autoRotateGltf: true,
         currentMatryoshkaZone: 1,
         matryoshkaZones: {
-            1: { w: 1024, h: 512, zoom: 0.8 },
-            2: { w: 512,  h: 256, zoom: 1.6 },
-            3: { w: 256,  h: 128, zoom: 3.2 },
-            4: { w: 128,  h: 64,  zoom: 6.4 },
-            5: { w: 64,   h: 32,  zoom: 12.8 },
-            6: { w: 32,   h: 16,  zoom: 25.6 }
+            1: { w: 1024, h: 512, zoom: 1.0 },
+            2: { w: 512,  h: 256, zoom: 2.0 },
+            3: { w: 256,  h: 128, zoom: 4.0 },
+            4: { w: 128,  h: 64,  zoom: 8.0 },
+            5: { w: 64,   h: 32,  zoom: 16.0 },
+            6: { w: 32,   h: 16,  zoom: 32.0 }
         }
     };
 
@@ -998,13 +995,12 @@
 
     const DOM = {
         wsCanvas: document.getElementById('workspace-canvas'),
-        gridCanvas: document.getElementById('grid-canvas'),
+        gridSvg: document.getElementById('grid-svg'),
         canvasWrapper: document.getElementById('canvas-wrapper'),
         fileInput: document.getElementById('file-input')
     };
 
     const wsCtx = DOM.wsCanvas.getContext('2d', { willReadFrequently: true });
-    const gCtx = DOM.gridCanvas.getContext('2d');
     let offscreenCanvas = document.createElement('canvas'); 
     offscreenCanvas.width = WORKBENCH_W; 
     offscreenCanvas.height = WORKBENCH_H;
@@ -1189,16 +1185,12 @@
     };
 
     /* =================================================================================
-       STUDIO CANVAS ENGINE (Matryoshka Logic Integrada e Proporção Inversa)
+       STUDIO CANVAS ENGINE (Motor Gráfico Vectorial SVG e Escala Inversa)
        ================================================================================= */
     const StudioCanvas = {
         iniciarStudioDoZero: function(targetBase) {
             DOM.wsCanvas.width = WORKBENCH_W; 
             DOM.wsCanvas.height = WORKBENCH_H; 
-            
-            // O Canvas da Grelha mantém-se fixo na resolução máxima para evitar pixels grossos
-            DOM.gridCanvas.width = WORKBENCH_W; 
-            DOM.gridCanvas.height = WORKBENCH_H; 
             
             offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             
@@ -1244,7 +1236,7 @@
 
         ajustarZoom: function(fator) {
             if (fator === 'in') {
-                STATE.currentZoom = Math.min(STATE.currentZoom + 0.5, 32.0);
+                STATE.currentZoom = Math.min(STATE.currentZoom + 0.5, 64.0); // Zoom massivo sem medo (É SVG agora!)
             } else if (fator === 'out') {
                 STATE.currentZoom = Math.max(0.4, STATE.currentZoom - 0.5);
             } else {
@@ -1254,16 +1246,15 @@
             const z = STATE.currentZoom;
             
             if (DOM.canvasWrapper) {
-                // A magia do Zoom ocorre via redimensionamento CSS do Container
-                // Isto ativa as barras de Scroll nativas e evita crashear o WebGL
-                DOM.canvasWrapper.style.width = `${WORKBENCH_W * z}px`;
-                DOM.canvasWrapper.style.height = `${WORKBENCH_H * z}px`;
+                // Ao aumentar o Wrapper, o DOM.wsCanvas e DOM.gridSvg crescem com 100% de width
+                DOM.canvasWrapper.style.width = `${Math.round(WORKBENCH_W * z)}px`;
+                DOM.canvasWrapper.style.height = `${Math.round(WORKBENCH_H * z)}px`;
             }
             
             const zl = document.getElementById('zoom-label'); 
             if (zl) zl.innerText = `${Math.round(z * 100)}%`;
             
-            // INVERSE SCALE FIX: Ao redesenhar, as linhas vão ser compensadas pela espessura do zoom
+            // O redesenho Vectorial cuida das proporções instantaneamente
             this.drawGridAndMold();
             this.renderFatiador();
         },
@@ -1280,180 +1271,114 @@
             UIManager.showNotification(`🎯 FOCO MATRYOSHKA: ZONA ${zIdx}`);
         },
 
+        // NOVO MOTOR VETORIAL SVG (Impede "linhas grossas" ou crashes de VRAM)
         drawGridAndMold: function() {
+            if (!DOM.gridSvg) return;
+            
             const z = STATE.currentZoom; 
-            gCtx.clearRect(0, 0, DOM.gridCanvas.width, DOM.gridCanvas.height);
-            
-            gCtx.save();
-            gCtx.scale(z, z); 
-            
             const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
             let zX = OFFSET_X + (1024 - aZ.w) / 2; 
             let zY = OFFSET_Y + (512 - aZ.h) / 2;
             const f = aZ.w / 64; 
             
             let gridThickness = parseFloat(document.getElementById('grid-size')?.value || 1);
-            let cellSize = parseInt(document.getElementById('grid-px')?.value || 4); // Ajuste Dinâmico da Grade Solicitado
+            let cellSize = parseInt(document.getElementById('grid-px')?.value || 4); 
+            
+            let svgContent = '';
 
+            // Função ajudante para criar vetores perfeitos à prova de zoom
+            const addRect = (x, y, w, h, strokeColor, fill, strokeW, dash = '') => {
+                svgContent += `<rect x="${x}" y="${y}" width="${w}" height="${h}" stroke="${strokeColor}" fill="${fill}" stroke-width="${strokeW}" stroke-dasharray="${dash}" vector-effect="non-scaling-stroke" />`;
+            };
+            
+            const addLine = (x1, y1, x2, y2, color, strokeW) => {
+                svgContent += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${color}" stroke-width="${strokeW}" vector-effect="non-scaling-stroke" />`;
+            };
+            
+            const addText = (text, x, y, color, size) => {
+                // Ajustamos o font-size ao inverso do zoom para a legibilidade perfeita no ecrã
+                const fontSize = Math.max(1, size / z);
+                svgContent += `<text x="${x}" y="${y}" fill="none" stroke="#000" stroke-width="${3/z}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
+                svgContent += `<text x="${x}" y="${y}" fill="${color}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
+            };
+
+            const hideText = z >= 4.0; // Desliga o texto se o zoom for grande para que não fique no caminho do rato
+
+            // 1. ZONAS MATRYOSHKA GERAIS
             const cbMat = document.getElementById('show-matryoshka');
             if (cbMat && cbMat.checked) {
                 const colors = {
-                    1:"rgba(255,170,0,0.3)", 
-                    2:"rgba(0,229,255,0.4)", 
-                    3:"rgba(255,0,255,0.5)", 
-                    4:"rgba(0,255,170,0.6)", 
-                    5:"rgba(255,255,0,0.7)", 
-                    6:"rgba(255,0,0,0.8)"
+                    1:"rgba(255,170,0,0.3)", 2:"rgba(0,229,255,0.4)", 3:"rgba(255,0,255,0.5)", 
+                    4:"rgba(0,255,170,0.6)", 5:"rgba(255,255,0,0.7)", 6:"rgba(255,0,0,0.8)"
                 };
                 
                 for(let i=1; i<=6; i++) {
                     let mz = STATE.matryoshkaZones[i]; 
                     let cx = OFFSET_X + (1024 - mz.w)/2; 
                     let cy = OFFSET_Y + (512 - mz.h)/2;
-                    
-                    gCtx.strokeStyle = colors[i]; 
-                    gCtx.lineWidth = gridThickness / z; 
-                    gCtx.setLineDash([4/z, 4/z]); 
-                    gCtx.strokeRect(cx, cy, mz.w, mz.h);
-                    
-                    if(i !== 1) { 
-                        gCtx.fillStyle = colors[i]; 
-                        gCtx.font = `bold ${10/z}px monospace`; 
-                        gCtx.fillText(`Z${i}`, cx+(2/z), cy+(10/z)); 
-                    }
+                    addRect(cx, cy, mz.w, mz.h, colors[i], 'none', gridThickness, '4,4');
+                    if(i !== 1 && !hideText) addText(`Z${i}`, cx + 10, cy + 10, colors[i], 10);
                 }
-                gCtx.setLineDash([]);
             }
 
-            if (document.getElementById('show-grid-1x1')?.checked && z >= 2.0) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; 
-                gCtx.lineWidth = gridThickness / z; 
-                gCtx.beginPath();
-                for (let x = 0; x <= aZ.w; x += 1) { 
-                    gCtx.moveTo(zX + x, zY); 
-                    gCtx.lineTo(zX + x, zY + aZ.h); 
+            // 2. A GRADE PROFISSIONAL AJUSTÁVEL
+            if (document.getElementById('show-custom-grid')?.checked) {
+                for (let x = 0; x <= aZ.w; x += cellSize) { 
+                    addLine(zX + x, zY, zX + x, zY + aZ.h, 'rgba(255, 255, 255, 0.2)', gridThickness);
                 }
-                for (let y = 0; y <= aZ.h; y += 1) { 
-                    gCtx.moveTo(zX, zY + y); 
-                    gCtx.lineTo(zX + aZ.w, zY + y); 
+                for (let y = 0; y <= aZ.h; y += cellSize) { 
+                    addLine(zX, zY + y, zX + aZ.w, zY + y, 'rgba(255, 255, 255, 0.2)', gridThickness);
                 }
-                gCtx.stroke();
             }
 
-            if (document.getElementById('show-grid-16x16')?.checked) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; 
-                gCtx.lineWidth = (gridThickness + 0.5) / z; 
-                gCtx.beginPath();
-                for (let x = 0; x <= aZ.w; x += f) { 
-                    gCtx.moveTo(zX + x, zY); 
-                    gCtx.lineTo(zX + x, zY + aZ.h); 
-                }
-                for (let y = 0; y <= aZ.h; y += f) { 
-                    gCtx.moveTo(zX, zY + y); 
-                    gCtx.lineTo(zX + aZ.w, zY + y); 
-                }
-                gCtx.stroke();
-            }
-
+            // 3. MOLDE MESTRE
             if (document.getElementById('show-export-zone')?.checked) {
-                gCtx.strokeStyle = "#ffaa00"; 
-                gCtx.lineWidth = 2 / z; 
-                gCtx.setLineDash([12/z, 8/z]); 
-                gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); 
-                gCtx.setLineDash([]);
-                gCtx.fillStyle = "#ffaa00"; 
-                gCtx.font = `bold ${16/z}px 'JetBrains Mono', monospace`; 
-                gCtx.fillText("MOLDE MESTRE (1024x512)", OFFSET_X, OFFSET_Y - (5/z));
+                addRect(OFFSET_X, OFFSET_Y, 1024, 512, '#ffaa00', 'none', 2, '12,8');
+                if (!hideText) addText("MOLDE MESTRE (1024x512)", OFFSET_X + 150, OFFSET_Y - 10, '#ffaa00', 16);
             }
             
-            const drawBox = (x, y, w, h, label) => {
-                let px = zX + (x * f); 
-                let py = zY + (y * f); 
-                let pw = w * f; 
-                let ph = h * f;
-                
-                gCtx.strokeStyle = "#b0279c"; 
-                gCtx.lineWidth = 2 / z; 
-                gCtx.setLineDash([6/z, 4/z]); 
-                gCtx.strokeRect(px, py, pw, ph); 
-                gCtx.setLineDash([]);
-                
-                gCtx.fillStyle = "rgba(176, 39, 156, 0.1)"; 
-                gCtx.fillRect(px, py, pw, ph);
-                
-                gCtx.font = `bold ${9/z}px 'JetBrains Mono', monospace`; 
-                let txtW = gCtx.measureText(label).width + (8/z);
-                
-                gCtx.fillStyle = "rgba(0,0,0,0.6)"; 
-                gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - (7/z), txtW, (14/z));
-                
-                gCtx.fillStyle = "#ffaa00"; 
-                gCtx.textAlign = "center"; 
-                gCtx.textBaseline = "middle"; 
-                gCtx.fillText(label, px + pw/2, py + ph/2); 
+            // 4. CAIXAS E ETIQUETAS DO MINECRAFT (Proporcionais à Zona)
+            const renderBox = (x, y, w, h, label) => {
+                let px = zX + (x * f); let py = zY + (y * f); let pw = w * f; let ph = h * f;
+                addRect(px, py, pw, ph, '#b0279c', 'rgba(176, 39, 156, 0.1)', 2, '6,4');
+                if (!hideText) addText(label, px + pw/2, py + ph/2, '#ffaa00', 9);
             };
 
             if (STATE.currentEditingLayer === 1) {
-                if (document.getElementById('uv-helmet')?.checked) { 
-                    drawBox(8, 0, 8, 8, "CAP.TOP"); drawBox(16, 0, 8, 8, "CAP.BAS"); drawBox(8, 8, 8, 8, "CAP.FRE"); 
-                }
-                if (document.getElementById('uv-chest')?.checked) { 
-                    drawBox(20, 16, 8, 4, "PEI.TOP"); drawBox(20, 20, 8, 12, "PEI.FRE"); 
-                }
-                if (document.getElementById('uv-arms')?.checked) { 
-                    drawBox(44, 16, 4, 4, "ARM.TOP"); drawBox(44, 20, 4, 12, "ARM.FRE"); 
-                }
-                if (document.getElementById('uv-boots')?.checked) { 
-                    drawBox(4, 16, 4, 4, "BOT.TOP"); drawBox(4, 20, 4, 12, "BOT.FRE"); 
-                }
+                if (document.getElementById('uv-helmet')?.checked) { renderBox(8, 0, 8, 8, "CAP.TOP"); renderBox(16, 0, 8, 8, "CAP.BAS"); renderBox(8, 8, 8, 8, "CAP.FRE"); }
+                if (document.getElementById('uv-chest')?.checked) { renderBox(20, 16, 8, 4, "PEI.TOP"); renderBox(20, 20, 8, 12, "PEI.FRE"); }
+                if (document.getElementById('uv-arms')?.checked) { renderBox(44, 16, 4, 4, "ARM.TOP"); renderBox(44, 20, 4, 12, "ARM.FRE"); }
+                if (document.getElementById('uv-boots')?.checked) { renderBox(4, 16, 4, 4, "BOT.TOP"); renderBox(4, 20, 4, 12, "BOT.FRE"); }
             } else if (STATE.currentEditingLayer === 2) {
-                if (document.getElementById('uv-waist')?.checked) { 
-                    drawBox(20, 16, 8, 4, "CIN.TOP"); drawBox(20, 20, 8, 12, "CIN.FRE"); 
-                }
-                if (document.getElementById('uv-legs')?.checked) { 
-                    drawBox(4, 16, 4, 4, "PER.TOP"); drawBox(4, 20, 4, 12, "PER.FRE"); 
-                }
+                if (document.getElementById('uv-waist')?.checked) { renderBox(20, 16, 8, 4, "CIN.TOP"); renderBox(20, 20, 8, 12, "CIN.FRE"); }
+                if (document.getElementById('uv-legs')?.checked) { renderBox(4, 16, 4, 4, "PER.TOP"); renderBox(4, 20, 4, 12, "PER.FRE"); }
             }
 
+            // 5. CAIXAS DE SELEÇÃO E PEÇAS ATIVAS (Ancoradas ao SVG para resolução perfeita)
             STATE.extractedPieces.forEach((p, i) => {
                 if (i === STATE.activePieceIndex) { 
-                    gCtx.strokeStyle = "#00e5ff"; 
-                    gCtx.lineWidth = 1.5 / z; 
-                    gCtx.strokeRect(p.x, p.y, p.w, p.h); 
-                    
-                    const drawHandle = (hx, hy) => { 
-                        gCtx.beginPath(); 
-                        gCtx.arc(hx, hy, 4/z, 0, Math.PI * 2); 
-                        gCtx.fillStyle = "#ffffff"; 
-                        gCtx.fill(); 
-                        gCtx.lineWidth = 1.5/z; 
-                        gCtx.strokeStyle = "#00e5ff"; 
-                        gCtx.stroke(); 
+                    addRect(p.x, p.y, p.w, p.h, '#00e5ff', 'none', 1.5);
+                    const r = 4 / z; 
+                    const drawCirc = (cx, cy) => {
+                        svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#00e5ff" stroke-width="1.5" vector-effect="non-scaling-stroke" />`;
                     };
-                    drawHandle(p.x, p.y); 
-                    drawHandle(p.x + p.w, p.y); 
-                    drawHandle(p.x, p.y + p.h); 
-                    drawHandle(p.x + p.w, p.y + p.h);
+                    drawCirc(p.x, p.y); drawCirc(p.x + p.w, p.y); drawCirc(p.x, p.y + p.h); drawCirc(p.x + p.w, p.y + p.h);
                 }
             });
 
             if (STATE.currentTool === 'slice' && STATE.manualSelection && STATE.manualSelection.w > 0) {
-                gCtx.strokeStyle = "#ff00ff"; 
-                gCtx.lineWidth = 2 / z; 
-                gCtx.setLineDash([5/z, 5/z]); 
-                gCtx.strokeRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h); 
-                gCtx.setLineDash([]);
-                gCtx.fillStyle = "rgba(255, 0, 255, 0.15)"; 
-                gCtx.fillRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h);
+                let s = STATE.manualSelection;
+                addRect(s.x, s.y, s.w, s.h, '#ff00ff', 'rgba(255, 0, 255, 0.15)', 2, '5,5');
             }
             
-            gCtx.restore();
+            DOM.gridSvg.innerHTML = svgContent;
         },
 
         renderFatiador: function() {
             wsCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             wsCtx.drawImage(offscreenCanvas, 0, 0); 
             
+            // As caixas de limite (azul) e Handles não estão mais aqui, apenas no SVG!
             STATE.extractedPieces.forEach((p, i) => {
                 const temp = document.createElement('canvas'); 
                 temp.width = p.imgData.width; 
@@ -1461,7 +1386,7 @@
                 temp.getContext('2d').putImageData(p.imgData, 0, 0);
                 
                 wsCtx.imageSmoothingEnabled = false; 
-                wsCtx.drawImage(temp, p.x, p.y, p.w, p.h);
+                wsCtx.drawImage(temp, Math.round(p.x), Math.round(p.y)); 
             });
         },
 
@@ -1623,10 +1548,11 @@
                 return; 
             }
             
-            let rx = STATE.manualSelection.x; 
-            let ry = STATE.manualSelection.y; 
-            let rw = STATE.manualSelection.w; 
-            let rh = STATE.manualSelection.h;
+            // Garantia de 100% Números Inteiros
+            let rx = Math.round(STATE.manualSelection.x); 
+            let ry = Math.round(STATE.manualSelection.y); 
+            let rw = Math.round(STATE.manualSelection.w); 
+            let rh = Math.round(STATE.manualSelection.h);
             
             let imgD = offscreenCtx.getImageData(rx, ry, rw, rh); 
             offscreenCtx.clearRect(rx, ry, rw, rh);
@@ -1637,6 +1563,7 @@
             
             this.setTool('move'); 
             StudioCanvas.renderFatiador(); 
+            StudioCanvas.drawGridAndMold();
             MemoryManager.registrarEstadoMemoria(); 
             UIManager.showNotification("✂️ CORTE EXTRAÍDO");
         },
@@ -1649,6 +1576,7 @@
                 
                 this.setTool('move'); 
                 StudioCanvas.renderFatiador(); 
+                StudioCanvas.drawGridAndMold();
                 MemoryManager.registrarEstadoMemoria(); 
             }
         },
@@ -1658,6 +1586,7 @@
                 STATE.extractedPieces.splice(STATE.activePieceIndex, 1); 
                 STATE.activePieceIndex = -1; 
                 StudioCanvas.renderFatiador(); 
+                StudioCanvas.drawGridAndMold();
                 MemoryManager.registrarEstadoMemoria(); 
                 UIManager.showNotification("🗑️ PEÇA APAGADA");
             }
@@ -1707,10 +1636,10 @@
             }
             const p = 3; 
             return { 
-                x: Math.max(0, minX - p), 
-                y: Math.max(0, minY - p), 
-                w: Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2)), 
-                h: Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2)) 
+                x: Math.round(Math.max(0, minX - p)), 
+                y: Math.round(Math.max(0, minY - p)), 
+                w: Math.round(Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2))), 
+                h: Math.round(Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2))) 
             };
         },
         
@@ -2055,6 +1984,7 @@
                 STATE.activePieceIndex = STATE.extractedPieces.length - 1; 
                 ToolManager.setTool('move'); 
                 StudioCanvas.renderFatiador(); 
+                StudioCanvas.drawGridAndMold();
                 MemoryManager.registrarEstadoMemoria();
             }
         }
@@ -2073,6 +2003,7 @@
                 }
             }
             StudioCanvas.renderFatiador();
+            StudioCanvas.drawGridAndMold();
         }
     };
 
@@ -2084,23 +2015,23 @@
         if (STATE.isDragging) {
             if(STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
                 const p = STATE.extractedPieces[STATE.activePieceIndex]; 
-                p.x += pos.x - STATE.startX; 
-                p.y += pos.y - STATE.startY; 
+                p.x += Math.round(pos.x - STATE.startX); 
+                p.y += Math.round(pos.y - STATE.startY); 
                 STATE.startX = pos.x; 
                 STATE.startY = pos.y; 
                 StudioCanvas.renderFatiador();
-                StudioCanvas.drawGridAndMold(); // Updates handles inversely scaled
+                StudioCanvas.drawGridAndMold(); // Updates handles via SVG
             } else if(STATE.currentTool === 'slice') {
                 const w = pos.x - STATE.startX; 
                 const h = pos.y - STATE.startY;
                 STATE.manualSelection = { 
-                    x: w < 0 ? pos.x : STATE.startX, 
-                    y: h < 0 ? pos.y : STATE.startY, 
-                    w: Math.abs(w), 
-                    h: Math.abs(h) 
+                    x: Math.round(w < 0 ? pos.x : STATE.startX), 
+                    y: Math.round(h < 0 ? pos.y : STATE.startY), 
+                    w: Math.round(Math.abs(w)), 
+                    h: Math.round(Math.abs(h)) 
                 }; 
                 StudioCanvas.renderFatiador();
-                StudioCanvas.drawGridAndMold(); // Draws selection inversely scaled
+                StudioCanvas.drawGridAndMold(); // Draws selection via SVG
             }
         }
     };
@@ -2120,7 +2051,6 @@
                 const zX = OFFSET_X + (1024 - aZ.w) / 2; 
                 const zY = OFFSET_Y + (512 - aZ.h) / 2;
                 
-                // O Snap Magnético agora obedece rigorosamente ao slider de "Tamanho da Célula" da Grade
                 const cellSizeEl = document.getElementById('grid-px');
                 const snapF = cellSizeEl ? parseInt(cellSizeEl.value) : 4;
                 
@@ -2148,7 +2078,7 @@
                 }
                 const img = new Image(); 
                 img.onload = () => { 
-                    offscreenCtx.clearRect(0,0,1920,1080); 
+                    offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
                     offscreenCtx.drawImage(img,0,0); 
                     STATE.extractedPieces = [];
                     
@@ -2164,6 +2094,7 @@
                                 imgData: tc.getContext('2d').getImageData(0,0,p.w,p.h)
                             });
                             StudioCanvas.renderFatiador();
+                            StudioCanvas.drawGridAndMold();
                         }; 
                         tImg.src = p.base64;
                     });
