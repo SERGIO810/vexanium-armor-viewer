@@ -149,10 +149,10 @@
         }
         
         #canvas-wrapper { 
+            /* FIXED: Sem min-width/min-height! Apenas proporção exata escalada por JS.
+               Isto impede a distorção da caixa de seleção e garante o ambiente puro 2:1. */
             width: 1024px; 
             height: 512px; 
-            min-width: 1024px; 
-            min-height: 512px; 
             margin: auto; 
             background-color: #0d141c; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
@@ -465,7 +465,7 @@
             transition: 0.2s; 
             display: flex; 
             align-items: center; 
-            gap: 8px; 
+            gap: 6px; 
             letter-spacing: 1px; 
             text-transform: uppercase; 
         }
@@ -1034,6 +1034,7 @@
 <script>
     /* =================================================================================
        ESCUDO DE INTERCEÇÃO GLOBAL DE ERROS (UNHANDLED REJECTIONS)
+       Impede que falhas assíncronas quebrem o frontend.
        ================================================================================= */
     window.addEventListener('unhandledrejection', function(event) {
         console.warn("🛡️ J.A.V.I.S. // FALHA INTERCETADA:", event.reason);
@@ -1436,6 +1437,7 @@
             }
             
             // 4. CAIXAS E ETIQUETAS DO MINECRAFT (Mapeamento Completo com Assimetria)
+            // As coordenadas X/Y do custom Vexanium Model estão a ser usadas nos ombros e pernas esquerdas (X=32/X=48)
             const renderBox = (x, y, w, h, label) => {
                 let px = zX + (x * f); let py = zY + (y * f); let pw = w * f; let ph = h * f;
                 addRect(px, py, pw, ph, '#b0279c', 'rgba(176, 39, 156, 0.1)', 2 / z, `${6/z},${4/z}`);
@@ -1458,20 +1460,20 @@
                     renderBox(44, 16, 4, 4, "BR.D.TOP"); renderBox(48, 16, 4, 4, "BR.D.BAS"); 
                     renderBox(40, 20, 4, 12, "BR.D.DIR"); renderBox(44, 20, 4, 12, "BR.D.FRE"); 
                     renderBox(48, 20, 4, 12, "BR.D.ESQ"); renderBox(52, 20, 4, 12, "BR.D.TRA"); 
-                    // Braço Esquerdo (Formato Bedrock / Optifine / 64x64)
-                    renderBox(36, 48, 4, 4, "BR.E.TOP"); renderBox(40, 48, 4, 4, "BR.E.BAS"); 
-                    renderBox(32, 52, 4, 12, "BR.E.DIR"); renderBox(36, 52, 4, 12, "BR.E.FRE"); 
-                    renderBox(40, 52, 4, 12, "BR.E.ESQ"); renderBox(44, 52, 4, 12, "BR.E.TRA"); 
+                    // Braço Esquerdo (Mapeamento Custom Vexanium X=32 Y=0)
+                    renderBox(36, 0, 4, 4, "BR.E.TOP"); renderBox(40, 0, 4, 4, "BR.E.BAS"); 
+                    renderBox(32, 4, 4, 12, "BR.E.DIR"); renderBox(36, 4, 4, 12, "BR.E.FRE"); 
+                    renderBox(40, 4, 4, 12, "BR.E.ESQ"); renderBox(44, 4, 4, 12, "BR.E.TRA"); 
                 }
                 if (document.getElementById('uv-boots')?.checked) { 
                     // Bota Direita
                     renderBox(4, 16, 4, 4, "BOT.D.TOP"); renderBox(8, 16, 4, 4, "BOT.D.BAS"); 
                     renderBox(0, 20, 4, 12, "BOT.D.DIR"); renderBox(4, 20, 4, 12, "BOT.D.FRE"); 
                     renderBox(8, 20, 4, 12, "BOT.D.ESQ"); renderBox(12, 20, 4, 12, "BOT.D.TRA"); 
-                    // Bota Esquerda
-                    renderBox(20, 48, 4, 4, "BOT.E.TOP"); renderBox(24, 48, 4, 4, "BOT.E.BAS"); 
-                    renderBox(16, 52, 4, 12, "BOT.E.DIR"); renderBox(20, 52, 4, 12, "BOT.E.FRE"); 
-                    renderBox(24, 52, 4, 12, "BOT.E.ESQ"); renderBox(28, 52, 4, 12, "BOT.E.TRA"); 
+                    // Bota Esquerda (Mapeamento Custom Vexanium X=48 Y=16)
+                    renderBox(52, 16, 4, 4, "BOT.E.TOP"); renderBox(56, 16, 4, 4, "BOT.E.BAS"); 
+                    renderBox(48, 20, 4, 12, "BOT.E.DIR"); renderBox(52, 20, 4, 12, "BOT.E.FRE"); 
+                    renderBox(56, 20, 4, 12, "BOT.E.ESQ"); renderBox(60, 20, 4, 12, "BOT.E.TRA"); 
                 }
             } else if (STATE.currentEditingLayer === 2) {
                 if (document.getElementById('uv-waist')?.checked) { 
@@ -1484,10 +1486,10 @@
                     renderBox(4, 16, 4, 4, "PER.D.TOP"); renderBox(8, 16, 4, 4, "PER.D.BAS"); 
                     renderBox(0, 20, 4, 12, "PER.D.DIR"); renderBox(4, 20, 4, 12, "PER.D.FRE"); 
                     renderBox(8, 20, 4, 12, "PER.D.ESQ"); renderBox(12, 20, 4, 12, "PER.D.TRA"); 
-                    // Perna Esquerda
-                    renderBox(20, 48, 4, 4, "PER.E.TOP"); renderBox(24, 48, 4, 4, "PER.E.BAS"); 
-                    renderBox(16, 52, 4, 12, "PER.E.DIR"); renderBox(20, 52, 4, 12, "PER.E.FRE"); 
-                    renderBox(24, 52, 4, 12, "PER.E.ESQ"); renderBox(28, 52, 4, 12, "PER.E.TRA"); 
+                    // Perna Esquerda (Mapeamento Custom Vexanium X=48 Y=16)
+                    renderBox(52, 16, 4, 4, "PER.E.TOP"); renderBox(56, 16, 4, 4, "PER.E.BAS"); 
+                    renderBox(48, 20, 4, 12, "PER.E.DIR"); renderBox(52, 20, 4, 12, "PER.E.FRE"); 
+                    renderBox(56, 20, 4, 12, "PER.E.ESQ"); renderBox(60, 20, 4, 12, "PER.E.TRA"); 
                 }
             }
 
@@ -1797,7 +1799,7 @@
     };
 
     /* =================================================================================
-       EXPORT & MATRYOSHKA NATIVE MANAGER (Sem Upscale Destrutivo)
+       EXPORT & MATRYOSHKA NATIVE MANAGER (Sem Upscale Destrutivo e com Preview Assimetria)
        ================================================================================= */
     const ExportManager = {
         triggerUpload: function(t) { 
@@ -1903,7 +1905,7 @@
             Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
                 if (!imgL1 && !imgL2) return;
 
-                // Skinview3d ou modelos aceitam o formato exato da armadura. Usamos a dimensão para calibrar
+                // Transforma o mapeamento de assimetria personalizado 64x32 na norma 64x64 da Skinview3D!
                 let baseW = imgL1 ? imgL1.width : imgL2.width;
                 let f = baseW / 64; 
                 
@@ -1918,27 +1920,24 @@
                     pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); 
                 };
 
-                pCtx.fillStyle = "#111111"; 
-                pCtx.fillRect(0, 0, 32*f, 16*f); 
-                pCtx.fillRect(16*f, 16*f, 24*f, 16*f); 
-                pCtx.fillRect(40*f, 16*f, 16*f, 16*f); 
-                pCtx.fillRect(32*f, 48*f, 16*f, 16*f); 
-                pCtx.fillRect(0, 16*f, 16*f, 16*f); 
-                pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
-
+                // Limpa o canvas para garantir transparência correta (Sem fundo preto)
+                pCtx.clearRect(0, 0, 64*f, 64*f);
+                
+                // === LAYER 2 (Pernas e Cintura) ===
                 if (imgL2) { 
-                    copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
-                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
-                    copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
+                    copyRegion(imgL2, 16, 16, 24, 16, 16, 16); // Cintura -> Torso do Preview
+                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   // Perna Direita
+                    copyRegion(imgL2, 48, 16, 16, 16, 16, 48); // Perna Esquerda (Mapeamento Assimetria Vexanium)
                 }
                 
+                // === LAYER 1 (Capacete, Peitoral, Braços, Botas) ===
                 if (imgL1) { 
-                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
-                    copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
-                    copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
-                    copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
-                    copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
-                    copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
+                    copyRegion(imgL1, 0, 0, 32, 16, 0, 0);     // Capacete -> Cabeça
+                    copyRegion(imgL1, 16, 16, 24, 16, 16, 16); // Peitoral -> Torso (Sobrepõe Cintura)
+                    copyRegion(imgL1, 40, 16, 16, 16, 40, 16); // Braço Direito
+                    copyRegion(imgL1, 32, 0, 16, 16, 32, 48);  // Braço Esquerdo (Mapeamento Assimetria Vexanium)
+                    copyRegion(imgL1, 0, 16, 16, 16, 0, 16);   // Bota Direita (Sobrepõe Perna D)
+                    copyRegion(imgL1, 48, 16, 16, 16, 16, 48); // Bota Esquerda (Mapeamento Assimetria Vexanium)
                 }
                 
                 skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => console.warn("Erro WebGL:", err));
