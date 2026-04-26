@@ -39,18 +39,20 @@
         /* BARRA TÁTICA INFERIOR */
         .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
         .btn-group { display: flex; gap: 8px; align-items: center; }
-        .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
+        .btn { background: transparent; color: var(--warden-bone); border: none; border-radius: 6px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
         
-        .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
-        .btn:active { border-bottom-width: 1px; transform: translateY(2px); }
+        .btn:hover { background: rgba(19, 201, 201, 0.1); transform: translateY(-2px); }
+        .btn:active { transform: translateY(0); }
         .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
         
-        .btn-ai { border-color: var(--sculk-core); color: var(--sculk-core); }
-        .btn-calib { border-color: var(--calib-accent); color: var(--calib-accent); border-bottom-color: var(--calib-accent); }
-        .btn-uplink { border-color: var(--uplink-accent); color: var(--uplink-accent); border-bottom-color: var(--uplink-accent); background: rgba(0, 229, 255, 0.05); }
-        .btn-uplink:hover { border-color: #fff; color: #fff; background: rgba(0, 229, 255, 0.2); }
-        .btn-save { border-color: #00bcd4; color: #00bcd4; border-bottom-color: #00bcd4; background: rgba(0, 188, 212, 0.05); }
-        .btn-save:hover { border-color: #fff; color: #fff; background: rgba(0, 188, 212, 0.2); }
+        .btn-ai { color: var(--sculk-core); }
+        .btn-ai:hover { background: rgba(19, 201, 201, 0.12); }
+        .btn-calib { color: var(--calib-accent); }
+        .btn-calib:hover { background: rgba(255, 170, 0, 0.1); }
+        .btn-uplink { color: var(--uplink-accent); }
+        .btn-uplink:hover { background: rgba(0, 229, 255, 0.1); }
+        .btn-save { color: #00bcd4; }
+        .btn-save:hover { background: rgba(0, 188, 212, 0.1); }
         .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
 
         #javis-branding { font-size: 11px; color: var(--warden-bone-dim); text-decoration: none; display: flex; align-items: center; gap: 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: auto; }
@@ -1476,6 +1478,16 @@
         const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] } };
         const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
         const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    // Função para Abrir Studio (Fatiador Livre)
+    function openStudio() {
+        if (!STATE.baseImageL1 && !STATE.baseImageL2) {
+            UIManager.showNotification("Operador, carregue uma imagem antes de abrir o Estúdio.", "warning");
+            return;
+        }
+        StudioCanvas.abrirFatiadorLivre(true);
+        UIManager.showNotification("✂️ ESTÚDIO DE MONTAGEM ATIVADO");
     }
 
     // Atalhos de Teclado
