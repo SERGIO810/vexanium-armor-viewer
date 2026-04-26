@@ -101,7 +101,6 @@
         /* ============================================
            FLOATING TOOLBAR MATRYOSHKA
            ============================================ */
-        /* Agora referenciada a editor-workspace-wrapper (fixa) em vez do canvas que faz zoom */
         .floating-toolbar {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 2000;
             background: rgba(10, 17, 23, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
@@ -290,7 +289,7 @@
                     </div>
                 </div>
                 
-                <!-- FLOATING TOOLBAR MATRYOSHKA (AGORA FIXA SOBRE O WRAPPER) -->
+                <!-- FLOATING TOOLBAR MATRYOSHKA -->
                 <div class="floating-toolbar">
                     <!-- ZONAS MATRYOSHKA -->
                     <div class="zones-container">
@@ -427,7 +426,7 @@
             <button class="btn btn-uplink" onclick="UIManager.showModal('ingame-modal')" title="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
             <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
             <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
-            <button class="btn btn-calib" id="btn-calib" onclick="StudioCanvas.abrirFatiadorLivre()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
+            <button class="btn btn-calib" id="btn-calib" onclick="StudioCanvas.abrirEstudio()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
             
             <div class="divider" id="div-export"></div>
 
@@ -817,33 +816,46 @@
 
         drawGridAndMold: function() {
             gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+            
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            // O Offset e o Fator de escala adaptam-se agora à Zona Ativa
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+            const f = activeZone.w / 64; // Tamanho do Bloco Minecraft para a Zona Ativa
 
-            // Grade de 1px nativa
+            // Grade de 1px nativa restrita à Zona Ativa
             if (document.getElementById('show-grid-1x1').checked) {
                 gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; gCtx.lineWidth = 1; gCtx.beginPath();
-                for (let x = 0; x <= 1024; x += 1) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
-                for (let y = 0; y <= 512; y += 1) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
+                for (let x = 0; x <= activeZone.w; x += 1) { gCtx.moveTo(zOffsetX + x, zOffsetY); gCtx.lineTo(zOffsetX + x, zOffsetY + activeZone.h); }
+                for (let y = 0; y <= activeZone.h; y += 1) { gCtx.moveTo(zOffsetX, zOffsetY + y); gCtx.lineTo(zOffsetX + activeZone.w, zOffsetY + y); }
                 gCtx.stroke();
             }
 
-            // Grade 16x16 Minecraft
+            // Grade Minecraft (Adaptada ao Fator F da Zona Ativa)
             if (document.getElementById('show-grid-16x16').checked) {
                 gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; gCtx.lineWidth = 1; gCtx.beginPath();
-                for (let x = 0; x <= 1024; x += 16) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
-                for (let y = 0; y <= 512; y += 16) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
+                for (let x = 0; x <= activeZone.w; x += f) { gCtx.moveTo(zOffsetX + x, zOffsetY); gCtx.lineTo(zOffsetX + x, zOffsetY + activeZone.h); }
+                for (let y = 0; y <= activeZone.h; y += f) { gCtx.moveTo(zOffsetX, zOffsetY + y); gCtx.lineTo(zOffsetX + activeZone.w, zOffsetY + y); }
                 gCtx.stroke();
             }
 
-            // Fronteira Mestre de Exportação (A Regra de Ouro)
+            // Fronteira Mestre de Exportação (Sempre Fixa a 1024x512)
             if (document.getElementById('show-export-zone').checked) {
                 gCtx.strokeStyle = "#ffaa00"; gCtx.lineWidth = 2; gCtx.setLineDash([12, 8]); gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); gCtx.setLineDash([]);
                 gCtx.fillStyle = "#ffaa00"; gCtx.font = "bold 16px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
                 gCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
             }
+            
+            // Fronteira da Zona Matryoshka Ativa
+            if (STATE.currentMatryoshkaZone !== 1) {
+                gCtx.strokeStyle = "#00e5ff"; gCtx.lineWidth = 2; gCtx.setLineDash([4, 4]); gCtx.strokeRect(zOffsetX, zOffsetY, activeZone.w, activeZone.h); gCtx.setLineDash([]);
+                gCtx.fillStyle = "#00e5ff"; gCtx.font = "bold 10px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
+                gCtx.fillText(`Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`, zOffsetX + 2, zOffsetY + activeZone.h - 2);
+            }
 
-            const f = 16; 
+            // Desenha as Caixas UV proporcionais à Zona Ativa
             const drawBox = (x, y, w, h, label) => {
-                let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
+                let px = zOffsetX + (x * f); let py = zOffsetY + (y * f); let pw = w * f; let ph = h * f;
                 
                 gCtx.strokeStyle = "#b0279c"; gCtx.lineWidth = 2; gCtx.setLineDash([6, 4]); gCtx.strokeRect(px, py, pw, ph); gCtx.setLineDash([]);
                 gCtx.fillStyle = "rgba(176, 39, 156, 0.1)"; gCtx.fillRect(px, py, pw, ph);
@@ -897,17 +909,6 @@
                     drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
                     drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
                 }
-            }
-
-            // Destaca a Zona Matryoshka Atual se aplicável
-            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
-            if (activeZone) {
-                let cx = OFFSET_X + (1024 - activeZone.w) / 2;
-                let cy = OFFSET_Y + (512 - activeZone.h) / 2;
-                
-                gCtx.strokeStyle = "#00e5ff"; gCtx.lineWidth = 2; gCtx.setLineDash([4, 4]); gCtx.strokeRect(cx, cy, activeZone.w, activeZone.h); gCtx.setLineDash([]);
-                gCtx.fillStyle = "#00e5ff"; gCtx.font = "bold 10px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
-                gCtx.fillText(`Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`, cx + 2, cy + activeZone.h - 2);
             }
         },
 
@@ -1160,11 +1161,16 @@
         if (STATE.isResizing) {
             STATE.isResizing = false; STATE.resizeHandle = '';
             if (document.getElementById('snap-grid').checked && STATE.activePieceIndex !== -1) {
+                const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+                let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+                let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+                const snapF = Math.max(1, activeZone.w / 64);
+                
                 let p = STATE.extractedPieces[STATE.activePieceIndex]; 
-                let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
-                let right = Math.round((relX + p.w) / 16) * 16; let bottom = Math.round((relY + p.h) / 16) * 16;
-                relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
-                p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; p.w = Math.max(16, right - relX); p.h = Math.max(16, bottom - relY);
+                let relX = p.x - zOffsetX; let relY = p.y - zOffsetY;
+                let right = Math.round((relX + p.w) / snapF) * snapF; let bottom = Math.round((relY + p.h) / snapF) * snapF;
+                relX = Math.round(relX / snapF) * snapF; relY = Math.round(relY / snapF) * snapF;
+                p.x = zOffsetX + relX; p.y = zOffsetY + relY; p.w = Math.max(snapF, right - relX); p.h = Math.max(snapF, bottom - relY);
             }
             StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); return;
         }
@@ -1173,10 +1179,15 @@
             if (STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
                 DOM.wsCanvas.style.cursor = 'grab';
                 if (document.getElementById('snap-grid').checked) {
+                    const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+                    let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+                    let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+                    const snapF = Math.max(1, activeZone.w / 64);
+                    
                     let p = STATE.extractedPieces[STATE.activePieceIndex]; 
-                    let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
-                    relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
-                    p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; 
+                    let relX = p.x - zOffsetX; let relY = p.y - zOffsetY;
+                    relX = Math.round(relX / snapF) * snapF; relY = Math.round(relY / snapF) * snapF;
+                    p.x = zOffsetX + relX; p.y = zOffsetY + relY; 
                 }
                 StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
             }
@@ -1218,24 +1229,40 @@
                 imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
             });
 
-            // Geração da Camada Final com base estritamente em 1024x512
-            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
+            // Geração da Camada Final baseada na Zona Ativa com Upscale para 1024x512
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+            
+            const zoneCanvas = document.createElement('canvas'); zoneCanvas.width = activeZone.w; zoneCanvas.height = activeZone.h;
+            const zoneCtx = zoneCanvas.getContext('2d'); zoneCtx.imageSmoothingEnabled = false;
+            
             STATE.extractedPieces.forEach(p => {
                 const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                // Retira o Offset visual da tela para gravar no Molde Base na coordenada exata
-                outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
+                zoneCtx.drawImage(temp, p.x - zOffsetX, p.y - zOffsetY, p.w, p.h);
             });
+
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
+            outCtx.imageSmoothingEnabled = false;
+            outCtx.drawImage(zoneCanvas, 0, 0, activeZone.w, activeZone.h, 0, 0, 1024, 512);
+
             const layerBase64 = outCanvas.toDataURL('image/png').split(',')[1];
             imagesFolder.file(`parasita_layer_${STATE.currentEditingLayer}_compiled.png`, layerBase64, {base64: true});
 
+            const scaleFactor = 1024 / activeZone.w;
             const metadata = {
                 "armor_name": "Vexanium Base Build",
                 "layer_type": STATE.currentEditingLayer === 1 ? "helmet_chest_boots" : "leggings",
                 "pipeline_phase": "Phase 3/4 (Frontend Export)",
                 "pieces_count": STATE.extractedPieces.length,
-                "format": "1024x512 HD Scaled", // Regra de Ouro garantida
+                "format": "1024x512 HD Scaled", 
+                "matryoshka_zone_used": `Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`,
                 "pieces_coordinates": STATE.extractedPieces.map(p => ({
-                    "id": p.id, "mc_x": p.x - OFFSET_X, "mc_y": p.y - OFFSET_Y, "w": p.w, "h": p.h
+                    "id": p.id, 
+                    "mc_x_scaled": Math.round((p.x - zOffsetX) * scaleFactor), 
+                    "mc_y_scaled": Math.round((p.y - zOffsetY) * scaleFactor), 
+                    "w_scaled": Math.round(p.w * scaleFactor), 
+                    "h_scaled": Math.round(p.h * scaleFactor)
                 }))
             };
             folder.file("metadata.json", JSON.stringify(metadata, null, 2));
@@ -1265,13 +1292,22 @@
         },
 
         aplicarMontagemUVLivre: function() {
-            // Regra de Ouro (Apenas 1024x512 processado internamente)
-            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
-            const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
+            // Regra de Ouro (1024x512 Mestre com Upscale da Zona Ativa)
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            let zOffsetX = OFFSET_X + (1024 - activeZone.w) / 2;
+            let zOffsetY = OFFSET_Y + (512 - activeZone.h) / 2;
+
+            const zoneCanvas = document.createElement('canvas'); zoneCanvas.width = activeZone.w; zoneCanvas.height = activeZone.h;
+            const zoneCtx = zoneCanvas.getContext('2d'); zoneCtx.imageSmoothingEnabled = false; 
             STATE.extractedPieces.forEach(p => {
                 const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
+                zoneCtx.drawImage(temp, p.x - zOffsetX, p.y - zOffsetY, p.w, p.h);
             });
+            
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
+            const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false;
+            outCtx.drawImage(zoneCanvas, 0, 0, activeZone.w, activeZone.h, 0, 0, 1024, 512);
+
             const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
             if (STATE.currentEditingLayer === 1) { STATE.finalImageL1 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 1 (L1) ATUALIZADA!"); } 
             else { STATE.finalImageL2 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 2 (L2) ATUALIZADA!"); }
