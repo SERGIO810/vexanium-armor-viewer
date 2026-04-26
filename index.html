@@ -117,6 +117,12 @@
         .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
 
+        /* Estilos dos Checkboxes do Molde UV */
+        .uv-toggles { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--sculk-core); }
+        .uv-toggles label { font-size: 11px; color: var(--warden-bone-dim); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; }
+        .uv-toggles input[type="checkbox"] { accent-color: var(--calib-accent); margin: 0; width: 14px; height: 14px; cursor: pointer; }
+        .uv-toggles label:hover { color: var(--calib-accent); }
+
         .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
@@ -171,7 +177,6 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAIS E ESTÚDIO DE CORTE OMITIDOS PARA BREVIDADE NESTE BLOCO (IDÊNTICOS AO ORIGINAL) -->
     <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
@@ -197,7 +202,7 @@
                 <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo (IA)</button>
                 <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">✨ 3. Analisar Arte (Vision)</button>
 
-                <!-- NOVO: PINTURA E RETOQUE -->
+                <!-- PINTURA E RETOQUE -->
                 <div class="slice-category">PINTURA TÁTICA (RETOQUE)</div>
                 <div style="display: flex; gap: 5px; margin-bottom: 8px;">
                     <button class="tool-btn" id="tool-brush" onclick="setTool('brush')" style="flex: 1; justify-content: center;">✏️ Pincel</button>
@@ -232,12 +237,24 @@
                 <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">🗑️ Apagar Peça (Restaurar)</button>
 
                 <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold; margin-bottom:5px;">
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#000; font-weight:bold;">
-                    <input type="checkbox" id="show-grid" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📐 Exibir Zona de Exportação
+                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
+                    <input type="checkbox" id="show-pixel-grid" onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📏 Exibir Grade de Pixels (16x16)
                 </label>
+
+                <!-- NOVOS CONTROLADORES DE ZONA (MOLDE UV) -->
+                <div id="uv-toggles-l1" class="uv-toggles">
+                    <label><input type="checkbox" id="uv-helmet" checked onchange="renderFatiador()"> Zona: Capacete</label>
+                    <label><input type="checkbox" id="uv-chest" checked onchange="renderFatiador()"> Zona: Peitoral</label>
+                    <label><input type="checkbox" id="uv-arms" checked onchange="renderFatiador()"> Zona: Braços</label>
+                    <label><input type="checkbox" id="uv-boots" checked onchange="renderFatiador()"> Zona: Botas</label>
+                </div>
+                <div id="uv-toggles-l2" class="uv-toggles" style="display:none;">
+                    <label><input type="checkbox" id="uv-waist" checked onchange="renderFatiador()"> Zona: Cintura (Waist)</label>
+                    <label><input type="checkbox" id="uv-legs" checked onchange="renderFatiador()"> Zona: Pernas</label>
+                </div>
             </div>
 
             <div class="editor-workspace" id="workspace-scroll-area">
@@ -268,7 +285,7 @@
         </div>
     </div>
     
-    <!-- MODAL IA (Omitido o html interno redundante, mantido o container) -->
+    <!-- MODAL IA -->
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
@@ -348,7 +365,7 @@
     let currentEditingLayer = 1; 
     let originalImageObj = new Image();
 
-    // Novas Variáveis de Pintura
+    // Variáveis de Pintura
     let currentPaintColor = "#a855f7";
     let isPainting = false;
 
@@ -357,9 +374,6 @@
     const statusOverlay = document.getElementById('status-overlay');
     const fileInput = document.getElementById('file-input');
 
-    // ============================================================================
-    // CONSTANTES DA MESA DE TRABALHO GIGANTE E CORTE 1024x512
-    // ============================================================================
     const WORKBENCH_W = 1920;
     const WORKBENCH_H = 1088; 
     const OFFSET_X = 448;     
@@ -416,7 +430,6 @@
         
         if (statusOverlay) statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
         
-        // Gestão da Visibilidade da Cena 3D
         if (mode === 'item') {
             scene.add(cajadoGroup);
             if (currentModel) scene.remove(currentModel);
@@ -494,9 +507,7 @@
     controls.enableDamping = true;
     let currentModel = null;
 
-    // ====================================================================
     // MODELO 3D: CAJADO DO INFINITO (Artefato Falso Procedural)
-    // ====================================================================
     const cajadoGroup = new THREE.Group();
     const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8);
     const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 });
@@ -515,9 +526,7 @@
     anel1.position.y = 1.9; anel1.rotation.x = Math.PI / 2;
     cajadoGroup.add(anel1);
     
-    // Posiciona o cajado para a câmara do visualizador atual
     cajadoGroup.position.set(0, -1, 0); 
-    // ====================================================================
 
     function animate() {
         requestAnimationFrame(animate);
@@ -569,7 +578,6 @@
         let py = Math.floor(pos.y);
         
         offscreenCtx.fillStyle = currentPaintColor;
-        // Pinta um pequeno rectângulo na canvas invisível de fundo
         offscreenCtx.fillRect(px - Math.floor(size/2), py - Math.floor(size/2), size, size);
         renderFatiador();
     }
@@ -577,9 +585,8 @@
     function aplicarContaGotas(pos) {
         let px = Math.floor(pos.x);
         let py = Math.floor(pos.y);
-        // Lemos a cor de TODOS os elementos visíveis (incluindo peças flutuantes)
         let pixel = wsCtx.getImageData(px, py, 1, 1).data;
-        if (pixel[3] > 0) { // Só extrai se não for transparente
+        if (pixel[3] > 0) { 
             setColor(rgbToHex(pixel[0], pixel[1], pixel[2]));
         }
     }
@@ -681,6 +688,10 @@
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         let badge = document.getElementById('slicer-layer-badge'); 
         
+        // Alternar a visibilidade dos menus de caixas da Camada correspondente
+        document.getElementById('uv-toggles-l1').style.display = currentEditingLayer === 1 ? 'flex' : 'none';
+        document.getElementById('uv-toggles-l2').style.display = currentEditingLayer === 2 ? 'flex' : 'none';
+
         if (currentEditingLayer === 1) {
             if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
         } else {
@@ -795,97 +806,110 @@
         if (statusOverlay) statusOverlay.innerText = "✂️ CORTE MANUAL EXECUTADO COM SUCESSO!";
     }
 
-    function desenharMoldeUV() {
-        if (!document.getElementById('show-grid').checked) return;
-        
-        wsCtx.strokeStyle = "#ffaa00"; wsCtx.lineWidth = 2; wsCtx.setLineDash([8, 8]);
-        wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); wsCtx.setLineDash([]);
-        wsCtx.fillStyle = "#ffaa00"; wsCtx.font = "bold 14px JetBrains Mono"; wsCtx.textAlign = "left";
-        wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 10);
+    function desenharPixelGrid() {
+        if (!document.getElementById('show-pixel-grid').checked) return;
+        wsCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+        wsCtx.lineWidth = 1;
+        wsCtx.beginPath();
+        // Linhas Verticais
+        for (let x = 0; x <= 1024; x += 16) {
+            wsCtx.moveTo(OFFSET_X + x, OFFSET_Y);
+            wsCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512);
+        }
+        // Linhas Horizontais
+        for (let y = 0; y <= 512; y += 16) {
+            wsCtx.moveTo(OFFSET_X, OFFSET_Y + y);
+            wsCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y);
+        }
+        wsCtx.stroke();
+    }
 
-        const f = 16; wsCtx.lineWidth = 1.5; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
-        const drawBox = (x, y, w, h, color, label, sublabel) => {
+    function desenharMoldeUV() {
+        // Marca a área de limite principal do Minecraft 1024x512
+        if (document.getElementById('show-grid').checked) {
+            wsCtx.strokeStyle = "#ffaa00"; wsCtx.lineWidth = 2; wsCtx.setLineDash([8, 8]);
+            wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); wsCtx.setLineDash([]);
+            wsCtx.fillStyle = "#ffaa00"; wsCtx.font = "bold 16px JetBrains Mono"; wsCtx.textAlign = "left";
+            wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 10);
+        }
+
+        const f = 16; wsCtx.lineWidth = 2; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
+        
+        // Nova função de molde com tracejado igual à imagem e fundo do texto
+        const drawBox = (x, y, w, h, label) => {
             let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
-            wsCtx.strokeStyle = color; wsCtx.fillStyle = color + "22"; 
-            wsCtx.strokeRect(px, py, pw, ph); wsCtx.fillRect(px, py, pw, ph);
-            wsCtx.fillStyle = "#000000"; 
-            if (sublabel) { 
-                wsCtx.fillText(label, px + pw/2, py + ph/2 - 6); 
-                wsCtx.font = "bold 9px JetBrains Mono"; 
-                wsCtx.fillText(sublabel, px + pw/2, py + ph/2 + 6); 
-                wsCtx.font = "bold 12px JetBrains Mono"; 
-            } else { wsCtx.fillText(label, px + pw/2, py + ph/2); }
+            wsCtx.strokeStyle = "#ffaa00"; 
+            wsCtx.setLineDash([6, 4]); // Estilo Blueprint tracejado
+            wsCtx.strokeRect(px, py, pw, ph);
+            wsCtx.setLineDash([]);
+            
+            // Fundo da etiqueta para garantir a leitura sobre texturas escuras
+            wsCtx.font = "bold 10px JetBrains Mono"; 
+            let txtW = wsCtx.measureText(label).width + 8;
+            wsCtx.fillStyle = "rgba(0,0,0,0.6)"; 
+            wsCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
+
+            wsCtx.fillStyle = "#ffaa00"; 
+            wsCtx.fillText(label, px + pw/2, py + ph/2); 
         };
 
         if (currentEditingLayer === 1) {
-            drawBox(8, 0, 8, 8, "#9c27b0", "TOPO", "CAPACETE");
-            drawBox(16, 0, 8, 8, "#9c27b0", "FUNDO", "CAPACETE");
-            drawBox(0, 8, 8, 8, "#9c27b0", "DIR.", "CAPACETE");
-            drawBox(8, 8, 8, 8, "#9c27b0", "FRENTE", "CAPACETE");
-            drawBox(16, 8, 8, 8, "#9c27b0", "ESQ.", "CAPACETE");
-            drawBox(24, 8, 8, 8, "#9c27b0", "COSTAS", "CAPACETE");
+            if (document.getElementById('uv-helmet') && document.getElementById('uv-helmet').checked) {
+                drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
+                drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
+                drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
+            }
+            if (document.getElementById('uv-chest') && document.getElementById('uv-chest').checked) {
+                drawBox(20, 16, 8, 4, "PEITO TOPO"); drawBox(28, 16, 8, 4, "PEITO BASE");
+                drawBox(16, 20, 4, 12, "PEITO DIR"); drawBox(20, 20, 8, 12, "PEITO FRE");
+                drawBox(28, 20, 4, 12, "PEITO ESQ"); drawBox(32, 20, 8, 12, "PEITO COS");
+            }
+            if (document.getElementById('uv-arms') && document.getElementById('uv-arms').checked) {
+                drawBox(44, 16, 4, 4, "BR.D TOP"); drawBox(48, 16, 4, 4, "BR.D BAS");
+                drawBox(40, 20, 4, 12, "BR.D DIR"); drawBox(44, 20, 4, 12, "BR.D FRE");
+                drawBox(48, 20, 4, 12, "BR.D ESQ"); drawBox(52, 20, 4, 12, "BR.D COS");
 
-            drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "PEITO");
-            drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "PEITO");
-            drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "PEITO");
-            drawBox(20, 20, 8, 12, "#00bcd4", "FRENTE", "PEITO");
-            drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "PEITO");
-            drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "PEITO");
+                drawBox(36, 48, 4, 4, "BR.E TOP"); drawBox(40, 48, 4, 4, "BR.E BAS");
+                drawBox(32, 52, 4, 12, "BR.E DIR"); drawBox(36, 52, 4, 12, "BR.E FRE");
+                drawBox(40, 52, 4, 12, "BR.E ESQ"); drawBox(44, 52, 4, 12, "BR.E COS");
+            }
+            if (document.getElementById('uv-boots') && document.getElementById('uv-boots').checked) {
+                drawBox(4, 16, 4, 4, "BOT.D TOP"); drawBox(8, 16, 4, 4, "BOT.D BAS");
+                drawBox(0, 20, 4, 12, "BOT.D DIR"); drawBox(4, 20, 4, 12, "BOT.D FRE");
+                drawBox(8, 20, 4, 12, "BOT.D ESQ"); drawBox(12, 20, 4, 12, "BOT.D COS");
 
-            drawBox(44, 16, 4, 4, "#4caf50", "TOPO", "BRAÇOS");
-            drawBox(48, 16, 4, 4, "#4caf50", "BASE", "BRAÇOS");
-            drawBox(40, 20, 4, 12, "#4caf50", "LADO", "BRAÇOS");
-            drawBox(44, 20, 4, 12, "#4caf50", "FRENTE", "BRAÇOS");
-            drawBox(48, 20, 4, 12, "#4caf50", "LADO", "BRAÇOS");
-            drawBox(52, 20, 4, 12, "#4caf50", "COSTAS", "BRAÇOS");
-
-            drawBox(4, 16, 4, 4, "#ff9800", "TOPO", "BOTAS");
-            drawBox(8, 16, 4, 4, "#ff9800", "BASE", "BOTAS");
-            drawBox(0, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
-            drawBox(4, 20, 4, 12, "#ff9800", "FRENTE", "BOTAS");
-            drawBox(8, 20, 4, 12, "#ff9800", "LADO", "BOTAS");
-            drawBox(12, 20, 4, 12, "#ff9800", "COSTAS", "BOTAS");
-
-            drawBox(36, 48, 4, 4, "#4caf50", "TOPO", "BRAÇO ESQ.");
-            drawBox(40, 48, 4, 4, "#4caf50", "BASE", "BRAÇO ESQ.");
-            drawBox(32, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
-            drawBox(36, 52, 4, 12, "#4caf50", "FRENTE", "BRAÇO ESQ.");
-            drawBox(40, 52, 4, 12, "#4caf50", "LADO", "BRAÇO ESQ.");
-            drawBox(44, 52, 4, 12, "#4caf50", "COSTAS", "BRAÇO ESQ.");
-
-            drawBox(20, 48, 4, 4, "#ff9800", "TOPO", "BOTA ESQ.");
-            drawBox(24, 48, 4, 4, "#ff9800", "BASE", "BOTA ESQ.");
-            drawBox(16, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
-            drawBox(20, 52, 4, 12, "#ff9800", "FRENTE", "BOTA ESQ.");
-            drawBox(24, 52, 4, 12, "#ff9800", "LADO", "BOTA ESQ.");
-            drawBox(28, 52, 4, 12, "#ff9800", "COSTAS", "BOTA ESQ.");
+                drawBox(20, 48, 4, 4, "BOT.E TOP"); drawBox(24, 48, 4, 4, "BOT.E BAS");
+                drawBox(16, 52, 4, 12, "BOT.E DIR"); drawBox(20, 52, 4, 12, "BOT.E FRE");
+                drawBox(24, 52, 4, 12, "BOT.E ESQ"); drawBox(28, 52, 4, 12, "BOT.E COS");
+            }
         } else if (currentEditingLayer === 2) {
-            drawBox(20, 16, 8, 4, "#00bcd4", "TOPO", "CINTURA");
-            drawBox(28, 16, 8, 4, "#00bcd4", "BASE", "CINTURA");
-            drawBox(16, 20, 4, 12, "#00bcd4", "DIR.", "CINTURA");
-            drawBox(20, 20, 8, 12, "#00bcd4", "FRENTE", "CINTURA");
-            drawBox(28, 20, 4, 12, "#00bcd4", "ESQ.", "CINTURA");
-            drawBox(32, 20, 8, 12, "#00bcd4", "COSTAS", "CINTURA");
+            if (document.getElementById('uv-waist') && document.getElementById('uv-waist').checked) {
+                drawBox(20, 16, 8, 4, "CINT. TOPO"); drawBox(28, 16, 8, 4, "CINT. BASE");
+                drawBox(16, 20, 4, 12, "CINT. DIR"); drawBox(20, 20, 8, 12, "CINT. FRE");
+                drawBox(28, 20, 4, 12, "CINT. ESQ"); drawBox(32, 20, 8, 12, "CINT. COS");
+            }
+            if (document.getElementById('uv-legs') && document.getElementById('uv-legs').checked) {
+                drawBox(4, 16, 4, 4, "PER.D TOP"); drawBox(8, 16, 4, 4, "PER.D BAS");
+                drawBox(0, 20, 4, 12, "PER.D DIR"); drawBox(4, 20, 4, 12, "PER.D FRE");
+                drawBox(8, 20, 4, 12, "PER.D ESQ"); drawBox(12, 20, 4, 12, "PER.D COS");
 
-            drawBox(4, 16, 4, 4, "#ffd700", "TOPO", "PERNA DIR.");
-            drawBox(8, 16, 4, 4, "#ffd700", "BASE", "PERNA DIR.");
-            drawBox(0, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
-            drawBox(4, 20, 4, 12, "#ffd700", "FRENTE", "PERNA DIR.");
-            drawBox(8, 20, 4, 12, "#ffd700", "LADO", "PERNA DIR.");
-            drawBox(12, 20, 4, 12, "#ffd700", "COSTAS", "PERNA DIR.");
-
-            drawBox(20, 48, 4, 4, "#ffd700", "TOPO", "PERNA ESQ.");
-            drawBox(24, 48, 4, 4, "#ffd700", "BASE", "PERNA ESQ.");
-            drawBox(16, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
-            drawBox(20, 52, 4, 12, "#ffd700", "FRENTE", "PERNA ESQ.");
-            drawBox(24, 52, 4, 12, "#ffd700", "LADO", "PERNA ESQ.");
-            drawBox(28, 52, 4, 12, "#ffd700", "COSTAS", "PERNA ESQ.");
+                drawBox(20, 48, 4, 4, "PER.E TOP"); drawBox(24, 48, 4, 4, "PER.E BAS");
+                drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
+                drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
+            }
         }
     }
 
     function renderFatiador() {
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
-        wsCtx.drawImage(offscreenCanvas, 0, 0); desenharMoldeUV();
+        wsCtx.drawImage(offscreenCanvas, 0, 0); 
+        
+        // Desenha a Grela de Pixels primeiro para ficar atrás do Molde
+        desenharPixelGrid();
+        
+        // Desenha o Molde UV atualizado e com Toggles
+        desenharMoldeUV();
+        
         extractedPieces.forEach((p, i) => {
             let tempC = document.createElement('canvas'); tempC.width = p.imgData.width; tempC.height = p.imgData.height; tempC.getContext('2d').putImageData(p.imgData, 0, 0);
             wsCtx.imageSmoothingEnabled = false; wsCtx.drawImage(tempC, p.x, p.y, p.w, p.h);
