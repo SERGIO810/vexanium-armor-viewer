@@ -65,7 +65,7 @@
         .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
         .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
 
-        /* MODAIS ECRÃO INTEIRO - CORREÇÃO GLOBAL: flex-direction: column adicionado */
+        /* MODAIS ECRÃO INTEIRO */
         .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; flex-direction: column; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
         #ai-modal, #gen-modal { width: 85vw; max-width: 550px; }
         .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
@@ -74,7 +74,7 @@
         #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
-        /* ESTÚDIO DE CIRURGIA UV - MESA GIGANTE (1920x1088) */
+        /* ESTÚDIO DE CIRURGIA UV */
         #slicer-modal { width: 98vw; height: 95vh; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
         #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
@@ -83,7 +83,6 @@
         .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
         .editor-workspace { flex: 1; background-color: #f1f3f4; background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8); background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box; }
         
-        /* WORKBENCH DIMENSIONS */
         #canvas-wrapper { width: 1920px; height: 1088px; min-width: 1920px; min-height: 1088px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
         #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; }
 
@@ -113,6 +112,11 @@
         .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
         .delete-btn { border-color: #ff5555; color: #ff5555; }
         .delete-btn:hover { background: #ff5555; color: #fff; }
+        
+        /* Paleta de Cores Customizada */
+        .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
+        .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
+
         .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
@@ -152,7 +156,6 @@
 <div id="javis-widget-container">
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
     
-    <!-- NO PAINEL DE DIAGNÓSTICO LATERAL -->
     <div class="status-panel" id="diagnostic-panel">
         <div class="status-header">DIAGNÓSTICO DE COMPILAÇÃO</div>
         <div><strong>L1 (C/P/B):</strong> <span id="status-l1" style="color: #ff5555;">Ausente</span></div>
@@ -168,34 +171,7 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- MODAL IA LORE & ATRIBUTOS -->
-    <div id="ai-modal" class="modal" style="display: none;">
-        <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
-        <div id="ai-response-text">A extrair dados do hospedeiro...</div>
-        <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
-    </div>
-
-    <!-- MODAL GERADOR FASE 1 (CORREÇÃO DE CAMPO DE TEXTO E FLEX-DIRECTION) -->
-    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
-        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
-        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
-        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
-            <button class="close-modal" style="background: transparent;" onclick="closeModal('gen-modal')">Cancelar</button>
-            <button class="close-modal" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 Iniciar Geração</button>
-        </div>
-    </div>
-
-    <div id="ingame-modal" class="modal" style="display: none;">
-        <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
-        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole o Relatório Tático gerado pelo <b>JarvisBrain.java</b> para analisar a telemetria da partida.</p>
-        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR..."></textarea>
-        <div style="display: flex; gap: 10px; justify-content: flex-end;">
-            <button class="close-modal" style="background: transparent;" onclick="closeModal('ingame-modal')">Cancelar Conexão</button>
-            <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
-        </div>
-    </div>
-
+    <!-- MODAIS E ESTÚDIO DE CORTE OMITIDOS PARA BREVIDADE NESTE BLOCO (IDÊNTICOS AO ORIGINAL) -->
     <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
@@ -215,11 +191,35 @@
 
                 <div class="slice-category">PREPARAÇÃO MULTI-IMAGEM</div>
                 <button class="tool-btn" style="justify-content: center; background: rgba(255, 0, 255, 0.1); border-color: #ff00ff; color: #ff00ff; margin-bottom: 5px;" onclick="showModal('gen-modal')">✨ 0. Gerar Arte Base (IA)</button>
-                <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Nova Imagem</button>
+                <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Imagem</button>
                 <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
                 
-                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo Inteligente</button>
+                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo (IA)</button>
                 <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">✨ 3. Analisar Arte (Vision)</button>
+
+                <!-- NOVO: PINTURA E RETOQUE -->
+                <div class="slice-category">PINTURA TÁTICA (RETOQUE)</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                    <button class="tool-btn" id="tool-brush" onclick="setTool('brush')" style="flex: 1; justify-content: center;">✏️ Pincel</button>
+                    <button class="tool-btn" id="tool-eyedrop" onclick="setTool('eyedropper')" style="flex: 1; justify-content: center;">💧 Gotas</button>
+                </div>
+                
+                <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                    <input type="color" id="color-picker" value="#a855f7" class="action-btn" style="padding: 0; width: 35px; height: 30px; cursor: pointer; border: 1px solid var(--warden-bone-dim);">
+                    <div style="display: flex; gap: 2px; flex: 1;">
+                        <div class="color-swatch" style="background:#a855f7;" onclick="setColor('#a855f7')"></div>
+                        <div class="color-swatch" style="background:#13c9c9;" onclick="setColor('#13c9c9')"></div>
+                        <div class="color-swatch" style="background:#0a1117;" onclick="setColor('#0a1117')"></div>
+                        <div class="color-swatch" style="background:#d1d5b4;" onclick="setColor('#d1d5b4')"></div>
+                        <div class="color-swatch" style="background:#ff3333;" onclick="setColor('#ff3333')"></div>
+                        <div class="color-swatch" style="background:#ffffff;" onclick="setColor('#ffffff')"></div>
+                    </div>
+                </div>
+                
+                <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-bottom: 5px;">
+                    Espessura: <span id="brush-size-val" style="color:var(--sculk-core); font-weight:bold; width:15px;">2</span>px
+                    <input type="range" id="brush-size" min="1" max="20" value="2" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('brush-size-val').innerText = this.value;">
+                </label>
 
                 <div class="slice-category">FERRAMENTAS DE EXTRAÇÃO</div>
                 <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')">✂️ Varinha Mágica (Extrair)</button>
@@ -267,12 +267,42 @@
             <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="aplicarMontagemUVLivre()">✅ Fundir Textura Final ao 3D</button>
         </div>
     </div>
+    
+    <!-- MODAL IA (Omitido o html interno redundante, mantido o container) -->
+    <div id="ai-modal" class="modal" style="display: none;">
+        <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
+        <div id="ai-response-text">A extrair dados do hospedeiro...</div>
+        <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
+    </div>
+
+    <!-- MODAL GERADOR FASE 1 -->
+    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
+        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
+        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
+            <button class="close-modal" style="background: transparent;" onclick="closeModal('gen-modal')">Cancelar</button>
+            <button class="close-modal" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 Iniciar Geração</button>
+        </div>
+    </div>
+
+    <!-- MODAL UPLINK -->
+    <div id="ingame-modal" class="modal" style="display: none;">
+        <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole o Relatório Tático gerado pelo <b>JarvisBrain.java</b> para analisar a telemetria da partida.</p>
+        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="close-modal" style="background: transparent;" onclick="closeModal('ingame-modal')">Cancelar Conexão</button>
+            <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
+        </div>
+    </div>
 
     <!-- BARRA TÁTICA INFERIOR -->
     <div class="control-bar">
         <div class="btn-group">
             <button class="btn active" id="btn-armor" onclick="switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
             <button class="btn" id="btn-model" onclick="switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
+            <button class="btn" id="btn-item" onclick="switchMode('item')"><span class="icon">🪄</span> ARTEFATO</button>
         </div>
         
         <div class="btn-group" style="margin-left: 5px;">
@@ -317,6 +347,10 @@
     let uploadTarget = 1; 
     let currentEditingLayer = 1; 
     let originalImageObj = new Image();
+
+    // Novas Variáveis de Pintura
+    let currentPaintColor = "#a855f7";
+    let isPainting = false;
 
     const loader = document.getElementById('ai-loader');
     const scanner = document.getElementById('scanning-overlay');
@@ -364,9 +398,10 @@
         currentMode = mode;
         document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
         document.getElementById('btn-model').classList.toggle('active', mode === 'model');
+        document.getElementById('btn-item').classList.toggle('active', mode === 'item');
         
         skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
-        gltfCanvas.style.display = mode === 'model' ? 'block' : 'none';
+        gltfCanvas.style.display = (mode === 'model' || mode === 'item') ? 'block' : 'none';
         
         const isArmor = mode === 'armor';
         document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
@@ -381,6 +416,15 @@
         
         if (statusOverlay) statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
         
+        // Gestão da Visibilidade da Cena 3D
+        if (mode === 'item') {
+            scene.add(cajadoGroup);
+            if (currentModel) scene.remove(currentModel);
+        } else if (mode === 'model') {
+            scene.remove(cajadoGroup);
+            if (currentModel) scene.add(currentModel);
+        }
+
         let btnRot = document.getElementById('btn-rotate');
         if(currentMode === 'armor') {
             btnRot.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
@@ -413,7 +457,7 @@
         } else {
             renderer.render(scene, camera);
             const dataUrl = gltfCanvas.toDataURL('image/png');
-            downloadVisualFile(dataUrl, `vexanium_entity_snapshot_${new Date().getTime()}.png`);
+            downloadVisualFile(dataUrl, `vexanium_${currentMode}_snapshot_${new Date().getTime()}.png`);
         }
         if (statusOverlay) statusOverlay.innerText = "📸 DIAGNÓSTICO VISUAL CAPTURADO!";
     }
@@ -425,6 +469,7 @@
         link.click();
     }
 
+    // Configuração Skinview3D (Armadura)
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
         canvas: skinCanvas, 
@@ -435,6 +480,7 @@
     skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
     skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
 
+    // Configuração Three.js (Entidades / Itens)
     const gltfCanvas = document.getElementById('gltfViewer');
     const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
     const scene = new THREE.Scene();
@@ -442,13 +488,46 @@
     camera.position.set(0, 0, 5);
     scene.add(new THREE.AmbientLight(0x0c8a8c, 0.6));
     const l1 = new THREE.PointLight(0xd1d5b4, 1.2, 100); l1.position.set(5, 8, 5); scene.add(l1);
+    const purpleLight = new THREE.PointLight(0xa855f7, 2, 10); purpleLight.position.set(0, 2, 0); scene.add(purpleLight);
+
     const controls = new THREE.OrbitControls(camera, gltfCanvas);
     controls.enableDamping = true;
     let currentModel = null;
 
+    // ====================================================================
+    // MODELO 3D: CAJADO DO INFINITO (Artefato Falso Procedural)
+    // ====================================================================
+    const cajadoGroup = new THREE.Group();
+    const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8);
+    const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 });
+    const bastao = new THREE.Mesh(bastaoGeo, bastaoMat);
+    cajadoGroup.add(bastao);
+
+    const cristalGeo = new THREE.OctahedronGeometry(0.4, 0);
+    const cristalMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0x6b21a8, metalness: 0.5, roughness: 0.1, transparent: true, opacity: 0.9 });
+    const cristal = new THREE.Mesh(cristalGeo, cristalMat);
+    cristal.position.y = 2.2;
+    cajadoGroup.add(cristal);
+
+    const anelGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 4);
+    const ouroMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 1, roughness: 0.2 });
+    const anel1 = new THREE.Mesh(anelGeo, ouroMat);
+    anel1.position.y = 1.9; anel1.rotation.x = Math.PI / 2;
+    cajadoGroup.add(anel1);
+    
+    // Posiciona o cajado para a câmara do visualizador atual
+    cajadoGroup.position.set(0, -1, 0); 
+    // ====================================================================
+
     function animate() {
         requestAnimationFrame(animate);
-        if (currentMode === 'model' && currentModel && autoRotateGltf) currentModel.rotation.y += 0.005;
+        if (currentMode === 'model' && currentModel && autoRotateGltf) {
+            currentModel.rotation.y += 0.005;
+        } else if (currentMode === 'item') {
+            if (autoRotateGltf) cajadoGroup.rotation.y += 0.01;
+            cristal.rotation.y += 0.01;
+            cristal.position.y = 2.2 + Math.sin(Date.now() * 0.003) * 0.05;
+        }
         controls.update(); renderer.render(scene, camera);
     }
     animate();
@@ -468,6 +547,42 @@
 
     let lastEditingLayer = 1;
     let layerStates = { 1: null, 2: null };
+
+    // FUNÇÕES DE PINTURA E CORES
+    function setColor(hex) {
+        currentPaintColor = hex;
+        document.getElementById('color-picker').value = hex;
+        setTool('brush');
+    }
+
+    document.getElementById('color-picker').addEventListener('input', (e) => { 
+        setColor(e.target.value); 
+    });
+
+    function rgbToHex(r, g, b) {
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+    }
+
+    function aplicarPincelada(pos) {
+        let size = parseInt(document.getElementById('brush-size').value) || 2;
+        let px = Math.floor(pos.x);
+        let py = Math.floor(pos.y);
+        
+        offscreenCtx.fillStyle = currentPaintColor;
+        // Pinta um pequeno rectângulo na canvas invisível de fundo
+        offscreenCtx.fillRect(px - Math.floor(size/2), py - Math.floor(size/2), size, size);
+        renderFatiador();
+    }
+
+    function aplicarContaGotas(pos) {
+        let px = Math.floor(pos.x);
+        let py = Math.floor(pos.y);
+        // Lemos a cor de TODOS os elementos visíveis (incluindo peças flutuantes)
+        let pixel = wsCtx.getImageData(px, py, 1, 1).data;
+        if (pixel[3] > 0) { // Só extrai se não for transparente
+            setColor(rgbToHex(pixel[0], pixel[1], pixel[2]));
+        }
+    }
 
     function salvarEstadoDaLayerAtual() {
         let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
@@ -618,7 +733,14 @@
         document.getElementById('tool-magic').classList.toggle('active', tool === 'magic');
         document.getElementById('tool-slice').classList.toggle('active', tool === 'slice');
         document.getElementById('tool-move').classList.toggle('active', tool === 'move');
-        wsCanvas.style.cursor = (tool === 'magic' || tool === 'slice') ? 'crosshair' : 'grab';
+        document.getElementById('tool-brush').classList.toggle('active', tool === 'brush');
+        document.getElementById('tool-eyedrop').classList.toggle('active', tool === 'eyedropper');
+        
+        if(tool === 'brush' || tool === 'eyedropper' || tool === 'magic' || tool === 'slice') {
+            wsCanvas.style.cursor = 'crosshair';
+        } else {
+            wsCanvas.style.cursor = 'grab';
+        }
     }
 
     function removerFundoBranco() {
@@ -811,8 +933,23 @@
         if (Math.abs(x - p.x) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'sw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'se'; return null;
     }
 
+    // EVENTOS DO RATO NA MESA
     wsCanvas.addEventListener('mousedown', (e) => {
         const pos = getMousePos(e); startX = pos.x; startY = pos.y;
+        
+        // Pincel
+        if (currentTool === 'brush') {
+            isPainting = true;
+            aplicarPincelada(pos);
+            return;
+        }
+        
+        // Conta Gotas
+        if (currentTool === 'eyedropper') {
+            aplicarContaGotas(pos);
+            return;
+        }
+
         if (currentTool === 'move') {
             if (activePieceIndex !== -1) {
                 let p = extractedPieces[activePieceIndex]; let handle = getHoverHandle(pos.x, pos.y, p);
@@ -841,6 +978,12 @@
 
     wsCanvas.addEventListener('mousemove', (e) => {
         const pos = getMousePos(e);
+        
+        if (isPainting && currentTool === 'brush') {
+            aplicarPincelada(pos);
+            return;
+        }
+
         if (!isDragging && !isResizing && currentTool === 'move') {
             let hoveringHandle = false;
             if (activePieceIndex !== -1) {
@@ -877,6 +1020,12 @@
     });
 
     wsCanvas.addEventListener('mouseup', (e) => {
+        if (isPainting) {
+            isPainting = false;
+            registrarEstadoMemoria(); // Grava na memória depois de terminar a pincelada
+            return;
+        }
+
         if (isResizing) {
             isResizing = false; resizeHandle = '';
             if (document.getElementById('snap-grid').checked && activePieceIndex !== -1) {
@@ -1110,11 +1259,17 @@
                 if (uploadTarget === 1) { baseImageL1 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); } 
                 else if (uploadTarget === 2) { baseImageL2 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); }
             }; reader.readAsDataURL(file);
-        } else if (currentMode === 'model') {
+        } else if (currentMode === 'model' || currentMode === 'item') {
             new THREE.GLTFLoader().load(url, (gltf) => {
                 if (currentModel) scene.remove(currentModel); currentModel = gltf.scene;
                 const box = new THREE.Box3().setFromObject(currentModel); const size = box.getSize(new THREE.Vector3()); const scale = 3.5 / Math.max(size.x, size.y, size.z);
                 currentModel.scale.set(scale, scale, scale); currentModel.position.set(0, -1, 0); scene.add(currentModel);
+                
+                // Se o utilizador importar um GLTF manual, escondemos o Cajado falso.
+                if(currentMode === 'item') {
+                    scene.remove(cajadoGroup);
+                }
+
                 if (statusOverlay) statusOverlay.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
             });
         }
@@ -1129,6 +1284,7 @@
     }
     window.addEventListener('resize', resize); setTimeout(resize, 200);
 
+    // INTEGRAÇÃO GEMINI IA OMITIDA PARA BREVIDADE (Mantida a estrutura original no código completo)
     async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
         if (loader) loader.style.display = 'block'; if (scanner) scanner.style.display = 'block';
         let retries = 0; const maxRetries = 5;
@@ -1146,23 +1302,19 @@
         const promptInput = document.getElementById('gen-prompt-input');
         const tema = promptInput ? promptInput.value : "";
         if (!tema || tema.trim() === '') { alert("Operador, descreva o design da armadura antes de iniciar a Forja."); return; }
-
         closeModal('gen-modal');
         if (statusOverlay) statusOverlay.innerText = "⏳ INICIANDO FORJA IA (GERANDO TEXTURA)...";
 
         const layoutInstructions = currentEditingLayer === 1
             ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)."
             : "Leggings/Pants: Waist Front(0,256), Waist Back(128,256), Leg Side(256,256), Leg Front(320,256).";
-
         const strictPrompt = `Minecraft armor texture map, flat 2D layout. CRITICAL INSTRUCTION: Generate ONLY Layer ${currentEditingLayer}. DO NOT draw the background, keep it solid white. Pixel art style. STRICT COORDINATES TO FOLLOW EXACTLY: ${layoutInstructions}. Theme: ${tema} (Must be exactly 2:1 aspect ratio)`;
-
         const payload = { instances: { prompt: strictPrompt }, parameters: { sampleCount: 1 } };
         const data = await callGemini(payload, "imagen-4.0-generate-001:predict");
 
         if (data && data.predictions && data.predictions.length > 0) {
             const base64Image = data.predictions[0].bytesBase64Encoded;
             const imageUrl = `data:image/png;base64,${base64Image}`;
-            
             const img = new Image();
             img.onload = () => {
                 offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
@@ -1170,12 +1322,9 @@
                 renderFatiador(); registrarEstadoMemoria(); 
                 if (statusOverlay) statusOverlay.innerText = "✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!";
             }; img.src = imageUrl;
-            
             if (currentEditingLayer === 1) baseImageL1 = imageUrl; else baseImageL2 = imageUrl;
             originalImageObj.src = imageUrl;
-            
-            updateDiagnosticPanel();
-            abrirFatiadorLivre(true);
+            updateDiagnosticPanel(); abrirFatiadorLivre(true);
         } else {
             alert("Falha na Forja. A IA não conseguiu gerar a armadura.");
             if (statusOverlay) statusOverlay.innerText = "SISTEMAS: ARMOR // AGUARDANDO COMANDOS";
@@ -1186,10 +1335,8 @@
         if (!originalImageObj || !originalImageObj.src || originalImageObj.src === "") { alert("Operador, necessita de carregar ou gerar uma Imagem Base primeiro."); return; }
         const base64Data = originalImageObj.src.split(',')[1]; let mimeType = "image/png";
         if(originalImageObj.src.startsWith("data:image/jpeg")) mimeType = "image/jpeg";
-
         showModal("ai-modal", "✨ ANÁLISE VISUAL DE ARTE (VISION)", "A processar padrões visuais e biologia da armadura...");
         const prompt = "Aja como J.A.V.I.S., uma IA tática de engenharia biomecânica. Analise visualmente esta textura de armadura de Minecraft. Descreva de forma técnica e sombria a paleta de cores, a biologia aparente e como estas peças se enquadram na temática do 'Vexanium' (um mod de parasitas espaciais e tecnologia alienígena nas profundezas do Deep Dark).";
-
         const payload = { contents: [{ role: "user", parts: [ { text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } } ] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português com formatação clara e tática." }] } };
         const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
         const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
@@ -1221,6 +1368,5 @@
         const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
     }
 </script>
-
 </body>
 </html>
