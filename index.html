@@ -36,7 +36,6 @@
         #scanning-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--sculk-core); box-shadow: 0 0 15px var(--sculk-core), 0 0 30px var(--sculk-core); display: none; z-index: 50; animation: scanMove 2s infinite ease-in-out; }
         @keyframes scanMove { 0% { top: 0; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
 
-        /* BARRA TÁTICA INFERIOR */
         .control-bar { background: rgba(6, 10, 14, 0.98); border-top: 1px solid #1a2a3a; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; gap: 12px; z-index: 10; }
         .btn-group { display: flex; gap: 8px; align-items: center; }
         .btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); border-bottom-width: 3px; border-radius: 4px; padding: 8px 12px; font-size: 11px; font-family: 'JetBrains Mono', monospace; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 6px; letter-spacing: 1px; text-transform: uppercase; }
@@ -78,39 +77,23 @@
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
 
-        .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
+        .editor-toolbar { flex: 0 0 250px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
         
-        /* WORKBENCH EXACT 1920x1080 */
+        /* WORKBENCH EXACT 1920x1080 - AMBIENTE LIMPO */
         .editor-workspace { flex: 1; background-color: #030508; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); position: relative; padding: 20px; box-sizing: border-box; }
         
         #canvas-wrapper { 
             width: 1920px; height: 1080px; min-width: 1920px; min-height: 1080px; 
             margin: auto; 
-            background-color: #e0e4e8;
-            /* Textura Quadriculada de Fundo (Photoshop style) */
-            background-image: 
-                linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%, #cbd5e1), 
-                linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%, #cbd5e1); 
-            background-size: 20px 20px; 
-            background-position: 0 0, 10px 10px; 
+            background-color: #0d141c; /* Fundo escuro sólido e limpo */
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
             position: relative;
             transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; 
         }
-        
-        /* AS GRADES NATIVAS SOBRE A TELA */
-        #grid-overlay {
-            position: absolute;
-            left: 448px; /* Centralizado em X: (1920-1024)/2 */
-            top: 284px;  /* Centralizado em Y: (1080-512)/2 */
-            width: 1024px;
-            height: 512px;
-            pointer-events: none;
-            display: none;
-            z-index: 5;
-        }
 
-        #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; position: relative; z-index: 10;}
+        #workspace-canvas, #grid-canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; image-rendering: pixelated; }
+        #workspace-canvas { cursor: crosshair; z-index: 10; }
+        #grid-canvas { pointer-events: none; z-index: 15; }
 
         .pieces-panel { flex: 0 0 260px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
         .pieces-header { font-size: 12px; color: var(--calib-accent); font-weight: 800; border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
@@ -133,11 +116,6 @@
         
         .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
-
-        .uv-toggles { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--sculk-core); }
-        .uv-toggles label { font-size: 11px; color: var(--warden-bone-dim); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; }
-        .uv-toggles input[type="checkbox"] { accent-color: var(--calib-accent); margin: 0; width: 14px; height: 14px; cursor: pointer; }
-        .uv-toggles label:hover { color: var(--calib-accent); }
 
         .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
@@ -199,7 +177,7 @@
         
         <div class="editor-layout">
             <div class="editor-toolbar">
-                <div class="slice-category">MEMÓRIA E PRESETS (JSON)</div>
+                <div class="slice-category">MEMÓRIA E PRESETS</div>
                 <div style="display: flex; gap: 5px;">
                     <button class="action-btn" style="flex: 1;" onclick="desfazerEstado()" title="Desfazer">↩️ Undo</button>
                     <button class="action-btn" style="flex: 1;" onclick="refazerEstado()" title="Refazer">↪️ Redo</button>
@@ -210,13 +188,7 @@
                     <input type="file" id="file-input-preset" accept="application/json">
                 </div>
 
-                <div class="slice-category">PREPARAÇÃO DE ARTE</div>
-                <button class="tool-btn" style="justify-content: center; background: rgba(255, 0, 255, 0.1); border-color: #ff00ff; color: #ff00ff; margin-bottom: 5px;" onclick="showModal('gen-modal')">✨ 0. Gerar Arte Base (IA)</button>
-                <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Imagem</button>
-                <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
-                
-                <!-- PINTURA E RETOQUE -->
-                <div class="slice-category">PINTURA E MANIPULAÇÃO</div>
+                <div class="slice-category">FERRAMENTAS</div>
                 <div style="display: flex; gap: 5px; margin-bottom: 8px;">
                     <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')" style="flex: 1; justify-content: center;" title="Extrair Área">✂️ Varinha</button>
                     <button class="tool-btn" id="tool-slice" onclick="setTool('slice')" style="flex: 1; justify-content: center;" title="Corte Quadrado">📐 Corte</button>
@@ -244,30 +216,30 @@
                     <input type="range" id="brush-size" min="1" max="20" value="2" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('brush-size-val').innerText = this.value;">
                 </label>
 
-                <div class="slice-category">OPÇÕES DE VISUALIZAÇÃO</div>
+                <div class="slice-category" style="margin-top: 15px;">MOLDES & GRADES</div>
+                
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:8px;">
+                    <input type="checkbox" id="show-export-zone" checked onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> Molde 1024x512
+                </label>
+                <div style="display: flex; gap: 5px; margin-bottom: 12px; padding-left: 20px;">
+                    <label style="font-size:10px; cursor:pointer; color:var(--calib-accent); font-weight:bold;">
+                        <input type="checkbox" id="show-molde-l1" checked onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> Peças L1
+                    </label>
+                    <label style="font-size:10px; cursor:pointer; color:var(--calib-accent); font-weight:bold;">
+                        <input type="checkbox" id="show-molde-l2" checked onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> Peças L2
+                    </label>
+                </div>
+
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
+                    <input type="checkbox" id="show-grid-mc" onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> Grade Minecraft (16x16)
+                </label>
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-grid-1x1" onchange="updateGridOverlay()" style="accent-color: var(--calib-accent);"> 📏 Grade de Pixel (1x1 Exato)
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-grid-16x16" onchange="updateGridOverlay()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
-                </label>
-
-                <div class="slice-category" style="margin-top: 15px;">ZONAS DE EXPORTAÇÃO (MOLDES)</div>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--calib-accent); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-export-zone" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> Molde Principal (Laranja)
-                </label>
-                <div id="uv-toggles-l1" class="uv-toggles">
-                    <label><input type="checkbox" id="uv-helmet" checked onchange="renderFatiador()"> Zona: Capacete</label>
-                    <label><input type="checkbox" id="uv-chest" checked onchange="renderFatiador()"> Zona: Peitoral</label>
-                    <label><input type="checkbox" id="uv-arms" checked onchange="renderFatiador()"> Zona: Braços</label>
-                    <label><input type="checkbox" id="uv-boots" checked onchange="renderFatiador()"> Zona: Botas</label>
-                </div>
-                <div id="uv-toggles-l2" class="uv-toggles" style="display:none;">
-                    <label><input type="checkbox" id="uv-waist" checked onchange="renderFatiador()"> Zona: Cintura</label>
-                    <label><input type="checkbox" id="uv-legs" checked onchange="renderFatiador()"> Zona: Pernas</label>
+                
+                <div style="margin-top: 15px;">
+                    <button class="tool-btn" style="width: 100%; justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 Adicionar Imagem / Base</button>
+                    <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
                 </div>
             </div>
 
@@ -279,8 +251,8 @@
                 </div>
 
                 <div id="canvas-wrapper">
-                    <!-- Overlay nativo CSS para grades perfeitas (1x1 e 16x16) -->
-                    <div id="grid-overlay"></div>
+                    <!-- Canvas nativo exclusivo para desenhar as grades perfeitas -->
+                    <canvas id="grid-canvas" width="1920" height="1080"></canvas>
                     <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
                 </div>
             </div>
@@ -563,6 +535,10 @@
 
     const wsCanvas = document.getElementById('workspace-canvas');
     const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
+    
+    const gridCanvas = document.getElementById('grid-canvas');
+    const gCtx = gridCanvas.getContext('2d');
+    
     let offscreenCanvas = document.createElement('canvas');
     let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
@@ -646,12 +622,12 @@
                     offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, nX, nY, nW, nH);
                 }
                 extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
-                setTool('magic'); renderFatiador(); registrarEstadoMemoria(); updatePiecesList();
+                setTool('magic'); renderFatiador(); drawGridAndMold(); registrarEstadoMemoria(); updatePiecesList();
             };
             originalImageObj.src = targetBase;
         } else {
             extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
-            setTool('magic'); renderFatiador(); registrarEstadoMemoria(); updatePiecesList();
+            setTool('magic'); renderFatiador(); drawGridAndMold(); registrarEstadoMemoria(); updatePiecesList();
         }
     }
 
@@ -704,9 +680,6 @@
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         let badge = document.getElementById('slicer-layer-badge'); 
         
-        document.getElementById('uv-toggles-l1').style.display = currentEditingLayer === 1 ? 'flex' : 'none';
-        document.getElementById('uv-toggles-l2').style.display = currentEditingLayer === 2 ? 'flex' : 'none';
-
         if (currentEditingLayer === 1) {
             if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
         } else {
@@ -717,7 +690,7 @@
         ajustarZoom(0.70); 
         
         if (!forceReload && currentEditingLayer === lastEditingLayer) {
-            renderFatiador(); updatePiecesList();
+            renderFatiador(); drawGridAndMold(); updatePiecesList();
             return;
         }
 
@@ -728,7 +701,7 @@
             iniciarStudioDoZero(targetBase);
         } else {
             if (carregarEstadoDaLayer(currentEditingLayer)) {
-                setTool('magic'); renderFatiador(); updatePiecesList();
+                setTool('magic'); renderFatiador(); drawGridAndMold(); updatePiecesList();
             } else {
                 iniciarStudioDoZero(targetBase);
             }
@@ -821,135 +794,111 @@
         if (statusOverlay) statusOverlay.innerText = "✂️ CORTE MANUAL EXECUTADO COM SUCESSO!";
     }
 
-    // GESTÃO NATIVA DA GRADE CSS
-    function updateGridOverlay() {
-        const gridOverlay = document.getElementById('grid-overlay');
-        const show1x1 = document.getElementById('show-grid-1x1').checked;
-        const show16x16 = document.getElementById('show-grid-16x16').checked;
+    // GESTÃO NATIVA DA GRADE CSS E MOLDES (CANVAS EXCLUSIVO DE OVERLAY)
+    function drawGridAndMold() {
+        gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
 
-        let bg = [];
-        let sz = [];
-        
-        // 1x1 Pixel Grid
-        if (show1x1) {
-            bg.push(`linear-gradient(to right, rgba(0,0,0,0.15) 1px, transparent 1px)`);
-            bg.push(`linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 1px)`);
-            sz.push('1px 1px', '1px 1px');
-        }
-        // 16x16 Minecraft Block Grid
-        if (show16x16) {
-            bg.push(`linear-gradient(to right, rgba(255,170,0,0.4) 1px, transparent 1px)`);
-            bg.push(`linear-gradient(to bottom, rgba(255,170,0,0.4) 1px, transparent 1px)`);
-            sz.push('16px 16px', '16px 16px');
+        // 1. DESENHAR GRADE MINECRAFT 16x16
+        if (document.getElementById('show-grid-mc').checked) {
+            gCtx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+            gCtx.lineWidth = 1;
+            gCtx.beginPath();
+            // Apenas na zona 1024x512
+            for (let x = 0; x <= 1024; x += 16) {
+                gCtx.moveTo(OFFSET_X + x, OFFSET_Y);
+                gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512);
+            }
+            for (let y = 0; y <= 512; y += 16) {
+                gCtx.moveTo(OFFSET_X, OFFSET_Y + y);
+                gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y);
+            }
+            gCtx.stroke();
         }
 
-        if (bg.length > 0) {
-            gridOverlay.style.display = 'block';
-            gridOverlay.style.backgroundImage = bg.join(', ');
-            gridOverlay.style.backgroundSize = sz.join(', ');
-        } else {
-            gridOverlay.style.display = 'none';
-        }
-    }
-
-    function desenharMoldeUV() {
-        // Marca a área de limite principal do Minecraft 1024x512
+        // 2. DESENHAR A ZONA DE EXPORTAÇÃO
         if (document.getElementById('show-export-zone').checked) {
-            wsCtx.strokeStyle = "#ffaa00"; 
-            wsCtx.lineWidth = 2; 
-            wsCtx.setLineDash([12, 8]); // Estilo Blueprint
-            wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); 
-            wsCtx.setLineDash([]);
+            gCtx.strokeStyle = "#ffaa00"; 
+            gCtx.lineWidth = 2; 
+            gCtx.setLineDash([12, 8]);
+            gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); 
+            gCtx.setLineDash([]);
             
-            wsCtx.fillStyle = "#ffaa00"; 
-            wsCtx.font = "bold 16px 'JetBrains Mono', monospace"; 
-            wsCtx.textAlign = "left"; 
-            wsCtx.textBaseline = "bottom";
-            wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
+            gCtx.fillStyle = "#ffaa00"; 
+            gCtx.font = "bold 16px 'JetBrains Mono', monospace"; 
+            gCtx.textAlign = "left"; 
+            gCtx.textBaseline = "bottom";
+            gCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
         }
 
+        // 3. DESENHAR AS PEÇAS INTERNAS DO MOLDE
         const f = 16; 
-        
-        // Nova função de molde com tracejado igual à imagem de referência
         const drawBox = (x, y, w, h, label) => {
             let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
             
-            // Borda Tracejada Magenta / Roxa
-            wsCtx.strokeStyle = "#b0279c"; 
-            wsCtx.lineWidth = 2;
-            wsCtx.setLineDash([6, 4]); 
-            wsCtx.strokeRect(px, py, pw, ph);
-            wsCtx.setLineDash([]);
+            gCtx.strokeStyle = "#b0279c"; 
+            gCtx.lineWidth = 2;
+            gCtx.setLineDash([6, 4]); 
+            gCtx.strokeRect(px, py, pw, ph);
+            gCtx.setLineDash([]);
             
-            // Preenchimento Suave
-            wsCtx.fillStyle = "rgba(176, 39, 156, 0.1)";
-            wsCtx.fillRect(px, py, pw, ph);
+            gCtx.fillStyle = "rgba(176, 39, 156, 0.1)";
+            gCtx.fillRect(px, py, pw, ph);
             
-            // Fundo da etiqueta e texto
-            wsCtx.font = "bold 10px 'JetBrains Mono', monospace"; 
-            let txtW = wsCtx.measureText(label).width + 8;
-            wsCtx.fillStyle = "rgba(0,0,0,0.6)"; 
-            wsCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
+            gCtx.font = "bold 10px 'JetBrains Mono', monospace"; 
+            let txtW = gCtx.measureText(label).width + 8;
+            gCtx.fillStyle = "rgba(0,0,0,0.6)"; 
+            gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
 
-            wsCtx.fillStyle = "#ffaa00"; 
-            wsCtx.textAlign = "center"; 
-            wsCtx.textBaseline = "middle";
-            wsCtx.fillText(label, px + pw/2, py + ph/2); 
+            gCtx.fillStyle = "#ffaa00"; 
+            gCtx.textAlign = "center"; 
+            gCtx.textBaseline = "middle";
+            gCtx.fillText(label, px + pw/2, py + ph/2); 
         };
 
-        if (currentEditingLayer === 1) {
-            if (document.getElementById('uv-helmet') && document.getElementById('uv-helmet').checked) {
-                drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
-                drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
-                drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
-            }
-            if (document.getElementById('uv-chest') && document.getElementById('uv-chest').checked) {
-                drawBox(20, 16, 8, 4, "PEITO TOPO"); drawBox(28, 16, 8, 4, "PEITO BASE");
-                drawBox(16, 20, 4, 12, "PEITO DIR"); drawBox(20, 20, 8, 12, "PEITO FRE");
-                drawBox(28, 20, 4, 12, "PEITO ESQ"); drawBox(32, 20, 8, 12, "PEITO COS");
-            }
-            if (document.getElementById('uv-arms') && document.getElementById('uv-arms').checked) {
-                drawBox(44, 16, 4, 4, "BR.D TOP"); drawBox(48, 16, 4, 4, "BR.D BAS");
-                drawBox(40, 20, 4, 12, "BR.D DIR"); drawBox(44, 20, 4, 12, "BR.D FRE");
-                drawBox(48, 20, 4, 12, "BR.D ESQ"); drawBox(52, 20, 4, 12, "BR.D COS");
+        if (document.getElementById('show-molde-l1').checked) {
+            drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
+            drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
+            drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
 
-                drawBox(36, 48, 4, 4, "BR.E TOP"); drawBox(40, 48, 4, 4, "BR.E BAS");
-                drawBox(32, 52, 4, 12, "BR.E DIR"); drawBox(36, 52, 4, 12, "BR.E FRE");
-                drawBox(40, 52, 4, 12, "BR.E ESQ"); drawBox(44, 52, 4, 12, "BR.E COS");
-            }
-            if (document.getElementById('uv-boots') && document.getElementById('uv-boots').checked) {
-                drawBox(4, 16, 4, 4, "BOT.D TOP"); drawBox(8, 16, 4, 4, "BOT.D BAS");
-                drawBox(0, 20, 4, 12, "BOT.D DIR"); drawBox(4, 20, 4, 12, "BOT.D FRE");
-                drawBox(8, 20, 4, 12, "BOT.D ESQ"); drawBox(12, 20, 4, 12, "BOT.D COS");
+            drawBox(20, 16, 8, 4, "PEITO TOPO"); drawBox(28, 16, 8, 4, "PEITO BASE");
+            drawBox(16, 20, 4, 12, "PEITO DIR"); drawBox(20, 20, 8, 12, "PEITO FRE");
+            drawBox(28, 20, 4, 12, "PEITO ESQ"); drawBox(32, 20, 8, 12, "PEITO COS");
 
-                drawBox(20, 48, 4, 4, "BOT.E TOP"); drawBox(24, 48, 4, 4, "BOT.E BAS");
-                drawBox(16, 52, 4, 12, "BOT.E DIR"); drawBox(20, 52, 4, 12, "BOT.E FRE");
-                drawBox(24, 52, 4, 12, "BOT.E ESQ"); drawBox(28, 52, 4, 12, "BOT.E COS");
-            }
-        } else if (currentEditingLayer === 2) {
-            if (document.getElementById('uv-waist') && document.getElementById('uv-waist').checked) {
-                drawBox(20, 16, 8, 4, "CINT. TOPO"); drawBox(28, 16, 8, 4, "CINT. BASE");
-                drawBox(16, 20, 4, 12, "CINT. DIR"); drawBox(20, 20, 8, 12, "CINT. FRE");
-                drawBox(28, 20, 4, 12, "CINT. ESQ"); drawBox(32, 20, 8, 12, "CINT. COS");
-            }
-            if (document.getElementById('uv-legs') && document.getElementById('uv-legs').checked) {
-                drawBox(4, 16, 4, 4, "PER.D TOP"); drawBox(8, 16, 4, 4, "PER.D BAS");
-                drawBox(0, 20, 4, 12, "PER.D DIR"); drawBox(4, 20, 4, 12, "PER.D FRE");
-                drawBox(8, 20, 4, 12, "PER.D ESQ"); drawBox(12, 20, 4, 12, "PER.D COS");
+            drawBox(44, 16, 4, 4, "BR.D TOP"); drawBox(48, 16, 4, 4, "BR.D BAS");
+            drawBox(40, 20, 4, 12, "BR.D DIR"); drawBox(44, 20, 4, 12, "BR.D FRE");
+            drawBox(48, 20, 4, 12, "BR.D ESQ"); drawBox(52, 20, 4, 12, "BR.D COS");
 
-                drawBox(20, 48, 4, 4, "PER.E TOP"); drawBox(24, 48, 4, 4, "PER.E BAS");
-                drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
-                drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
-            }
+            drawBox(36, 48, 4, 4, "BR.E TOP"); drawBox(40, 48, 4, 4, "BR.E BAS");
+            drawBox(32, 52, 4, 12, "BR.E DIR"); drawBox(36, 52, 4, 12, "BR.E FRE");
+            drawBox(40, 52, 4, 12, "BR.E ESQ"); drawBox(44, 52, 4, 12, "BR.E COS");
+
+            drawBox(4, 16, 4, 4, "BOT.D TOP"); drawBox(8, 16, 4, 4, "BOT.D BAS");
+            drawBox(0, 20, 4, 12, "BOT.D DIR"); drawBox(4, 20, 4, 12, "BOT.D FRE");
+            drawBox(8, 20, 4, 12, "BOT.D ESQ"); drawBox(12, 20, 4, 12, "BOT.D COS");
+
+            drawBox(20, 48, 4, 4, "BOT.E TOP"); drawBox(24, 48, 4, 4, "BOT.E BAS");
+            drawBox(16, 52, 4, 12, "BOT.E DIR"); drawBox(20, 52, 4, 12, "BOT.E FRE");
+            drawBox(24, 52, 4, 12, "BOT.E ESQ"); drawBox(28, 52, 4, 12, "BOT.E COS");
+        }
+
+        if (document.getElementById('show-molde-l2').checked) {
+            drawBox(20, 16, 8, 4, "CINT. TOPO"); drawBox(28, 16, 8, 4, "CINT. BASE");
+            drawBox(16, 20, 4, 12, "CINT. DIR"); drawBox(20, 20, 8, 12, "CINT. FRE");
+            drawBox(28, 20, 4, 12, "CINT. ESQ"); drawBox(32, 20, 8, 12, "CINT. COS");
+
+            drawBox(4, 16, 4, 4, "PER.D TOP"); drawBox(8, 16, 4, 4, "PER.D BAS");
+            drawBox(0, 20, 4, 12, "PER.D DIR"); drawBox(4, 20, 4, 12, "PER.D FRE");
+            drawBox(8, 20, 4, 12, "PER.D ESQ"); drawBox(12, 20, 4, 12, "PER.D COS");
+
+            drawBox(20, 48, 4, 4, "PER.E TOP"); drawBox(24, 48, 4, 4, "PER.E BAS");
+            drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
+            drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
         }
     }
 
     function renderFatiador() {
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
         wsCtx.drawImage(offscreenCanvas, 0, 0); 
-        
-        // Desenha o Molde UV atualizado
-        desenharMoldeUV();
         
         extractedPieces.forEach((p, i) => {
             let tempC = document.createElement('canvas'); tempC.width = p.imgData.width; tempC.height = p.imgData.height; tempC.getContext('2d').putImageData(p.imgData, 0, 0);
@@ -1236,7 +1185,7 @@
                             }; pImg.src = p.base64;
                         });
                     }
-                    registrarEstadoMemoria(); renderFatiador(); alert("Preset carregado com sucesso! A simbiose visual foi restaurada.");
+                    registrarEstadoMemoria(); renderFatiador(); drawGridAndMold(); alert("Preset carregado com sucesso! A simbiose visual foi restaurada.");
                 }; img.src = preset.baseImage;
             } catch (err) { alert("Falha ao ler o ficheiro JSON. Arquivo corrompido."); }
         }; reader.readAsText(file); e.target.value = "";
@@ -1382,7 +1331,7 @@
             img.onload = () => {
                 offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
                 offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
-                renderFatiador(); registrarEstadoMemoria(); 
+                renderFatiador(); drawGridAndMold(); registrarEstadoMemoria(); 
                 if (statusOverlay) statusOverlay.innerText = "✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!";
             }; img.src = imageUrl;
             if (currentEditingLayer === 1) baseImageL1 = imageUrl; else baseImageL2 = imageUrl;
