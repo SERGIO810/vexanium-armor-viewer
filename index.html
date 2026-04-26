@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Motor Gráfico Vectorial)</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Precisão 2:1 e Grelha Dinâmica)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -99,7 +99,7 @@
         }
 
         /* =================================================================================
-           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE (1920x1080)
+           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE (Proporção Exata 2:1)
            ================================================================================= */
         #slicer-modal { 
             width: 98vw; 
@@ -144,20 +144,22 @@
             display: flex; 
             overflow: auto; 
             position: relative; 
-            padding: 20px; 
+            padding: 50px; 
             box-sizing: border-box; 
         }
         
         #canvas-wrapper { 
-            width: 1920px; 
-            height: 1080px; 
-            min-width: 1920px; 
-            min-height: 1080px; 
+            /* Fix: Dimensões fixas 1024x512 para o Molde de Armadura! O flex-shrink: 0 impede que seja esmagado (achatado) pelo layout flexível, mantendo a proporção 2:1 sempre perfeita */
+            width: 1024px; 
+            height: 512px; 
+            min-width: 1024px; 
+            min-height: 512px; 
             margin: auto; 
             background-color: #0d141c; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
             position: relative; 
             transform-origin: center center;
+            flex-shrink: 0;
         }
 
         #workspace-canvas, #grid-svg { 
@@ -761,12 +763,12 @@
                 </label>
 
                 <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
-                    Tamanho da Célula: <span id="grid-px-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">4</span>px
+                    Célula (Pixel): <span id="grid-px-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">4</span>px
                     <input type="range" id="grid-px" min="1" max="32" step="1" value="4" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-px-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
                 </label>
 
                 <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
-                    Espessura da Linha: <span id="grid-size-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">1</span>px
+                    Espessura (Linha): <span id="grid-size-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">1</span>px
                     <input type="range" id="grid-size" min="0.5" max="3" step="0.5" value="1" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-size-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
                 </label>
 
@@ -795,9 +797,9 @@
             <div class="editor-workspace-wrapper">
                 <div class="editor-workspace" id="workspace-scroll-area">
                     <div id="canvas-wrapper">
-                        <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
-                        <!-- Nova Grade Vectorial para garantir linhas perfeitas e 0% craches de memória -->
-                        <svg id="grid-svg" viewBox="0 0 1920 1080" preserveAspectRatio="none"></svg>
+                        <canvas id="workspace-canvas" width="1024" height="512"></canvas>
+                        <!-- A Grade SVG é usada para sobrepor linhas perfeitas à prova de zoom -->
+                        <svg id="grid-svg" viewBox="0 0 1024 512" preserveAspectRatio="none"></svg>
                     </div>
                 </div>
                 
@@ -971,9 +973,6 @@
         startX: 0, 
         startY: 0, 
         manualSelection: null, 
-        isResizing: false, 
-        resizeHandle: '', 
-        origP: {x:0, y:0, w:0, h:0},
         isPainting: false, 
         currentPaintColor: "#a855f7", 
         autoRotateGltf: true,
@@ -988,10 +987,11 @@
         }
     };
 
-    const WORKBENCH_W = 1920; 
-    const WORKBENCH_H = 1080; 
-    const OFFSET_X = 448; 
-    const OFFSET_Y = 284; 
+    // A RESTRIÇÃO MATEMÁTICA PERFEITA (2:1 EXACT)
+    const WORKBENCH_W = 1024; 
+    const WORKBENCH_H = 512; 
+    const OFFSET_X = 0; 
+    const OFFSET_Y = 0; 
 
     const DOM = {
         wsCanvas: document.getElementById('workspace-canvas'),
@@ -1204,8 +1204,8 @@
                         if (STATE.matryoshkaZones[key].w === img.width) targetZone = parseInt(key);
                     });
 
-                    const zX = OFFSET_X + (1024 - img.width) / 2;
-                    const zY = OFFSET_Y + (512 - img.height) / 2;
+                    const zX = (1024 - img.width) / 2;
+                    const zY = (512 - img.height) / 2;
 
                     // A imagem é desenhada NO SEU TAMANHO ORIGINAL, sem upscale, no centro da mesa
                     offscreenCtx.drawImage(img, zX, zY, img.width, img.height);
@@ -1236,7 +1236,7 @@
 
         ajustarZoom: function(fator) {
             if (fator === 'in') {
-                STATE.currentZoom = Math.min(STATE.currentZoom + 0.5, 64.0); // Zoom massivo sem medo (É SVG agora!)
+                STATE.currentZoom = Math.min(STATE.currentZoom + 0.5, 64.0); // Zoom massivo sem medo (SVG Engine)
             } else if (fator === 'out') {
                 STATE.currentZoom = Math.max(0.4, STATE.currentZoom - 0.5);
             } else {
@@ -1246,7 +1246,7 @@
             const z = STATE.currentZoom;
             
             if (DOM.canvasWrapper) {
-                // Ao aumentar o Wrapper, o DOM.wsCanvas e DOM.gridSvg crescem com 100% de width
+                // A magia do Zoom ocorre via redimensionamento CSS do Container Flex-Shrink:0
                 DOM.canvasWrapper.style.width = `${Math.round(WORKBENCH_W * z)}px`;
                 DOM.canvasWrapper.style.height = `${Math.round(WORKBENCH_H * z)}px`;
             }
@@ -1254,7 +1254,7 @@
             const zl = document.getElementById('zoom-label'); 
             if (zl) zl.innerText = `${Math.round(z * 100)}%`;
             
-            // O redesenho Vectorial cuida das proporções instantaneamente
+            // O redesenho Vectorial cuida das proporções instantaneamente para linhas não crescerem
             this.drawGridAndMold();
             this.renderFatiador();
         },
@@ -1271,14 +1271,14 @@
             UIManager.showNotification(`🎯 FOCO MATRYOSHKA: ZONA ${zIdx}`);
         },
 
-        // NOVO MOTOR VETORIAL SVG (Impede "linhas grossas" ou crashes de VRAM)
+        // MOTOR VETORIAL SVG AVANÇADO (Impede crash VRAM e linhas desfocadas/grossas)
         drawGridAndMold: function() {
             if (!DOM.gridSvg) return;
             
             const z = STATE.currentZoom; 
             const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
-            let zX = OFFSET_X + (1024 - aZ.w) / 2; 
-            let zY = OFFSET_Y + (512 - aZ.h) / 2;
+            let zX = (1024 - aZ.w) / 2; 
+            let zY = (512 - aZ.h) / 2;
             const f = aZ.w / 64; 
             
             let gridThickness = parseFloat(document.getElementById('grid-size')?.value || 1);
@@ -1286,7 +1286,6 @@
             
             let svgContent = '';
 
-            // Função ajudante para criar vetores perfeitos à prova de zoom
             const addRect = (x, y, w, h, strokeColor, fill, strokeW, dash = '') => {
                 svgContent += `<rect x="${x}" y="${y}" width="${w}" height="${h}" stroke="${strokeColor}" fill="${fill}" stroke-width="${strokeW}" stroke-dasharray="${dash}" vector-effect="non-scaling-stroke" />`;
             };
@@ -1296,13 +1295,13 @@
             };
             
             const addText = (text, x, y, color, size) => {
-                // Ajustamos o font-size ao inverso do zoom para a legibilidade perfeita no ecrã
-                const fontSize = Math.max(1, size / z);
+                // ESCALA INVERSA DO TEXTO: Mantém sempre legível independentemente do Zoom no ecrã
+                const fontSize = Math.max(0.5, size / z);
                 svgContent += `<text x="${x}" y="${y}" fill="none" stroke="#000" stroke-width="${3/z}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
                 svgContent += `<text x="${x}" y="${y}" fill="${color}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
             };
 
-            const hideText = z >= 4.0; // Desliga o texto se o zoom for grande para que não fique no caminho do rato
+            const hideText = z >= 4.0; // Desliga os textos "PEI.FRE" se o zoom for enorme
 
             // 1. ZONAS MATRYOSHKA GERAIS
             const cbMat = document.getElementById('show-matryoshka');
@@ -1314,33 +1313,35 @@
                 
                 for(let i=1; i<=6; i++) {
                     let mz = STATE.matryoshkaZones[i]; 
-                    let cx = OFFSET_X + (1024 - mz.w)/2; 
-                    let cy = OFFSET_Y + (512 - mz.h)/2;
-                    addRect(cx, cy, mz.w, mz.h, colors[i], 'none', gridThickness, '4,4');
-                    if(i !== 1 && !hideText) addText(`Z${i}`, cx + 10, cy + 10, colors[i], 10);
+                    let cx = (1024 - mz.w)/2; 
+                    let cy = (512 - mz.h)/2;
+                    addRect(cx, cy, mz.w, mz.h, colors[i], 'none', gridThickness / z, `${4/z},${4/z}`);
+                    if(i !== 1 && !hideText) addText(`Z${i}`, cx + (10/z), cy + (10/z), colors[i], 10);
                 }
             }
 
             // 2. A GRADE PROFISSIONAL AJUSTÁVEL
             if (document.getElementById('show-custom-grid')?.checked) {
+                // Linhas Verticais
                 for (let x = 0; x <= aZ.w; x += cellSize) { 
-                    addLine(zX + x, zY, zX + x, zY + aZ.h, 'rgba(255, 255, 255, 0.2)', gridThickness);
+                    addLine(zX + x, zY, zX + x, zY + aZ.h, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
                 }
+                // Linhas Horizontais
                 for (let y = 0; y <= aZ.h; y += cellSize) { 
-                    addLine(zX, zY + y, zX + aZ.w, zY + y, 'rgba(255, 255, 255, 0.2)', gridThickness);
+                    addLine(zX, zY + y, zX + aZ.w, zY + y, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
                 }
             }
 
             // 3. MOLDE MESTRE
             if (document.getElementById('show-export-zone')?.checked) {
-                addRect(OFFSET_X, OFFSET_Y, 1024, 512, '#ffaa00', 'none', 2, '12,8');
-                if (!hideText) addText("MOLDE MESTRE (1024x512)", OFFSET_X + 150, OFFSET_Y - 10, '#ffaa00', 16);
+                addRect(0, 0, 1024, 512, '#ffaa00', 'none', 2 / z, `${12/z},${8/z}`);
+                if (!hideText) addText("MOLDE MESTRE (1024x512)", 150/z, 15/z, '#ffaa00', 16);
             }
             
             // 4. CAIXAS E ETIQUETAS DO MINECRAFT (Proporcionais à Zona)
             const renderBox = (x, y, w, h, label) => {
                 let px = zX + (x * f); let py = zY + (y * f); let pw = w * f; let ph = h * f;
-                addRect(px, py, pw, ph, '#b0279c', 'rgba(176, 39, 156, 0.1)', 2, '6,4');
+                addRect(px, py, pw, ph, '#b0279c', 'rgba(176, 39, 156, 0.1)', 2 / z, `${6/z},${4/z}`);
                 if (!hideText) addText(label, px + pw/2, py + ph/2, '#ffaa00', 9);
             };
 
@@ -1357,10 +1358,10 @@
             // 5. CAIXAS DE SELEÇÃO E PEÇAS ATIVAS (Ancoradas ao SVG para resolução perfeita)
             STATE.extractedPieces.forEach((p, i) => {
                 if (i === STATE.activePieceIndex) { 
-                    addRect(p.x, p.y, p.w, p.h, '#00e5ff', 'none', 1.5);
+                    addRect(p.x, p.y, p.w, p.h, '#00e5ff', 'none', 1.5 / z);
                     const r = 4 / z; 
                     const drawCirc = (cx, cy) => {
-                        svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#00e5ff" stroke-width="1.5" vector-effect="non-scaling-stroke" />`;
+                        svgContent += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="#ffffff" stroke="#00e5ff" stroke-width="${1.5/z}" vector-effect="non-scaling-stroke" />`;
                     };
                     drawCirc(p.x, p.y); drawCirc(p.x + p.w, p.y); drawCirc(p.x, p.y + p.h); drawCirc(p.x + p.w, p.y + p.h);
                 }
@@ -1368,9 +1369,11 @@
 
             if (STATE.currentTool === 'slice' && STATE.manualSelection && STATE.manualSelection.w > 0) {
                 let s = STATE.manualSelection;
-                addRect(s.x, s.y, s.w, s.h, '#ff00ff', 'rgba(255, 0, 255, 0.15)', 2, '5,5');
+                addRect(s.x, s.y, s.w, s.h, '#ff00ff', 'rgba(255, 0, 255, 0.15)', 2 / z, `${5/z},${5/z}`);
             }
             
+            // Injeção ultra-rápida do SVG e aplicação das novas definições de viewBox
+            DOM.gridSvg.setAttribute('viewBox', `0 0 ${WORKBENCH_W} ${WORKBENCH_H}`);
             DOM.gridSvg.innerHTML = svgContent;
         },
 
@@ -1378,7 +1381,7 @@
             wsCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             wsCtx.drawImage(offscreenCanvas, 0, 0); 
             
-            // As caixas de limite (azul) e Handles não estão mais aqui, apenas no SVG!
+            // As caixas de limite (azul) e Handles não estão mais aqui, estão impecáveis no SVG!
             STATE.extractedPieces.forEach((p, i) => {
                 const temp = document.createElement('canvas'); 
                 temp.width = p.imgData.width; 
@@ -1508,17 +1511,16 @@
             const sizeEl = document.getElementById('brush-size'); 
             let size = sizeEl ? parseInt(sizeEl.value) : 1;
             
-            // Não divide a espessura do pincel pelo Zoom! 
-            // 1 pixel desenhado no canvas nativo de 1920x1080 é perfeitamente exato.
+            // Desenha estritamente e nativamente no Canvas 1024x512, sem erros de zoom
             offscreenCtx.fillStyle = STATE.currentPaintColor; 
-            offscreenCtx.fillRect(Math.floor(pos.x - size/2), Math.floor(pos.y - size/2), size, size);
+            offscreenCtx.fillRect(Math.round(pos.x - size/2), Math.round(pos.y - size/2), size, size);
             StudioCanvas.renderFatiador();
         },
         
         aplicarContaGotas: function(pos) {
             let pixel = wsCtx.getImageData(pos.x, pos.y, 1, 1).data;
             if (pixel[3] > 0) {
-                this.setColor("#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).slice(1));
+                this.setColor("#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).padStart(6, '0'));
             }
         },
         
@@ -1548,7 +1550,7 @@
                 return; 
             }
             
-            // Garantia de 100% Números Inteiros
+            // Garantia Absoluta de 100% Números Inteiros (Evita caixas com píxeis a 0.5 que distorcem o corte)
             let rx = Math.round(STATE.manualSelection.x); 
             let ry = Math.round(STATE.manualSelection.y); 
             let rw = Math.round(STATE.manualSelection.w); 
@@ -1645,8 +1647,8 @@
         
         getMousePos: function(evt) {
             const rect = DOM.wsCanvas.getBoundingClientRect();
-            // A largura do rect reflete o zoom CSS (rect.width = 1920 * zoom). 
-            // O cálculo devolve-nos o clique exatamente nas coordenadas nativas 1920x1080 da mesa de trabalho
+            // A largura do rect reflete o zoom CSS (rect.width = 1024 * zoom). 
+            // O cálculo devolve-nos o clique exatamente nas coordenadas nativas matemáticas.
             return { 
                 x: (evt.clientX - rect.left) * (WORKBENCH_W / rect.width), 
                 y: (evt.clientY - rect.top) * (WORKBENCH_H / rect.height) 
@@ -1724,8 +1726,16 @@
                 zCtx.drawImage(pCanv, p.x - zX, p.y - zY, p.w, p.h);
             });
 
-            // NÃO FAZ UPSCALE PARA O METADATA, MANTÉM ORIGINAL
-            const finalBase64 = zoneCanvas.toDataURL('image/png');
+            // FAZ O UPSCALE PARA O MODELO 3D NÃO SE QUEBRAR
+            const masterCanvas = document.createElement('canvas'); 
+            masterCanvas.width = 1024; 
+            masterCanvas.height = 512;
+            
+            const mCtx = masterCanvas.getContext('2d'); 
+            mCtx.imageSmoothingEnabled = false; 
+            mCtx.drawImage(zoneCanvas, 0, 0, aZ.w, aZ.h, 0, 0, 1024, 512);
+
+            const finalBase64 = masterCanvas.toDataURL('image/png');
             
             if (STATE.currentEditingLayer === 1) { 
                 STATE.finalImageL1 = finalBase64; 
@@ -1736,7 +1746,7 @@
             UIManager.updateDiagnosticPanel(); 
             this.atualizarPreview3D();
             
-            UIManager.showNotification(`✅ TEXTURA COMPILADA (${aZ.w}x${aZ.h}) COM SUCESSO`);
+            UIManager.showNotification(`✅ TEXTURA COMPILADA (${aZ.w}x${aZ.h} -> 1024) COM SUCESSO`);
             UIManager.closeModal('slicer-modal');
         },
         
@@ -1996,7 +2006,6 @@
                     STATE.activePieceIndex = i; 
                     STATE.isDragging = true; 
                     DOM.wsCanvas.style.cursor = 'grabbing';
-                    // Coloca a peça no topo do array para ser desenhada por último (ficar por cima)
                     STATE.extractedPieces.push(STATE.extractedPieces.splice(i,1)[0]); 
                     STATE.activePieceIndex = STATE.extractedPieces.length-1; 
                     break;
