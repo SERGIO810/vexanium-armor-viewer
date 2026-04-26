@@ -952,6 +952,41 @@
             });
         },
 
+        abrirFatiadorLivre: function(forceReload = false) {
+            let targetBase = STATE.currentEditingLayer === 1 ? STATE.baseImageL1 : STATE.baseImageL2;
+            let badge = document.getElementById('slicer-layer-badge'); 
+            
+            document.getElementById('uv-toggles-l1').style.display = STATE.currentEditingLayer === 1 ? 'flex' : 'none';
+            document.getElementById('uv-toggles-l2').style.display = STATE.currentEditingLayer === 2 ? 'flex' : 'none';
+
+            if (STATE.currentEditingLayer === 1) {
+                if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
+            } else {
+                if (badge) { badge.innerText = "L2 (CALÇAS)"; badge.style.background = "#00ffaa"; }
+            }
+            
+            UIManager.showModal('slicer-modal'); 
+            this.ajustarZoom(0.70); 
+            
+            if (!forceReload && STATE.currentEditingLayer === STATE.lastEditingLayer) {
+                this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList();
+                return;
+            }
+
+            if (STATE.currentEditingLayer !== STATE.lastEditingLayer) MemoryManager.salvarEstadoDaLayerAtual();
+            STATE.lastEditingLayer = STATE.currentEditingLayer;
+
+            if (forceReload) {
+                this.iniciarStudioDoZero(targetBase);
+            } else {
+                if (MemoryManager.carregarEstadoDaLayer(STATE.currentEditingLayer)) {
+                    ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); this.updatePiecesList();
+                } else {
+                    this.iniciarStudioDoZero(targetBase);
+                }
+            }
+        },
+
         abrirEstudio: function() {
             this.abrirFatiadorLivre(false);
         }
