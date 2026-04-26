@@ -59,13 +59,11 @@
 
         #status-overlay { position: absolute; top: 20px; left: 20px; font-size: 11px; color: var(--sculk-glow); pointer-events: none; text-transform: uppercase; z-index: 5; font-weight: 800; letter-spacing: 2px; background: rgba(10, 17, 23, 0.8); padding: 10px 15px; border-radius: 4px; border-left: 3px solid var(--sculk-core); backdrop-filter: blur(5px); }
 
-        /* NOVO PAINEL DE DIAGNÓSTICO (STATUS) */
         .status-panel { position: absolute; top: 20px; right: 20px; background: rgba(10, 17, 23, 0.8); border: 1px solid var(--warden-bone-dim); padding: 15px; border-radius: 4px; font-size: 11px; color: var(--warden-bone); backdrop-filter: blur(5px); z-index: 10; pointer-events: none; border-right: 3px solid var(--warden-bone-dim); text-transform: uppercase; }
         .status-panel div { margin-bottom: 5px; }
         .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
         .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
 
-        /* MODAIS ECRÃO INTEIRO */
         .modal { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(5, 10, 15, 0.98); border: 2px solid var(--sculk-core); padding: 20px; border-radius: 8px; box-shadow: 0 0 80px rgba(0,0,0,1), inset 0 0 20px rgba(19, 201, 201, 0.1); z-index: 100; display: none; flex-direction: column; color: var(--warden-bone); backdrop-filter: blur(15px); box-sizing: border-box; }
         #ai-modal, #gen-modal { width: 85vw; max-width: 550px; }
         .modal h3 { color: var(--sculk-core); margin-top: 0; font-size: 16px; border-bottom: 1px solid rgba(19, 201, 201, 0.3); padding-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; }
@@ -74,19 +72,47 @@
         #gen-prompt-input { width: 100%; height: 80px; background: #050505; color: var(--sculk-core); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 15px; font-family: 'JetBrains Mono', monospace; font-size: 12px; margin-bottom: 15px; resize: vertical; box-sizing: border-box; box-shadow: inset 0 0 10px rgba(0,0,0,0.8); }
         #gen-prompt-input:focus { outline: none; border-color: var(--sculk-core); }
 
-        /* ESTÚDIO DE CIRURGIA UV */
-        #slicer-modal { width: 98vw; height: 95vh; max-width: 1900px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
+        /* ESTÚDIO DE CIRURGIA UV: 1920x1080 FULL HD */
+        #slicer-modal { width: 98vw; height: 95vh; max-width: 1950px; border-color: var(--calib-accent); display: flex; flex-direction: column; padding: 15px; box-sizing: border-box;}
         #slicer-modal h3 { color: var(--calib-accent); border-bottom-color: rgba(255, 170, 0, 0.3); flex-shrink: 0; margin-bottom: 10px; font-size: 16px; }
         .layer-badge { background: var(--calib-accent); color: #000; padding: 2px 8px; border-radius: 3px; font-size: 12px; font-weight: bold; margin-left: auto; }
         .editor-layout { display: flex; flex: 1; gap: 15px; overflow: hidden; }
 
         .editor-toolbar { flex: 0 0 280px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 8px; overflow-y: auto; box-sizing: border-box;}
-        .editor-workspace { flex: 1; background-color: #f1f3f4; background-image: linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8), linear-gradient(45deg, #e0e4e8 25%, transparent 25%, transparent 75%, #e0e4e8 75%, #e0e4e8); background-size: 20px 20px; background-position: 0 0, 10px 10px; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); position: relative; padding: 20px; box-sizing: border-box; }
         
-        #canvas-wrapper { width: 1920px; height: 1088px; min-width: 1920px; min-height: 1088px; margin: auto; box-shadow: 0 0 30px rgba(0,0,0,0.3); transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; }
-        #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; }
+        /* WORKBENCH EXACT 1920x1080 */
+        .editor-workspace { flex: 1; background-color: #030508; border: 1px solid var(--warden-bone-dim); border-radius: 6px; display: flex; overflow: auto; box-shadow: inset 0 0 20px rgba(0,0,0,0.8); position: relative; padding: 20px; box-sizing: border-box; }
+        
+        #canvas-wrapper { 
+            width: 1920px; height: 1080px; min-width: 1920px; min-height: 1080px; 
+            margin: auto; 
+            background-color: #e0e4e8;
+            /* Textura Quadriculada de Fundo (Photoshop style) */
+            background-image: 
+                linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%, #cbd5e1), 
+                linear-gradient(45deg, #cbd5e1 25%, transparent 25%, transparent 75%, #cbd5e1 75%, #cbd5e1); 
+            background-size: 20px 20px; 
+            background-position: 0 0, 10px 10px; 
+            box-shadow: 0 0 30px rgba(0,0,0,0.5); 
+            position: relative;
+            transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; 
+        }
+        
+        /* AS GRADES NATIVAS SOBRE A TELA */
+        #grid-overlay {
+            position: absolute;
+            left: 448px; /* Centralizado em X: (1920-1024)/2 */
+            top: 284px;  /* Centralizado em Y: (1080-512)/2 */
+            width: 1024px;
+            height: 512px;
+            pointer-events: none;
+            display: none;
+            z-index: 5;
+        }
 
-        .pieces-panel { flex: 0 0 300px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
+        #workspace-canvas { width: 100%; height: 100%; cursor: crosshair; background: transparent; image-rendering: pixelated; position: relative; z-index: 10;}
+
+        .pieces-panel { flex: 0 0 260px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
         .pieces-header { font-size: 12px; color: var(--calib-accent); font-weight: 800; border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
         .pieces-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
         .piece-item { background: rgba(18, 30, 41, 0.8); border: 1px solid var(--warden-bone-dim); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; gap: 8px; transition: 0.2s; }
@@ -95,17 +121,9 @@
         .piece-preview { width: 100%; height: 70px; background: #000; border: 1px solid var(--warden-bone-dim); border-radius: 4px; display: flex; align-items: center; justify-content: center; overflow: hidden; cursor: pointer; background-image: linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222), linear-gradient(45deg, #222 25%, transparent 25%, transparent 75%, #222 75%, #222); background-size: 10px 10px; background-position: 0 0, 5px 5px; }
         .piece-preview img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
         .piece-info { font-size: 10px; color: var(--warden-bone-dim); display: flex; justify-content: space-between; font-weight: bold; }
-        .piece-actions { display: flex; gap: 6px; }
-        .piece-btn { flex: 1; background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim); padding: 6px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; }
-        .piece-btn:hover { background: var(--warden-bone-dim); color: #000; }
-        .piece-btn.delete { border-color: #ff5555; color: #ff5555; }
-        .piece-btn.delete:hover { background: #ff5555; color: #fff; }
-        .pieces-footer { border-top: 1px solid var(--warden-bone-dim); padding-top: 10px; display: flex; flex-direction: column; gap: 8px; }
-        .download-btn { background: rgba(0, 188, 212, 0.1); color: #00bcd4; border: 1px solid #00bcd4; padding: 10px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; text-transform: uppercase; letter-spacing: 1px; }
-        .download-btn:hover { background: #00bcd4; color: #000; }
-
+        
         .slice-category { font-size: 11px; color: var(--warden-bone-dim); font-weight: 800; margin-top: 12px; border-bottom: 1px solid #222; padding-bottom: 5px; display: flex; justify-content: space-between; align-items: center; text-transform: uppercase; }
-        .tool-btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); padding: 10px 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 12px; text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
+        .tool-btn { background: var(--sculk-surface); color: var(--warden-bone); border: 1px solid var(--warden-bone-dim); padding: 10px 12px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: left; display: flex; align-items: center; gap: 8px; transition: 0.2s; }
         .tool-btn:hover { background: #1f3447; }
         .tool-btn.active { background: rgba(255, 170, 0, 0.2); border-color: var(--calib-accent); color: var(--calib-accent); }
         .action-btn { background: rgba(139, 145, 114, 0.1); color: #fff; border: 1px solid var(--warden-bone-dim); padding: 8px; font-weight: bold; cursor: pointer; border-radius: 4px; font-size: 11px; text-align: center; transition: 0.2s; }
@@ -113,11 +131,9 @@
         .delete-btn { border-color: #ff5555; color: #ff5555; }
         .delete-btn:hover { background: #ff5555; color: #fff; }
         
-        /* Paleta de Cores Customizada */
         .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
 
-        /* Estilos dos Checkboxes do Molde UV */
         .uv-toggles { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--sculk-core); }
         .uv-toggles label { font-size: 11px; color: var(--warden-bone-dim); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; }
         .uv-toggles input[type="checkbox"] { accent-color: var(--calib-accent); margin: 0; width: 14px; height: 14px; cursor: pointer; }
@@ -127,7 +143,7 @@
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
 
-        .zoom-bar { position: absolute; top: 15px; right: 35px; background: rgba(10,17,23, 0.9); border: 1px solid var(--warden-bone-dim); padding: 8px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; z-index: 10; }
+        .zoom-bar { position: absolute; top: 15px; right: 35px; background: rgba(10,17,23, 0.9); border: 1px solid var(--warden-bone-dim); padding: 8px 12px; border-radius: 4px; display: flex; gap: 10px; align-items: center; z-index: 20; }
 
         #ingame-modal { width: 85vw; max-width: 600px; border-color: var(--uplink-accent); }
         #ingame-modal h3 { color: var(--uplink-accent); border-bottom-color: rgba(0, 229, 255, 0.3); }
@@ -177,7 +193,7 @@
         <canvas id="gltfViewer" style="display: none;"></canvas>
     </div>
 
-    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1088) -->
+    <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1080) -->
     <div id="slicer-modal" class="modal" style="display: none;">
         <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
@@ -194,16 +210,18 @@
                     <input type="file" id="file-input-preset" accept="application/json">
                 </div>
 
-                <div class="slice-category">PREPARAÇÃO MULTI-IMAGEM</div>
+                <div class="slice-category">PREPARAÇÃO DE ARTE</div>
                 <button class="tool-btn" style="justify-content: center; background: rgba(255, 0, 255, 0.1); border-color: #ff00ff; color: #ff00ff; margin-bottom: 5px;" onclick="showModal('gen-modal')">✨ 0. Gerar Arte Base (IA)</button>
                 <button class="tool-btn" style="justify-content: center; background: rgba(0, 188, 212, 0.1); border-color: #00bcd4; color: #00bcd4; margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Imagem</button>
                 <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
                 
-                <button class="tool-btn" style="justify-content: center; background: rgba(255, 170, 0, 0.1); border-color: var(--calib-accent); color: var(--calib-accent); margin-bottom: 5px;" onclick="removerFundoBranco()">✨ 2. Remover Fundo (IA)</button>
-                <button class="tool-btn" style="justify-content: center; background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core);" onclick="analisarArteBase()">✨ 3. Analisar Arte (Vision)</button>
-
                 <!-- PINTURA E RETOQUE -->
-                <div class="slice-category">PINTURA TÁTICA (RETOQUE)</div>
+                <div class="slice-category">PINTURA E MANIPULAÇÃO</div>
+                <div style="display: flex; gap: 5px; margin-bottom: 8px;">
+                    <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')" style="flex: 1; justify-content: center;" title="Extrair Área">✂️ Varinha</button>
+                    <button class="tool-btn" id="tool-slice" onclick="setTool('slice')" style="flex: 1; justify-content: center;" title="Corte Quadrado">📐 Corte</button>
+                    <button class="tool-btn" id="tool-move" onclick="setTool('move')" style="flex: 1; justify-content: center;" title="Mover Peças">🖐️ Mover</button>
+                </div>
                 <div style="display: flex; gap: 5px; margin-bottom: 8px;">
                     <button class="tool-btn" id="tool-brush" onclick="setTool('brush')" style="flex: 1; justify-content: center;">✏️ Pincel</button>
                     <button class="tool-btn" id="tool-eyedrop" onclick="setTool('eyedropper')" style="flex: 1; justify-content: center;">💧 Gotas</button>
@@ -226,25 +244,21 @@
                     <input type="range" id="brush-size" min="1" max="20" value="2" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('brush-size-val').innerText = this.value;">
                 </label>
 
-                <div class="slice-category">FERRAMENTAS DE EXTRAÇÃO</div>
-                <button class="tool-btn active" id="tool-magic" onclick="setTool('magic')">✂️ Varinha Mágica (Extrair)</button>
-                <button class="tool-btn" id="tool-slice" onclick="setTool('slice')">📐 Seleção Manual</button>
-                <button class="tool-btn" id="tool-move" onclick="setTool('move')">🖐️ Mover / Scale</button>
-
-                <div class="slice-category">AÇÕES DA PEÇA / SELEÇÃO</div>
-                <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1); margin-bottom: 5px;" onclick="confirmarCorteManual()">🔪 Recortar Seleção Manual</button>
-                <button class="action-btn" onclick="duplicarPecaAtiva()">🖨️ Duplicar Peça</button>
-                <button class="action-btn delete-btn" onclick="apagarPecaAtiva()">🗑️ Apagar Peça (Restaurar)</button>
-
-                <div class="slice-category">VISUALIZAÇÃO TÁTICA</div>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
+                <div class="slice-category">OPÇÕES DE VISUALIZAÇÃO</div>
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
-                <label style="font-size:12px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-pixel-grid" onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> 📏 Exibir Grade de Pixels (16x16)
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
+                    <input type="checkbox" id="show-grid-1x1" onchange="updateGridOverlay()" style="accent-color: var(--calib-accent);"> 📏 Grade de Pixel (1x1 Exato)
+                </label>
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
+                    <input type="checkbox" id="show-grid-16x16" onchange="updateGridOverlay()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
                 </label>
 
-                <!-- NOVOS CONTROLADORES DE ZONA (MOLDE UV) -->
+                <div class="slice-category" style="margin-top: 15px;">ZONAS DE EXPORTAÇÃO (MOLDES)</div>
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--calib-accent); font-weight:bold; margin-bottom:5px;">
+                    <input type="checkbox" id="show-export-zone" checked onchange="renderFatiador()" style="accent-color: var(--calib-accent);"> Molde Principal (Laranja)
+                </label>
                 <div id="uv-toggles-l1" class="uv-toggles">
                     <label><input type="checkbox" id="uv-helmet" checked onchange="renderFatiador()"> Zona: Capacete</label>
                     <label><input type="checkbox" id="uv-chest" checked onchange="renderFatiador()"> Zona: Peitoral</label>
@@ -252,7 +266,7 @@
                     <label><input type="checkbox" id="uv-boots" checked onchange="renderFatiador()"> Zona: Botas</label>
                 </div>
                 <div id="uv-toggles-l2" class="uv-toggles" style="display:none;">
-                    <label><input type="checkbox" id="uv-waist" checked onchange="renderFatiador()"> Zona: Cintura (Waist)</label>
+                    <label><input type="checkbox" id="uv-waist" checked onchange="renderFatiador()"> Zona: Cintura</label>
                     <label><input type="checkbox" id="uv-legs" checked onchange="renderFatiador()"> Zona: Pernas</label>
                 </div>
             </div>
@@ -265,16 +279,24 @@
                 </div>
 
                 <div id="canvas-wrapper">
-                    <canvas id="workspace-canvas"></canvas>
+                    <!-- Overlay nativo CSS para grades perfeitas (1x1 e 16x16) -->
+                    <div id="grid-overlay"></div>
+                    <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
                 </div>
             </div>
 
             <div class="pieces-panel">
-                <div class="pieces-header">📦 FASE 4: EMPACOTAMENTO</div>
+                <div class="pieces-header">📦 CAIXA DE FERRAMENTAS & PEÇAS</div>
+                <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 10px;">
+                    <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1);" onclick="confirmarCorteManual()">🔪 Recortar Seleção Manual</button>
+                    <div style="display:flex; gap:5px;">
+                        <button class="action-btn" style="flex:1;" onclick="duplicarPecaAtiva()">🖨️ Duplicar</button>
+                        <button class="action-btn delete-btn" style="flex:1;" onclick="apagarPecaAtiva()">🗑️ Apagar</button>
+                    </div>
+                </div>
                 <div class="pieces-list" id="pieces-list"></div>
                 <div class="pieces-footer">
                     <button class="download-btn" onclick="downloadAllPieces()">📥 Baixar Tudo + JSON (ZIP)</button>
-                    <button class="download-btn" style="background: rgba(0, 229, 255, 0.1); color: var(--uplink-accent); border-color: var(--uplink-accent);" onclick="downloadAllIndividual()">📥 Baixar Individual</button>
                 </div>
             </div>
         </div>
@@ -374,10 +396,11 @@
     const statusOverlay = document.getElementById('status-overlay');
     const fileInput = document.getElementById('file-input');
 
+    // DIMENSÕES EXATAS FULL HD (1920x1080)
     const WORKBENCH_W = 1920;
-    const WORKBENCH_H = 1088; 
-    const OFFSET_X = 448;     
-    const OFFSET_Y = 288;     
+    const WORKBENCH_H = 1080; 
+    const OFFSET_X = 448;  // (1920 - 1024) / 2
+    const OFFSET_Y = 284;  // (1080 - 512) / 2
 
     function showModal(modalId, title, message) {
         const modal = document.getElementById(modalId);
@@ -482,7 +505,6 @@
         link.click();
     }
 
-    // Configuração Skinview3D (Armadura)
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
         canvas: skinCanvas, 
@@ -493,7 +515,6 @@
     skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
     skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
 
-    // Configuração Three.js (Entidades / Itens)
     const gltfCanvas = document.getElementById('gltfViewer');
     const renderer = new THREE.WebGLRenderer({ canvas: gltfCanvas, alpha: true, antialias: true, preserveDrawingBuffer: true });
     const scene = new THREE.Scene();
@@ -507,7 +528,6 @@
     controls.enableDamping = true;
     let currentModel = null;
 
-    // MODELO 3D: CAJADO DO INFINITO (Artefato Falso Procedural)
     const cajadoGroup = new THREE.Group();
     const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8);
     const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 });
@@ -564,12 +584,8 @@
         setTool('brush');
     }
 
-    document.getElementById('color-picker').addEventListener('input', (e) => { 
-        setColor(e.target.value); 
-    });
-
     function rgbToHex(r, g, b) {
-        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1);
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).padStart(6, '0');
     }
 
     function aplicarPincelada(pos) {
@@ -688,7 +704,6 @@
         let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
         let badge = document.getElementById('slicer-layer-badge'); 
         
-        // Alternar a visibilidade dos menus de caixas da Camada correspondente
         document.getElementById('uv-toggles-l1').style.display = currentEditingLayer === 1 ? 'flex' : 'none';
         document.getElementById('uv-toggles-l2').style.display = currentEditingLayer === 2 ? 'flex' : 'none';
 
@@ -806,50 +821,79 @@
         if (statusOverlay) statusOverlay.innerText = "✂️ CORTE MANUAL EXECUTADO COM SUCESSO!";
     }
 
-    function desenharPixelGrid() {
-        if (!document.getElementById('show-pixel-grid').checked) return;
-        wsCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-        wsCtx.lineWidth = 1;
-        wsCtx.beginPath();
-        // Linhas Verticais
-        for (let x = 0; x <= 1024; x += 16) {
-            wsCtx.moveTo(OFFSET_X + x, OFFSET_Y);
-            wsCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512);
+    // GESTÃO NATIVA DA GRADE CSS
+    function updateGridOverlay() {
+        const gridOverlay = document.getElementById('grid-overlay');
+        const show1x1 = document.getElementById('show-grid-1x1').checked;
+        const show16x16 = document.getElementById('show-grid-16x16').checked;
+
+        let bg = [];
+        let sz = [];
+        
+        // 1x1 Pixel Grid
+        if (show1x1) {
+            bg.push(`linear-gradient(to right, rgba(0,0,0,0.15) 1px, transparent 1px)`);
+            bg.push(`linear-gradient(to bottom, rgba(0,0,0,0.15) 1px, transparent 1px)`);
+            sz.push('1px 1px', '1px 1px');
         }
-        // Linhas Horizontais
-        for (let y = 0; y <= 512; y += 16) {
-            wsCtx.moveTo(OFFSET_X, OFFSET_Y + y);
-            wsCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y);
+        // 16x16 Minecraft Block Grid
+        if (show16x16) {
+            bg.push(`linear-gradient(to right, rgba(255,170,0,0.4) 1px, transparent 1px)`);
+            bg.push(`linear-gradient(to bottom, rgba(255,170,0,0.4) 1px, transparent 1px)`);
+            sz.push('16px 16px', '16px 16px');
         }
-        wsCtx.stroke();
+
+        if (bg.length > 0) {
+            gridOverlay.style.display = 'block';
+            gridOverlay.style.backgroundImage = bg.join(', ');
+            gridOverlay.style.backgroundSize = sz.join(', ');
+        } else {
+            gridOverlay.style.display = 'none';
+        }
     }
 
     function desenharMoldeUV() {
         // Marca a área de limite principal do Minecraft 1024x512
-        if (document.getElementById('show-grid').checked) {
-            wsCtx.strokeStyle = "#ffaa00"; wsCtx.lineWidth = 2; wsCtx.setLineDash([8, 8]);
-            wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); wsCtx.setLineDash([]);
-            wsCtx.fillStyle = "#ffaa00"; wsCtx.font = "bold 16px JetBrains Mono"; wsCtx.textAlign = "left";
-            wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 10);
+        if (document.getElementById('show-export-zone').checked) {
+            wsCtx.strokeStyle = "#ffaa00"; 
+            wsCtx.lineWidth = 2; 
+            wsCtx.setLineDash([12, 8]); // Estilo Blueprint
+            wsCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); 
+            wsCtx.setLineDash([]);
+            
+            wsCtx.fillStyle = "#ffaa00"; 
+            wsCtx.font = "bold 16px 'JetBrains Mono', monospace"; 
+            wsCtx.textAlign = "left"; 
+            wsCtx.textBaseline = "bottom";
+            wsCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
         }
 
-        const f = 16; wsCtx.lineWidth = 2; wsCtx.textAlign = "center"; wsCtx.textBaseline = "middle";
+        const f = 16; 
         
-        // Nova função de molde com tracejado igual à imagem e fundo do texto
+        // Nova função de molde com tracejado igual à imagem de referência
         const drawBox = (x, y, w, h, label) => {
             let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
-            wsCtx.strokeStyle = "#ffaa00"; 
-            wsCtx.setLineDash([6, 4]); // Estilo Blueprint tracejado
+            
+            // Borda Tracejada Magenta / Roxa
+            wsCtx.strokeStyle = "#b0279c"; 
+            wsCtx.lineWidth = 2;
+            wsCtx.setLineDash([6, 4]); 
             wsCtx.strokeRect(px, py, pw, ph);
             wsCtx.setLineDash([]);
             
-            // Fundo da etiqueta para garantir a leitura sobre texturas escuras
-            wsCtx.font = "bold 10px JetBrains Mono"; 
+            // Preenchimento Suave
+            wsCtx.fillStyle = "rgba(176, 39, 156, 0.1)";
+            wsCtx.fillRect(px, py, pw, ph);
+            
+            // Fundo da etiqueta e texto
+            wsCtx.font = "bold 10px 'JetBrains Mono', monospace"; 
             let txtW = wsCtx.measureText(label).width + 8;
             wsCtx.fillStyle = "rgba(0,0,0,0.6)"; 
             wsCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
 
             wsCtx.fillStyle = "#ffaa00"; 
+            wsCtx.textAlign = "center"; 
+            wsCtx.textBaseline = "middle";
             wsCtx.fillText(label, px + pw/2, py + ph/2); 
         };
 
@@ -904,10 +948,7 @@
         wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
         wsCtx.drawImage(offscreenCanvas, 0, 0); 
         
-        // Desenha a Grela de Pixels primeiro para ficar atrás do Molde
-        desenharPixelGrid();
-        
-        // Desenha o Molde UV atualizado e com Toggles
+        // Desenha o Molde UV atualizado
         desenharMoldeUV();
         
         extractedPieces.forEach((p, i) => {
@@ -1046,7 +1087,7 @@
     wsCanvas.addEventListener('mouseup', (e) => {
         if (isPainting) {
             isPainting = false;
-            registrarEstadoMemoria(); // Grava na memória depois de terminar a pincelada
+            registrarEstadoMemoria();
             return;
         }
 
@@ -1289,7 +1330,6 @@
                 const box = new THREE.Box3().setFromObject(currentModel); const size = box.getSize(new THREE.Vector3()); const scale = 3.5 / Math.max(size.x, size.y, size.z);
                 currentModel.scale.set(scale, scale, scale); currentModel.position.set(0, -1, 0); scene.add(currentModel);
                 
-                // Se o utilizador importar um GLTF manual, escondemos o Cajado falso.
                 if(currentMode === 'item') {
                     scene.remove(cajadoGroup);
                 }
@@ -1308,7 +1348,6 @@
     }
     window.addEventListener('resize', resize); setTimeout(resize, 200);
 
-    // INTEGRAÇÃO GEMINI IA OMITIDA PARA BREVIDADE (Mantida a estrutura original no código completo)
     async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
         if (loader) loader.style.display = 'block'; if (scanner) scanner.style.display = 'block';
         let retries = 0; const maxRetries = 5;
