@@ -89,6 +89,7 @@
             background-color: #0d141c; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
             position: relative;
+            transform-origin: center center;
             transition: width 0.15s, height 0.15s, min-width 0.15s, min-height 0.15s; 
         }
 
@@ -96,83 +97,66 @@
         #workspace-canvas { cursor: crosshair; z-index: 10; }
         #grid-canvas { pointer-events: none; z-index: 15; }
 
-        /* FLOATING TOOLBAR (J.A.V.I.S. GLASSMORPHISM) */
+        /* ============================================
+           FLOATING TOOLBAR MATRYOSHKA
+           ============================================ */
         .floating-toolbar {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-            background: rgba(10, 17, 23, 0.85);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(19, 201, 201, 0.3);
-            border-radius: 50px;
-            padding: 8px 12px;
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 1000;
+            background: rgba(10, 17, 23, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(19, 201, 201, 0.3); border-radius: 50px; padding: 8px 12px;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(19, 201, 201, 0.1);
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            justify-content: center;
-            animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: flex; gap: 6px; align-items: center; justify-content: center; animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateX(-50%) translateY(30px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        @keyframes slideUp { from { opacity: 0; transform: translateX(-50%) translateY(30px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+
+        /* ZONAS MATRYOSHKA */
+        .zones-container { display: flex; gap: 4px; align-items: center; }
+        .zone-btn {
+            width: 36px; height: 36px; border: 1px solid rgba(19, 201, 201, 0.2); background: rgba(19, 201, 201, 0.03);
+            border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); color: var(--warden-bone-dim); font-size: 11px;
+            font-weight: 700; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; flex-shrink: 0; position: relative;
         }
+        .zone-btn:hover { background: rgba(19, 201, 201, 0.1); border-color: var(--sculk-core); color: var(--sculk-core); transform: scale(1.1); }
+        .zone-btn.active { background: rgba(19, 201, 201, 0.3); border-color: var(--sculk-core); color: var(--sculk-core); box-shadow: 0 0 12px rgba(19, 201, 201, 0.4); }
 
         .toolbar-btn {
-            width: 40px; height: 40px; border: none; background: transparent; border-radius: 12px;
-            cursor: pointer; display: flex; align-items: center; justify-content: center;
-            transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative; overflow: visible;
-            color: var(--warden-bone);
+            width: 40px; height: 40px; border: none; background: transparent; border-radius: 12px; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative; overflow: visible; color: var(--warden-bone);
         }
         .toolbar-btn:hover { background: rgba(19, 201, 201, 0.15); transform: scale(1.1); color: var(--sculk-core); }
         .toolbar-btn:active { transform: scale(0.95); }
-        
-        .toolbar-btn.active {
-            background: rgba(255, 170, 0, 0.2); color: var(--calib-accent); box-shadow: 0 0 10px rgba(255,170,0,0.3);
-        }
-        
+        .toolbar-btn.active { background: rgba(255, 170, 0, 0.2); color: var(--calib-accent); box-shadow: 0 0 10px rgba(255,170,0,0.3); }
         .toolbar-divider { width: 1px; height: 24px; background: rgba(19, 201, 201, 0.3); margin: 0 8px; border-radius: 1px;}
 
-        /* Tooltips Animados */
-        .toolbar-btn::after {
-            content: attr(data-tooltip); position: absolute; bottom: calc(100% + 12px); left: 50%;
-            transform: translateX(-50%) translateY(4px);
-            background: rgba(5, 10, 15, 0.95); border: 1px solid var(--sculk-core);
-            color: var(--sculk-core); padding: 6px 10px; border-radius: 4px;
-            font-size: 11px; font-weight: bold; white-space: nowrap; pointer-events: none;
-            opacity: 0; transition: all 0.2s ease; z-index: 1000; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
+        .toolbar-btn::after, .zone-btn::after {
+            content: attr(data-tooltip); position: absolute; bottom: calc(100% + 12px); left: 50%; transform: translateX(-50%) translateY(4px);
+            background: rgba(5, 10, 15, 0.95); border: 1px solid var(--sculk-core); color: var(--sculk-core); padding: 6px 10px; border-radius: 4px;
+            font-size: 11px; font-weight: bold; white-space: nowrap; pointer-events: none; opacity: 0; transition: all 0.2s ease; z-index: 1000; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; text-transform: uppercase;
         }
-        .toolbar-btn::before {
-            content: ''; position: absolute; bottom: calc(100% + 7px); left: 50%;
-            transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--sculk-core);
+        .toolbar-btn::before, .zone-btn::before {
+            content: ''; position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 5px solid var(--sculk-core);
             opacity: 0; transition: all 0.2s ease; z-index: 1000; pointer-events: none;
         }
-        .toolbar-btn:hover::after, .toolbar-btn:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
-
+        .toolbar-btn:hover::after, .toolbar-btn:hover::before, .zone-btn:hover::after, .zone-btn:hover::before { opacity: 1; transform: translateX(-50%) translateY(0); }
         .toolbar-btn svg { width: 18px; height: 18px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; fill: none; transition: all 0.3s ease; }
         .toolbar-btn:hover svg { stroke-width: 2.5; filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));}
 
-        @keyframes ripple {
-            from { transform: scale(0); opacity: 1; }
-            to { transform: scale(3.5); opacity: 0; }
-        }
+        @keyframes ripple { from { transform: scale(0); opacity: 1; } to { transform: scale(3.5); opacity: 0; } }
 
-        /* SISTEMA DE NOTIFICAÇÕES POP-UP */
+        /* ============================================
+           SISTEMA DE NOTIFICAÇÕES POP-UP
+           ============================================ */
         .notification {
-            position: fixed; top: 20px; right: 20px;
-            background: rgba(19, 201, 201, 0.9); border-left: 4px solid #fff;
-            color: #fff; padding: 14px 20px; border-radius: 4px;
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); animation: slideInRight 0.3s ease;
+            position: fixed; top: 20px; right: 20px; background: rgba(19, 201, 201, 0.9); border-left: 4px solid #fff;
+            color: #fff; padding: 14px 20px; border-radius: 4px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); animation: slideInRight 0.3s ease;
             z-index: 2000; font-size: 12px; font-weight: bold; backdrop-filter: blur(10px); text-transform: uppercase; letter-spacing: 1px;
         }
         @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
-        .notification.error { background: rgba(255, 51, 51, 0.9); }
-        .notification.warning { background: rgba(255, 170, 0, 0.9); }
+        .notification.error { background: rgba(255, 51, 51, 0.9); border-left-color: rgba(255, 51, 51, 1); }
+        .notification.warning { background: rgba(255, 170, 0, 0.9); border-left-color: rgba(255, 170, 0, 1); }
 
         .pieces-panel { flex: 0 0 260px; background: rgba(0,0,0,0.6); border: 1px solid var(--warden-bone-dim); border-radius: 6px; padding: 15px; display: flex; flex-direction: column; gap: 10px; overflow-y: auto; box-sizing: border-box;}
         .pieces-header { font-size: 12px; color: var(--calib-accent); font-weight: 800; border-bottom: 1px solid var(--warden-bone-dim); padding-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
@@ -193,11 +177,6 @@
         .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
         .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
 
-        .uv-toggles { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; padding-left: 10px; border-left: 2px solid var(--sculk-core); }
-        .uv-toggles label { font-size: 11px; color: var(--warden-bone-dim); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: bold; }
-        .uv-toggles input[type="checkbox"] { margin: 0; width: 14px; height: 14px; cursor: pointer; }
-        .uv-toggles label:hover { color: var(--calib-accent); }
-
         .editor-footer { flex-shrink: 0; margin-top: 15px; display: flex; justify-content: flex-end; gap: 10px; }
         .close-modal { background: var(--sculk-surface); border: 1px solid var(--warden-bone-dim); color: #fff; cursor: pointer; padding: 12px 25px; font-size: 13px; border-radius: 4px; font-weight: 800; text-transform: uppercase; transition: 0.2s; letter-spacing: 1px; }
         .close-modal:hover { background: #1f3447; border-color: #fff; }
@@ -215,6 +194,22 @@
     </style>
 </head>
 <body oncontextmenu="return false;">
+
+<script>
+(function() {
+    const allowedDomains = ["sergio810.github.io", "localhost", "127.0.0.1"];
+    const currentDomain = window.location.hostname;
+    if (!allowedDomains.includes(currentDomain) && currentDomain !== "") {
+        document.body.innerHTML = "";
+        document.body.style.backgroundColor = "#000000";
+        const warning = document.createElement("div");
+        warning.style.cssText = "color: #ff0000; font-family: monospace; text-align: center; margin-top: 20%; padding: 20px; border: 2px solid #ff0000; background: rgba(255,0,0,0.1);";
+        warning.innerHTML = `<h1>⚠ [ACESSO NEGADO] CLONE DETETADO ⚠</h1><p>O Código Genético desta ferramenta pertence ao Projeto Vexanium.</p><p>Hospedagem não autorizada no domínio: <b>${currentDomain}</b></p>`;
+        document.body.appendChild(warning);
+        throw new Error("J.A.V.I.S SECURITY: Execução bloqueada.");
+    }
+})();
+</script>
 
 <div id="javis-widget-container">
     <div id="status-overlay">SISTEMA J.A.V.I.S. // MONITORIZAÇÃO BIOMÉTRICA ATIVA</div>
@@ -236,35 +231,38 @@
 
     <!-- ESTÚDIO DE MONTAGEM E CORTE: MESA GIGANTE (1920x1080) -->
     <div id="slicer-modal" class="modal" style="display: none;">
-        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM MATRYOSHKA <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
+        <h3>✂️ BLOCO OPERATÓRIO: MONTAGEM LIVRE <span id="slicer-layer-badge" class="layer-badge">L1 (CORPO)</span></h3>
         
         <div class="editor-layout">
-            <!-- PAINEL LATERAL ESQUERDO -->
             <div class="editor-toolbar">
                 <div class="slice-category">MEMÓRIA E PRESETS</div>
                 <div style="display: flex; gap: 5px;">
-                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="salvarPresetJSON()">💾 Salvar</button>
+                    <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="StudioCanvas.salvarPresetJSON()">💾 Salvar</button>
                     <button class="action-btn" style="flex: 1; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="document.getElementById('file-input-preset').click()">📂 Abrir</button>
                     <input type="file" id="file-input-preset" accept="application/json">
                 </div>
 
-                <div class="slice-category" style="margin-top: 15px;">ZONAS DE EXPORTAÇÃO (MATRYOSHKA)</div>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--warden-bone); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-zone-1024" checked onchange="drawGridAndMold()" style="accent-color: #000000;"> 1024x512 (Mestre)
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--warden-bone); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-zone-512" checked onchange="drawGridAndMold()" style="accent-color: #ffff00;"> 512x256 (Nível 2)
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--warden-bone); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-zone-256" checked onchange="drawGridAndMold()" style="accent-color: #00ff00;"> 256x128 (Nível 3)
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--warden-bone); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-zone-128" checked onchange="drawGridAndMold()" style="accent-color: #ff0000;"> 128x64 (Nível 4)
-                </label>
-
-                <div class="slice-category" style="margin-top: 15px;">MOLDE DE ARMADURA</div>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--uplink-accent); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-armor-layout" checked onchange="drawGridAndMold()" style="accent-color: var(--uplink-accent);"> Mostrar Layout 2D
+                <div class="slice-category">PREPARAÇÃO DE ARTE</div>
+                <button class="action-btn" style="width: 100%; border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1); margin-bottom: 5px;" onclick="UIManager.showModal('gen-modal')">✨ 0. Gerar Arte Base (IA)</button>
+                <button class="action-btn" style="width: 100%; border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1); margin-bottom: 5px;" onclick="document.getElementById('file-input-add').click()">📥 1. Adicionar Imagem</button>
+                <input type="file" id="file-input-add" accept="image/png,image/jpeg" style="display:none">
+                
+                <div class="slice-category">CORES DA PINTURA</div>
+                <div style="display: flex; gap: 5px; align-items: center; margin-bottom: 5px;">
+                    <input type="color" id="color-picker" value="#a855f7" class="action-btn" style="padding: 0; width: 35px; height: 30px; cursor: pointer; border: 1px solid var(--warden-bone-dim);">
+                    <div style="display: flex; gap: 2px; flex: 1;">
+                        <div class="color-swatch" style="background:#a855f7;" onclick="ToolManager.setColor('#a855f7')"></div>
+                        <div class="color-swatch" style="background:#13c9c9;" onclick="ToolManager.setColor('#13c9c9')"></div>
+                        <div class="color-swatch" style="background:#0a1117;" onclick="ToolManager.setColor('#0a1117')"></div>
+                        <div class="color-swatch" style="background:#d1d5b4;" onclick="ToolManager.setColor('#d1d5b4')"></div>
+                        <div class="color-swatch" style="background:#ff3333;" onclick="ToolManager.setColor('#ff3333')"></div>
+                        <div class="color-swatch" style="background:#ffffff;" onclick="ToolManager.setColor('#ffffff')"></div>
+                    </div>
+                </div>
+                
+                <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-bottom: 5px;">
+                    Espessura: <span id="brush-size-val" style="color:var(--sculk-core); font-weight:bold; width:15px;">2</span>px
+                    <input type="range" id="brush-size" min="1" max="20" value="2" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('brush-size-val').innerText = this.value;">
                 </label>
 
                 <div class="slice-category" style="margin-top: 15px;">OPÇÕES DE VISUALIZAÇÃO</div>
@@ -272,11 +270,12 @@
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-grid-1x1" onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade de Pixel (1x1)
+                    <input type="checkbox" id="show-grid-1x1" onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade de Pixel (1x1)
                 </label>
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-grid-16x16" checked onchange="drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
+                    <input type="checkbox" id="show-grid-16x16" onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade Minecraft (16x16)
                 </label>
+
             </div>
 
             <!-- AMBIENTE CENTRAL (WORKSPACE) -->
@@ -286,40 +285,63 @@
                     <canvas id="grid-canvas" width="1920" height="1080"></canvas>
                     <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
                     
-                    <!-- NEW FLOATING TOOLBAR (GLASSMORPHISM J.A.V.I.S) -->
+                    <!-- FLOATING TOOLBAR MATRYOSHKA E FERRAMENTAS -->
                     <div class="floating-toolbar">
-                        <button class="toolbar-btn" data-tooltip="Desfazer" onclick="desfazerEstado()">
+                        
+                        <!-- ZONAS MATRYOSHKA -->
+                        <div class="zones-container">
+                            <span style="font-size: 10px; color: var(--warden-bone-dim); text-transform: uppercase; letter-spacing: 1px; margin-right: 4px;">Zones:</span>
+                            <button class="zone-btn active" data-zone="1" data-tooltip="Mestre: 1024x512" onclick="StudioCanvas.switchZone(1)">Z1</button>
+                            <button class="zone-btn" data-zone="2" data-tooltip="Interna 1: 512x256" onclick="StudioCanvas.switchZone(2)">Z2</button>
+                            <button class="zone-btn" data-zone="3" data-tooltip="Interna 2: 256x128" onclick="StudioCanvas.switchZone(3)">Z3</button>
+                            <button class="zone-btn" data-zone="4" data-tooltip="Interna 3: 128x64" onclick="StudioCanvas.switchZone(4)">Z4</button>
+                            <button class="zone-btn" data-zone="5" data-tooltip="Interna 4: 64x32" onclick="StudioCanvas.switchZone(5)">Z5</button>
+                            <button class="zone-btn" data-zone="6" data-tooltip="Interna 5: 32x16" onclick="StudioCanvas.switchZone(6)">Z6</button>
+                        </div>
+
+                        <div class="toolbar-divider"></div>
+
+                        <!-- UNDO / REDO -->
+                        <button class="toolbar-btn" data-tooltip="Desfazer" onclick="MemoryManager.desfazerEstado()">
                             <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                         </button>
-                        <button class="toolbar-btn" data-tooltip="Refazer" onclick="refazerEstado()">
+                        <button class="toolbar-btn" data-tooltip="Refazer" onclick="MemoryManager.refazerEstado()">
                             <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/></svg>
                         </button>
                         
                         <div class="toolbar-divider"></div>
 
-                        <button class="toolbar-btn" id="tool-btn-move" data-tooltip="Mover" onclick="setTool('move')">
+                        <!-- FERRAMENTAS PRINCIPAIS -->
+                        <button class="toolbar-btn" id="tool-btn-move" data-tooltip="Mover" onclick="ToolManager.setTool('move')">
                             <svg viewBox="0 0 24 24"><path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M14 10V5a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M6 14v-1a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0"/><path d="M18 11a4 4 0 0 1 4 4v2a8 8 0 0 1-8 8h-2a8 8 0 0 1-8-8v-3.5"/></svg>
                         </button>
-                        <button class="toolbar-btn active" id="tool-btn-magic" data-tooltip="Varinha Mágica" onclick="setTool('magic')">
+                        <button class="toolbar-btn active" id="tool-btn-magic" data-tooltip="Varinha Mágica" onclick="ToolManager.setTool('magic')">
                             <svg viewBox="0 0 24 24"><path d="m21.64 3.64-1.28-1.28a1.21 1.21 0 0 0-1.72 0L2.36 18.64a1.21 1.21 0 0 0 0 1.72l1.28 1.28a1.2 1.2 0 0 0 1.72 0L21.64 5.36a1.2 1.2 0 0 0 0-1.72Z"/><path d="m14 7 3 3"/><path d="M5 6v4"/><path d="M19 14v4"/><path d="M10 2v2"/><path d="M7 8H3"/><path d="M21 16h-4"/><path d="M11 3H9"/></svg>
                         </button>
-                        <button class="toolbar-btn" id="tool-btn-slice" data-tooltip="Corte Manual" onclick="setTool('slice')">
+                        <button class="toolbar-btn" id="tool-btn-slice" data-tooltip="Corte" onclick="ToolManager.setTool('slice')">
                             <svg viewBox="0 0 24 24"><path d="M6 2v14a2 2 0 0 0 2 2h14"/><path d="M18 22V8a2 2 0 0 0-2-2H2"/></svg>
                         </button>
 
                         <div class="toolbar-divider"></div>
 
-                        <button class="toolbar-btn" data-tooltip="Remover Fundo" onclick="removerFundoBranco()">
-                            <svg viewBox="0 0 24 24"><path d="M6 9l12 0"></path><path d="M4 6h16"></path><path d="M10 3h4"></path><path d="M5 6l1 14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2l1-14"></path><line x1="9" y1="11" x2="9" y2="17"></line><line x1="15" y1="11" x2="15" y2="17"></line></svg>
+                        <button class="toolbar-btn" id="tool-btn-brush" data-tooltip="Pincel" onclick="ToolManager.setTool('brush')">
+                            <svg viewBox="0 0 24 24"><path d="m9.06 11.9 8.07-8.06a2.85 2.85 0 1 1 4.03 4.03l-8.06 8.08"/><path d="M7.07 14.94c-1.66 0-3 1.35-3 3.02 0 1.33-2.5 1.52-2 2.02 1.08 1.1 2.49 2.02 4 2.02 2.2 0 4-1.8 4-4.04a3.01 3.01 0 0 0-3-3.02z"/></svg>
+                        </button>
+                        <button class="toolbar-btn" id="tool-btn-eyedropper" data-tooltip="Conta Gotas" onclick="ToolManager.setTool('eyedropper')">
+                            <svg viewBox="0 0 24 24"><path d="m2 22 1-1h3l9-9"/><path d="M3 21v-3l9-9"/><path d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"/></svg>
                         </button>
 
                         <div class="toolbar-divider"></div>
 
-                        <button class="toolbar-btn" data-tooltip="Zoom Out" onclick="ajustarZoom(0.8)">
+                        <!-- ZOOM -->
+                        <button class="toolbar-btn" data-tooltip="Ajustar e Limpar" onclick="StudioCanvas.ajustarZoom(1.0)">
+                            <svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>
+                        </button>
+                        <button class="toolbar-btn" data-tooltip="Zoom Out" onclick="StudioCanvas.ajustarZoom('out')">
                             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                         </button>
                         <span id="zoom-label" style="font-size:11px; font-weight:bold; width: 35px; text-align:center; color: var(--calib-accent); font-family: 'JetBrains Mono', monospace;">100%</span>
-                        <button class="toolbar-btn" data-tooltip="Zoom In" onclick="ajustarZoom(1.2)">
+                        <button class="toolbar-btn" data-tooltip="Zoom In" onclick="StudioCanvas.ajustarZoom('in')">
                             <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.35-4.35"></path><line x1="11" y1="8" x2="11" y2="14"></line><line x1="8" y1="11" x2="14" y2="11"></line></svg>
                         </button>
                     </div>
@@ -327,24 +349,25 @@
             </div>
 
             <div class="pieces-panel">
-                <div class="pieces-header">📦 CAIXA DE PEÇAS</div>
+                <div class="pieces-header">📦 CAIXA DE FERRAMENTAS & PEÇAS</div>
                 <div style="display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; border-bottom: 1px solid #222; padding-bottom: 10px;">
-                    <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1);" onclick="confirmarCorteManual()">🔪 Confirmar Corte</button>
+                    <button class="action-btn" style="border-color: var(--ai-accent); color: var(--ai-accent); background: rgba(255, 0, 255, 0.1);" onclick="ToolManager.confirmarCorteManual()">🔪 Recortar Seleção Manual</button>
+                    <button class="action-btn" style="border-color: #00bcd4; color: #00bcd4; background: rgba(0, 188, 212, 0.1);" onclick="ToolManager.removerFundoBranco()">✨ Remover Fundo (IA)</button>
                     <div style="display:flex; gap:5px;">
-                        <button class="action-btn" style="flex:1;" onclick="duplicarPecaAtiva()">🖨️ Duplicar</button>
-                        <button class="action-btn delete-btn" style="flex:1;" onclick="apagarPecaAtiva()">🗑️ Apagar</button>
+                        <button class="action-btn" style="flex:1;" onclick="ToolManager.duplicarPecaAtiva()">🖨️ Duplicar</button>
+                        <button class="action-btn delete-btn" style="flex:1;" onclick="ToolManager.apagarPecaAtiva()">🗑️ Apagar</button>
                     </div>
                 </div>
                 <div class="pieces-list" id="pieces-list"></div>
                 <div class="pieces-footer">
-                    <button class="download-btn action-btn" style="width:100%" onclick="downloadAllPieces()">📥 Baixar ZIP + JSON</button>
+                    <button class="download-btn" onclick="ExportManager.downloadAllPieces()">📥 Baixar Tudo + JSON (ZIP)</button>
                 </div>
             </div>
         </div>
 
         <div class="editor-footer">
-            <button class="close-modal" style="background: transparent;" onclick="closeModal('slicer-modal')">Abortar Extração</button>
-            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="aplicarMontagemUVLivre()">✅ Fundir Textura Final ao 3D</button>
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('slicer-modal')">Abortar Extração</button>
+            <button class="close-modal" style="border-color: var(--calib-accent); color: var(--calib-accent); background: rgba(255, 170, 0, 0.1);" onclick="ExportManager.aplicarMontagemUVLivre()">✅ Fundir Textura Final ao 3D</button>
         </div>
     </div>
     
@@ -352,36 +375,61 @@
     <div id="ai-modal" class="modal" style="display: none;">
         <h3 id="modal-title">✨ RELATÓRIO DE SINCRONIZAÇÃO</h3>
         <div id="ai-response-text">A extrair dados do hospedeiro...</div>
-        <button class="close-modal" onclick="closeModal('ai-modal')">Sincronizar e Sair</button>
+        <button class="close-modal" onclick="UIManager.closeModal('ai-modal')">Sincronizar e Sair</button>
+    </div>
+
+    <!-- MODAL GERADOR FASE 1 -->
+    <div id="gen-modal" class="modal" style="display: none; border-color: #ff00ff; flex-direction: column;">
+        <h3 style="color: #ff00ff; border-bottom-color: rgba(255,0,255,0.3); margin-bottom: 10px;">✨ A FORJA (GERAÇÃO DE ARMADURA)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: 0; margin-bottom: 15px; line-height: 1.4;">O J.A.V.I.S enviará os dados para a rede neural aplicando o layout tático 'Vexanium Mold' automaticamente (Fase 1).</p>
+        <textarea id="gen-prompt-input" placeholder="Ex: Armadura parasitária alienígena, texturas biomecânicas roxas do Deep Dark..." style="width: 100%; min-height: 100px; margin-bottom: 15px;"></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end; width: 100%;">
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('gen-modal')">Cancelar</button>
+            <button class="close-modal" style="border-color: #ff00ff; color: #ff00ff; background: rgba(255, 0, 255, 0.1);" onclick="executarGeracaoIA()">🧠 Iniciar Geração</button>
+        </div>
+    </div>
+
+    <!-- MODAL UPLINK -->
+    <div id="ingame-modal" class="modal" style="display: none;">
+        <h3 id="modal-title-ingame">📡 UPLINK NEURAL (Dados do Jogo)</h3>
+        <p style="font-size:12px; color:var(--warden-bone-dim); margin-top: -5px; margin-bottom: 15px;">Cole o Relatório Tático gerado pelo <b>JarvisBrain.java</b> para analisar a telemetria da partida.</p>
+        <textarea id="jarvis-telemetry-input" placeholder="STATUS DO OPERADOR..."></textarea>
+        <div style="display: flex; gap: 10px; justify-content: flex-end;">
+            <button class="close-modal" style="background: transparent;" onclick="UIManager.closeModal('ingame-modal')">Cancelar Conexão</button>
+            <button class="close-modal" style="border-color: var(--uplink-accent); color: var(--uplink-accent); background: rgba(0, 229, 255, 0.1);" onclick="processarTelemetriaInGame()">🧠 Analisar Telemetria</button>
+        </div>
     </div>
 
     <!-- BARRA TÁTICA INFERIOR -->
     <div class="control-bar">
         <div class="btn-group">
-            <button class="btn active" id="btn-armor" onclick="switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
-            <button class="btn" id="btn-model" onclick="switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
-            <button class="btn" id="btn-item" onclick="switchMode('item')"><span class="icon">🪄</span> ARTEFATO</button>
+            <button class="btn active" id="btn-armor" onclick="UIManager.switchMode('armor')"><span class="icon">🛡️</span> ARMADURA</button>
+            <button class="btn" id="btn-model" onclick="UIManager.switchMode('model')"><span class="icon">👾</span> ENTIDADE</button>
+            <button class="btn" id="btn-item" onclick="UIManager.switchMode('item')"><span class="icon">🪄</span> ARTEFATO</button>
         </div>
         
         <div class="btn-group" style="margin-left: 5px;">
-            <button class="btn btn-calib" id="btn-rotate" onclick="toggleRotation()" title="Pausar/Retomar Rotação" style="padding: 8px; width: 35px; justify-content: center;"><span class="icon">⏸️</span></button>
-            <button class="btn btn-calib" id="btn-screenshot" onclick="takeScreenshot()" title="Capturar Foto 3D" style="padding: 8px; width: 35px; justify-content: center; background: rgba(255, 170, 0, 0.1);"><span class="icon">📸</span></button>
+            <button class="btn btn-calib" id="btn-rotate" onclick="UIManager.toggleRotation()" title="Pausar/Retomar Rotação" style="padding: 8px; width: 35px; justify-content: center;"><span class="icon">⏸️</span></button>
+            <button class="btn btn-calib" id="btn-screenshot" onclick="UIManager.takeScreenshot()" title="Capturar Foto 3D" style="padding: 8px; width: 35px; justify-content: center; background: rgba(255, 170, 0, 0.1);"><span class="icon">📸</span></button>
         </div>
         
         <div class="divider"></div>
         <div class="btn-group" id="upload-group">
-            <button class="btn btn-calib" id="btn-upload-l1" onclick="triggerUpload(1)"><span class="icon">📥</span> BASE L1 (C/P/B)</button>
-            <button class="btn btn-calib" id="btn-upload-l2" onclick="triggerUpload(2)"><span class="icon">📥</span> BASE L2 (CALÇAS)</button>
-            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="triggerUpload(3)"><span class="icon">📥</span> IMPORTAR .GLTF</button>
+            <button class="btn btn-calib" id="btn-upload-l1" onclick="ExportManager.triggerUpload(1)"><span class="icon">📥</span> BASE L1 (C/P/B)</button>
+            <button class="btn btn-calib" id="btn-upload-l2" onclick="ExportManager.triggerUpload(2)"><span class="icon">📥</span> BASE L2 (CALÇAS)</button>
+            <button class="btn btn-calib" id="btn-upload-3d" style="display:none;" onclick="ExportManager.triggerUpload(3)"><span class="icon">📥</span> IMPORTAR .GLTF</button>
         </div>
         <div class="divider"></div>
         <div class="btn-group">
-            <button class="btn btn-calib" id="btn-calib" onclick="abrirFatiadorLivre()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO MATRYOSHKA</button>
+            <button class="btn btn-uplink" onclick="UIManager.showModal('ingame-modal')" title="Uplink Neural (Logs Minecraft)"><span class="icon">📡</span></button>
+            <button class="btn btn-ai" onclick="generateLore()" title="Gerar Lore Biomecânica"><span class="icon">✨</span></button>
+            <button class="btn btn-ai" onclick="gerarAtributos()" title="Atributos Táticos"><span class="icon">📊</span></button>
+            <button class="btn btn-calib" id="btn-calib" onclick="StudioCanvas.abrirFatiadorLivre()" title="Estúdio de Montagem Livre"><span class="icon">✂️</span> ESTÚDIO</button>
             
             <div class="divider" id="div-export"></div>
 
-            <button class="btn btn-save" id="btn-save-l1" onclick="baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
-            <button class="btn btn-save" id="btn-save-l2" onclick="baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
+            <button class="btn btn-save" id="btn-save-l1" onclick="ExportManager.baixarTextura(1)"><span class="icon">💾</span> EXPORTAR L1</button>
+            <button class="btn btn-save" id="btn-save-l2" onclick="ExportManager.baixarTextura(2)"><span class="icon">💾</span> EXPORTAR L2</button>
             
             <div class="loader" id="ai-loader"></div>
         </div>
@@ -393,40 +441,190 @@
 <input type="file" id="file-input">
 
 <script>
-    let currentMode = 'armor';
-    let baseImageL1 = null; 
-    let baseImageL2 = null; 
-    let finalImageL1 = null; 
-    let finalImageL2 = null; 
-    let uploadTarget = 1; 
-    let currentEditingLayer = 1; 
-    let originalImageObj = new Image();
+    /* =================================================================================
+       CORE SYSTEM STATE & CONSTANTS
+       A Regra de Ouro: O molde master tem 1024x512. Ele é imutável na exportação.
+       ================================================================================= */
+    const STATE = {
+        apiKey: "", 
+        currentMode: 'armor',
+        baseImageL1: null, 
+        baseImageL2: null, 
+        finalImageL1: null, 
+        finalImageL2: null, 
+        uploadTarget: 1, 
+        currentEditingLayer: 1, 
+        originalImageObj: new Image(),
+        currentPaintColor: "#a855f7",
+        isPainting: false,
+        autoRotateGltf: true,
+        extractedPieces: [], 
+        activePieceIndex: -1, 
+        nextPieceId: 1,
+        currentZoom: 1.0,
+        historyUndo: [], 
+        historyRedo: [],
+        lastEditingLayer: 1,
+        layerStates: { 1: null, 2: null },
+        
+        // Tool State variables
+        currentTool: 'magic', 
+        isDragging: false, 
+        startX: 0, 
+        startY: 0, 
+        manualSelection: null, 
+        isResizing: false, 
+        resizeHandle: '', 
+        origP: {x:0, y:0, w:0, h:0},
+        
+        // Matryoshka Zones Logic
+        currentMatryoshkaZone: 1,
+        matryoshkaZones: {
+            1: { w: 1024, h: 512, zoom: 1.0 },
+            2: { w: 512,  h: 256, zoom: 1.8 },
+            3: { w: 256,  h: 128, zoom: 3.0 },
+            4: { w: 128,  h: 64,  zoom: 4.0 },
+            5: { w: 64,   h: 32,  zoom: 4.0 },
+            6: { w: 32,   h: 16,  zoom: 4.0 }
+        }
+    };
 
-    const loader = document.getElementById('ai-loader');
-    const scanner = document.getElementById('scanning-overlay');
-    const statusOverlay = document.getElementById('status-overlay');
-    const fileInput = document.getElementById('file-input');
-
-    // DIMENSÕES EXATAS FULL HD (1920x1080)
+    // Constantes Arquiteturais do Workspace (Dimensões Full HD do Studio)
     const WORKBENCH_W = 1920;
     const WORKBENCH_H = 1080; 
+    
+    // Regra de Ouro: Posição do Molde Imutável 1024x512 no centro da tela
     const OFFSET_X = 448;  // (1920 - 1024) / 2
     const OFFSET_Y = 284;  // (1080 - 512) / 2
 
-    // SISTEMA DE NOTIFICAÇÕES PREMIUM J.A.V.I.S.
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type === 'error' || type === 'warning' ? type : ''}`;
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        setTimeout(() => {
-            notification.style.animation = 'slideInRight 0.3s ease reverse';
-            setTimeout(() => notification.remove(), 300);
-        }, 3000);
-    }
+    // DOM Elements Cached
+    const DOM = {
+        loader: document.getElementById('ai-loader'),
+        scanner: document.getElementById('scanning-overlay'),
+        statusOverlay: document.getElementById('status-overlay'),
+        fileInput: document.getElementById('file-input'),
+        wsCanvas: document.getElementById('workspace-canvas'),
+        gridCanvas: document.getElementById('grid-canvas'),
+        canvasWrapper: document.getElementById('canvas-wrapper')
+    };
 
-    // APLICANDO EFEITO RIPPLE AOS BOTÕES DA FLOATING TOOLBAR
-    document.querySelectorAll('.toolbar-btn').forEach(btn => {
+    const wsCtx = DOM.wsCanvas.getContext('2d', { willReadFrequently: true });
+    const gCtx = DOM.gridCanvas.getContext('2d');
+    let offscreenCanvas = document.createElement('canvas');
+    let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
+
+    /* =================================================================================
+       UI MANAGER (Notificações, Modais e Rotação)
+       ================================================================================= */
+    const UIManager = {
+        showNotification: function(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'error' || type === 'warning' ? type : ''}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideInRight 0.3s ease reverse';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        },
+
+        showModal: function(modalId, title, message) {
+            const modal = document.getElementById(modalId);
+            if (!modal) return;
+            const titleEl = modal.querySelector('h3');
+            const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
+            if (titleEl && title) titleEl.innerText = title;
+            if (textEl && message) textEl.innerText = message;
+            modal.style.display = 'flex';
+        },
+
+        closeModal: function(modalId) { 
+            const modal = document.getElementById(modalId);
+            if (modal) modal.style.display = 'none'; 
+            if (DOM.scanner) DOM.scanner.style.display = 'none'; 
+        },
+
+        updateDiagnosticPanel: function() {
+            let elL1 = document.getElementById('status-l1');
+            let elL2 = document.getElementById('status-l2');
+            
+            if (STATE.finalImageL1) { elL1.innerText = "COMPILADA"; elL1.style.color = "#00ffaa"; }
+            else if (STATE.baseImageL1) { elL1.innerText = "BRUTA (Aguardando Edição)"; elL1.style.color = "#ffaa00"; }
+            else { elL1.innerText = "Ausente"; elL1.style.color = "#ff5555"; }
+
+            if (STATE.finalImageL2) { elL2.innerText = "COMPILADA"; elL2.style.color = "#00ffaa"; }
+            else if (STATE.baseImageL2) { elL2.innerText = "BRUTA (Aguardando Edição)"; elL2.style.color = "#ffaa00"; }
+            else { elL2.innerText = "Ausente"; elL2.style.color = "#ff5555"; }
+        },
+
+        switchMode: function(mode) {
+            STATE.currentMode = mode;
+            document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
+            document.getElementById('btn-model').classList.toggle('active', mode === 'model');
+            document.getElementById('btn-item').classList.toggle('active', mode === 'item');
+            
+            skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
+            gltfCanvas.style.display = (mode === 'model' || mode === 'item') ? 'block' : 'none';
+            
+            const isArmor = mode === 'armor';
+            document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
+            
+            document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
+            
+            document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
+            document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
+            document.getElementById('div-export').style.display = isArmor ? "block" : "none";
+            
+            if (DOM.statusOverlay) DOM.statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
+            
+            if (mode === 'item') {
+                scene.add(cajadoGroup);
+                if (currentModel) scene.remove(currentModel);
+            } else if (mode === 'model') {
+                scene.remove(cajadoGroup);
+                if (currentModel) scene.add(currentModel);
+            }
+
+            let btnRot = document.getElementById('btn-rotate');
+            if(STATE.currentMode === 'armor') {
+                btnRot.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            } else {
+                btnRot.innerHTML = STATE.autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+            }
+            resize();
+        },
+
+        toggleRotation: function() {
+            let btn = document.getElementById('btn-rotate');
+            if (STATE.currentMode === 'armor') {
+                skinViewer.controls.autoRotate = !skinViewer.controls.autoRotate;
+                btn.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+                btn.style.borderColor = skinViewer.controls.autoRotate ? "var(--calib-accent)" : "var(--sculk-core)";
+            } else {
+                STATE.autoRotateGltf = !STATE.autoRotateGltf;
+                btn.innerHTML = STATE.autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
+                btn.style.borderColor = STATE.autoRotateGltf ? "var(--calib-accent)" : "var(--sculk-core)";
+            }
+        },
+
+        takeScreenshot: function() {
+            if (STATE.currentMode === 'armor') {
+                skinViewer.renderer.render(skinViewer.scene, skinViewer.camera);
+                const dataUrl = skinCanvas.toDataURL('image/png');
+                downloadVisualFile(dataUrl, `vexanium_armor_snapshot_${new Date().getTime()}.png`);
+            } else {
+                renderer.render(scene, camera);
+                const dataUrl = gltfCanvas.toDataURL('image/png');
+                downloadVisualFile(dataUrl, `vexanium_${STATE.currentMode}_snapshot_${new Date().getTime()}.png`);
+            }
+            this.showNotification("📸 Diagnóstico visual capturado!");
+        }
+    };
+
+    // Inicializar efeito Ripple globalmente
+    document.querySelectorAll('.toolbar-btn, .zone-btn').forEach(btn => {
         btn.addEventListener('click', function(e) {
             const ripple = document.createElement('span');
             const rect = this.getBoundingClientRect();
@@ -448,115 +646,16 @@
         });
     });
 
-    function showModal(modalId, title, message) {
-        const modal = document.getElementById(modalId);
-        if (!modal) return;
-        const titleEl = modal.querySelector('h3');
-        const textEl = modal.querySelector('[id$="-text"]') || modal.querySelector('div:not(h3)');
-        if (titleEl && title) titleEl.innerText = title;
-        if (textEl && message) textEl.innerText = message;
-        modal.style.display = 'flex';
-    }
-
-    function closeModal(modalId) { 
-        const modal = document.getElementById(modalId);
-        if (modal) modal.style.display = 'none'; 
-        if (scanner) scanner.style.display = 'none'; 
-    }
-
-    function updateDiagnosticPanel() {
-        let elL1 = document.getElementById('status-l1');
-        let elL2 = document.getElementById('status-l2');
-        
-        if (finalImageL1) { elL1.innerText = "COMPILADA"; elL1.style.color = "#00ffaa"; }
-        else if (baseImageL1) { elL1.innerText = "BRUTA (Aguardando Edição)"; elL1.style.color = "#ffaa00"; }
-        else { elL1.innerText = "Ausente"; elL1.style.color = "#ff5555"; }
-
-        if (finalImageL2) { elL2.innerText = "COMPILADA"; elL2.style.color = "#00ffaa"; }
-        else if (baseImageL2) { elL2.innerText = "BRUTA (Aguardando Edição)"; elL2.style.color = "#ffaa00"; }
-        else { elL2.innerText = "Ausente"; elL2.style.color = "#ff5555"; }
-    }
-
-    function switchMode(mode) {
-        currentMode = mode;
-        document.getElementById('btn-armor').classList.toggle('active', mode === 'armor');
-        document.getElementById('btn-model').classList.toggle('active', mode === 'model');
-        document.getElementById('btn-item').classList.toggle('active', mode === 'item');
-        
-        skinCanvas.style.display = mode === 'armor' ? 'block' : 'none';
-        gltfCanvas.style.display = (mode === 'model' || mode === 'item') ? 'block' : 'none';
-        
-        const isArmor = mode === 'armor';
-        document.getElementById('btn-calib').style.opacity = isArmor ? "1" : "0.3";
-        
-        document.getElementById('btn-upload-l1').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-upload-l2').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-upload-3d').style.display = !isArmor ? "flex" : "none";
-        
-        document.getElementById('btn-save-l1').style.display = isArmor ? "flex" : "none";
-        document.getElementById('btn-save-l2').style.display = isArmor ? "flex" : "none";
-        document.getElementById('div-export').style.display = isArmor ? "block" : "none";
-        
-        if (statusOverlay) statusOverlay.innerText = `SISTEMAS: ${mode.toUpperCase()} // AGUARDANDO COMANDOS`;
-        
-        if (mode === 'item') {
-            scene.add(cajadoGroup);
-            if (currentModel) scene.remove(currentModel);
-        } else if (mode === 'model') {
-            scene.remove(cajadoGroup);
-            if (currentModel) scene.add(currentModel);
-        }
-
-        let btnRot = document.getElementById('btn-rotate');
-        if(currentMode === 'armor') {
-            btnRot.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
-        } else {
-            btnRot.innerHTML = autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
-        }
-        resize();
-    }
-
-    let autoRotateGltf = true;
-
-    function toggleRotation() {
-        let btn = document.getElementById('btn-rotate');
-        if (currentMode === 'armor') {
-            skinViewer.controls.autoRotate = !skinViewer.controls.autoRotate;
-            btn.innerHTML = skinViewer.controls.autoRotate ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
-            btn.style.borderColor = skinViewer.controls.autoRotate ? "var(--calib-accent)" : "var(--sculk-core)";
-        } else {
-            autoRotateGltf = !autoRotateGltf;
-            btn.innerHTML = autoRotateGltf ? '<span class="icon">⏸️</span>' : '<span class="icon">▶️</span>';
-            btn.style.borderColor = autoRotateGltf ? "var(--calib-accent)" : "var(--sculk-core)";
-        }
-    }
-
-    function takeScreenshot() {
-        if (currentMode === 'armor') {
-            skinViewer.renderer.render(skinViewer.scene, skinViewer.camera);
-            const dataUrl = skinCanvas.toDataURL('image/png');
-            downloadVisualFile(dataUrl, `vexanium_armor_snapshot_${new Date().getTime()}.png`);
-        } else {
-            renderer.render(scene, camera);
-            const dataUrl = gltfCanvas.toDataURL('image/png');
-            downloadVisualFile(dataUrl, `vexanium_${currentMode}_snapshot_${new Date().getTime()}.png`);
-        }
-        showNotification("📸 Diagnóstico visual capturado!");
-    }
-
     function downloadVisualFile(dataUrl, filename) {
-        const link = document.createElement('a');
-        link.href = dataUrl;
-        link.download = filename;
-        link.click();
+        const link = document.createElement('a'); link.href = dataUrl; link.download = filename; link.click();
     }
 
+    /* =================================================================================
+       THREE.JS & SKINVIEW 3D INITIALIZATION
+       ================================================================================= */
     const skinCanvas = document.getElementById('skinViewer');
     const skinViewer = new skinview3d.SkinViewer({
-        canvas: skinCanvas, 
-        width: skinCanvas.parentElement.clientWidth, 
-        height: skinCanvas.parentElement.clientHeight,
-        alpha: true 
+        canvas: skinCanvas, width: skinCanvas.parentElement.clientWidth, height: skinCanvas.parentElement.clientHeight, alpha: true 
     });
     skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
     skinViewer.controls.autoRotate = true; skinViewer.controls.autoRotateSpeed = 1.5;
@@ -575,763 +674,766 @@
     let currentModel = null;
 
     const cajadoGroup = new THREE.Group();
-    const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8);
-    const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 });
-    const bastao = new THREE.Mesh(bastaoGeo, bastaoMat);
-    cajadoGroup.add(bastao);
-
-    const cristalGeo = new THREE.OctahedronGeometry(0.4, 0);
-    const cristalMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0x6b21a8, metalness: 0.5, roughness: 0.1, transparent: true, opacity: 0.9 });
-    const cristal = new THREE.Mesh(cristalGeo, cristalMat);
-    cristal.position.y = 2.2;
-    cajadoGroup.add(cristal);
-
-    const anelGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 4);
-    const ouroMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 1, roughness: 0.2 });
-    const anel1 = new THREE.Mesh(anelGeo, ouroMat);
-    anel1.position.y = 1.9; anel1.rotation.x = Math.PI / 2;
-    cajadoGroup.add(anel1);
-    
+    const bastaoGeo = new THREE.CylinderGeometry(0.1, 0.08, 4, 8); const bastaoMat = new THREE.MeshStandardMaterial({ color: 0x3d2314, roughness: 0.8 }); const bastao = new THREE.Mesh(bastaoGeo, bastaoMat); cajadoGroup.add(bastao);
+    const cristalGeo = new THREE.OctahedronGeometry(0.4, 0); const cristalMat = new THREE.MeshStandardMaterial({ color: 0xa855f7, emissive: 0x6b21a8, metalness: 0.5, roughness: 0.1, transparent: true, opacity: 0.9 }); const cristal = new THREE.Mesh(cristalGeo, cristalMat); cristal.position.y = 2.2; cajadoGroup.add(cristal);
+    const anelGeo = new THREE.TorusGeometry(0.3, 0.05, 8, 4); const ouroMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 1, roughness: 0.2 }); const anel1 = new THREE.Mesh(anelGeo, ouroMat); anel1.position.y = 1.9; anel1.rotation.x = Math.PI / 2; cajadoGroup.add(anel1);
     cajadoGroup.position.set(0, -1, 0); 
 
     function animate() {
         requestAnimationFrame(animate);
-        if (currentMode === 'model' && currentModel && autoRotateGltf) {
+        if (STATE.currentMode === 'model' && currentModel && STATE.autoRotateGltf) {
             currentModel.rotation.y += 0.005;
-        } else if (currentMode === 'item') {
-            if (autoRotateGltf) cajadoGroup.rotation.y += 0.01;
-            cristal.rotation.y += 0.01;
-            cristal.position.y = 2.2 + Math.sin(Date.now() * 0.003) * 0.05;
+        } else if (STATE.currentMode === 'item') {
+            if (STATE.autoRotateGltf) cajadoGroup.rotation.y += 0.01;
+            cristal.rotation.y += 0.01; cristal.position.y = 2.2 + Math.sin(Date.now() * 0.003) * 0.05;
         }
         controls.update(); renderer.render(scene, camera);
     }
     animate();
 
-    const wsCanvas = document.getElementById('workspace-canvas');
-    const wsCtx = wsCanvas.getContext('2d', { willReadFrequently: true });
-    
-    const gridCanvas = document.getElementById('grid-canvas');
-    const gCtx = gridCanvas.getContext('2d');
-    
-    let offscreenCanvas = document.createElement('canvas');
-    let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
-
-    let currentTool = 'magic'; let isDragging = false; let startX = 0, startY = 0; let manualSelection = null; 
-    let isResizing = false; let resizeHandle = ''; let origP = {x:0, y:0, w:0, h:0};
-    let extractedPieces = []; let activePieceIndex = -1; let nextPieceId = 1; 
-
-    let currentZoom = 1.0;
-    const canvasWrapper = document.getElementById('canvas-wrapper');
-    let historyUndo = []; let historyRedo = [];
-
-    let lastEditingLayer = 1;
-    let layerStates = { 1: null, 2: null };
-
-    function salvarEstadoDaLayerAtual() {
-        let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
-        offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
-        let piecesCopy = extractedPieces.map(p => {
-            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
-        });
-        layerStates[lastEditingLayer] = { offscreen: offCopy, pieces: piecesCopy, nextId: nextPieceId, undo: historyUndo.slice(), redo: historyRedo.slice() };
+    function resize() {
+        const parent = skinCanvas.parentElement; if (!parent) return;
+        const w = parent.clientWidth; const h = parent.clientHeight;
+        skinViewer.width = w; skinViewer.height = h;
+        renderer.setSize(w, h); camera.aspect = w / h; camera.updateProjectionMatrix();
     }
+    window.addEventListener('resize', resize); setTimeout(resize, 200);
 
-    function carregarEstadoDaLayer(layer) {
-        let state = layerStates[layer];
-        if (!state) return false;
-        offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
-        offscreenCtx.drawImage(state.offscreen, 0, 0);
-        extractedPieces = state.pieces.map(p => {
-            return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
-        });
-        nextPieceId = state.nextId; historyUndo = state.undo.slice(); historyRedo = state.redo.slice();
-        activePieceIndex = -1; manualSelection = null;
-        return true;
-    }
+    /* =================================================================================
+       MEMORY MANAGER (Undo/Redo)
+       ================================================================================= */
+    const MemoryManager = {
+        salvarEstadoDaLayerAtual: function() {
+            let offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
+            offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            let piecesCopy = STATE.extractedPieces.map(p => {
+                return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+            });
+            STATE.layerStates[STATE.lastEditingLayer] = { offscreen: offCopy, pieces: piecesCopy, nextId: STATE.nextPieceId, undo: STATE.historyUndo.slice(), redo: STATE.historyRedo.slice() };
+        },
 
-    function iniciarStudioDoZero(targetBase) {
-        wsCanvas.width = WORKBENCH_W; wsCanvas.height = WORKBENCH_H; 
-        offscreenCanvas.width = WORKBENCH_W; offscreenCanvas.height = WORKBENCH_H;
-        offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+        carregarEstadoDaLayer: function(layer) {
+            let state = STATE.layerStates[layer];
+            if (!state) return false;
+            offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+            offscreenCtx.drawImage(state.offscreen, 0, 0);
+            STATE.extractedPieces = state.pieces.map(p => {
+                return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) };
+            });
+            STATE.nextPieceId = state.nextId; STATE.historyUndo = state.undo.slice(); STATE.historyRedo = state.redo.slice();
+            STATE.activePieceIndex = -1; STATE.manualSelection = null;
+            return true;
+        },
 
-        if(targetBase) {
-            originalImageObj.onload = () => {
-                let aspect = originalImageObj.width / originalImageObj.height;
-                if (Math.abs(aspect - 2.0) < 0.05) {
-                    offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
-                } else {
-                    let scale = Math.min(WORKBENCH_W / originalImageObj.width, WORKBENCH_H / originalImageObj.height);
-                    let nW = originalImageObj.width * scale; let nH = originalImageObj.height * scale;
-                    let nX = (WORKBENCH_W - nW) / 2; let nY = (WORKBENCH_H - nH) / 2;
-                    offscreenCtx.drawImage(originalImageObj, 0, 0, originalImageObj.width, originalImageObj.height, nX, nY, nW, nH);
-                }
-                extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
-                setTool('magic'); renderFatiador(); drawGridAndMold(); registrarEstadoMemoria(); updatePiecesList();
-            };
-            originalImageObj.src = targetBase;
-        } else {
-            extractedPieces = []; activePieceIndex = -1; manualSelection = null; historyUndo = []; historyRedo = []; nextPieceId = 1;
-            setTool('magic'); renderFatiador(); drawGridAndMold(); registrarEstadoMemoria(); updatePiecesList();
+        registrarEstadoMemoria: function() {
+            const offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
+            offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const piecesCopy = STATE.extractedPieces.map(p => {
+                const idata = new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height);
+                return { ...p, imgData: idata };
+            });
+            STATE.historyUndo.push({ offscreen: offCopy, pieces: piecesCopy, nextId: STATE.nextPieceId });
+            if(STATE.historyUndo.length > 20) STATE.historyUndo.shift(); STATE.historyRedo = []; StudioCanvas.updatePiecesList();
+        },
+
+        desfazerEstado: function() {
+            if (STATE.historyUndo.length <= 1) return; 
+            const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
+            currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const currPiecesCopy = STATE.extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.historyRedo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: STATE.nextPieceId });
+            STATE.historyUndo.pop();
+            const prevState = STATE.historyUndo[STATE.historyUndo.length - 1]; 
+            offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(prevState.offscreen, 0, 0);
+            STATE.extractedPieces = prevState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.nextPieceId = prevState.nextId; STATE.activePieceIndex = -1; STATE.manualSelection = null; StudioCanvas.renderFatiador(); StudioCanvas.updatePiecesList();
+            UIManager.showNotification("↩️ Ação desfeita");
+        },
+
+        refazerEstado: function() {
+            if (STATE.historyRedo.length === 0) return;
+            const nextState = STATE.historyRedo.pop();
+            const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
+            currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
+            const currPiecesCopy = STATE.extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.historyUndo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: STATE.nextPieceId });
+            offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(nextState.offscreen, 0, 0);
+            STATE.extractedPieces = nextState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
+            STATE.nextPieceId = nextState.nextId; STATE.activePieceIndex = -1; STATE.manualSelection = null; StudioCanvas.renderFatiador(); StudioCanvas.updatePiecesList();
+            UIManager.showNotification("↪️ Ação refeita");
         }
-    }
+    };
 
-    function registrarEstadoMemoria() {
-        const offCopy = document.createElement('canvas'); offCopy.width = WORKBENCH_W; offCopy.height = WORKBENCH_H;
-        offCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
-        const piecesCopy = extractedPieces.map(p => {
-            const idata = new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height);
-            return { ...p, imgData: idata };
-        });
-        historyUndo.push({ offscreen: offCopy, pieces: piecesCopy, nextId: nextPieceId });
-        if(historyUndo.length > 20) historyUndo.shift(); historyRedo = []; updatePiecesList();
-    }
+    /* =================================================================================
+       STUDIO CANVAS ENGINE (Grid, Rendering, Initialization, Matryoshka)
+       ================================================================================= */
+    const StudioCanvas = {
+        iniciarStudioDoZero: function(targetBase) {
+            DOM.wsCanvas.width = WORKBENCH_W; DOM.wsCanvas.height = WORKBENCH_H; 
+            offscreenCanvas.width = WORKBENCH_W; offscreenCanvas.height = WORKBENCH_H;
+            offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
 
-    function desfazerEstado() {
-        if (historyUndo.length <= 1) return; 
-        const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
-        currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
-        const currPiecesCopy = extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
-        historyRedo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
-        historyUndo.pop();
-        const prevState = historyUndo[historyUndo.length - 1]; 
-        offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(prevState.offscreen, 0, 0);
-        extractedPieces = prevState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
-        nextPieceId = prevState.nextId; activePieceIndex = -1; manualSelection = null; renderFatiador(); updatePiecesList();
-        showNotification("↩️ Ação desfeita");
-    }
-
-    function refazerEstado() {
-        if (historyRedo.length === 0) return;
-        const nextState = historyRedo.pop();
-        const currOffCopy = document.createElement('canvas'); currOffCopy.width = WORKBENCH_W; currOffCopy.height = WORKBENCH_H;
-        currOffCopy.getContext('2d', { willReadFrequently: true }).drawImage(offscreenCanvas, 0, 0);
-        const currPiecesCopy = extractedPieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
-        historyUndo.push({ offscreen: currOffCopy, pieces: currPiecesCopy, nextId: nextPieceId });
-        offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(nextState.offscreen, 0, 0);
-        extractedPieces = nextState.pieces.map(p => { return { ...p, imgData: new ImageData(new Uint8ClampedArray(p.imgData.data), p.imgData.width, p.imgData.height) }; });
-        nextPieceId = nextState.nextId; activePieceIndex = -1; manualSelection = null; renderFatiador(); updatePiecesList();
-        showNotification("↪️ Ação refeita");
-    }
-
-    function ajustarZoom(fator) {
-        if (fator === 1) currentZoom = 1.0;
-        else currentZoom = Math.max(0.3, Math.min(currentZoom * fator, 4.0)); 
-        const newW = WORKBENCH_W * currentZoom; const newH = WORKBENCH_H * currentZoom;
-        canvasWrapper.style.width = `${newW}px`; canvasWrapper.style.height = `${newH}px`;
-        canvasWrapper.style.minWidth = `${newW}px`; canvasWrapper.style.minHeight = `${newH}px`;
-        document.getElementById('zoom-label').innerText = `${Math.round(currentZoom * 100)}%`;
-    }
-
-    function abrirFatiadorLivre(forceReload = false) {
-        let targetBase = currentEditingLayer === 1 ? baseImageL1 : baseImageL2;
-        let badge = document.getElementById('slicer-layer-badge'); 
-        
-        if (currentEditingLayer === 1) {
-            if (badge) { badge.innerText = "L1 (C/P/B)"; badge.style.background = "var(--calib-accent)"; }
-        } else {
-            if (badge) { badge.innerText = "L2 (CALÇAS)"; badge.style.background = "#00ffaa"; }
-        }
-        
-        showModal('slicer-modal'); 
-        ajustarZoom(0.70); 
-        
-        if (!forceReload && currentEditingLayer === lastEditingLayer) {
-            renderFatiador(); drawGridAndMold(); updatePiecesList();
-            return;
-        }
-
-        if (currentEditingLayer !== lastEditingLayer) salvarEstadoDaLayerAtual();
-        lastEditingLayer = currentEditingLayer;
-
-        if (forceReload) {
-            iniciarStudioDoZero(targetBase);
-        } else {
-            if (carregarEstadoDaLayer(currentEditingLayer)) {
-                setTool('magic'); renderFatiador(); drawGridAndMold(); updatePiecesList();
+            if(targetBase) {
+                STATE.originalImageObj.onload = () => {
+                    let aspect = STATE.originalImageObj.width / STATE.originalImageObj.height;
+                    // Encaixa na zona central de exportação Mestre 1024x512
+                    if (Math.abs(aspect - 2.0) < 0.05) {
+                        offscreenCtx.drawImage(STATE.originalImageObj, 0, 0, STATE.originalImageObj.width, STATE.originalImageObj.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                    } else {
+                        let scale = Math.min(WORKBENCH_W / STATE.originalImageObj.width, WORKBENCH_H / STATE.originalImageObj.height);
+                        let nW = STATE.originalImageObj.width * scale; let nH = STATE.originalImageObj.height * scale;
+                        let nX = (WORKBENCH_W - nW) / 2; let nY = (WORKBENCH_H - nH) / 2;
+                        offscreenCtx.drawImage(STATE.originalImageObj, 0, 0, STATE.originalImageObj.width, STATE.originalImageObj.height, nX, nY, nW, nH);
+                    }
+                    STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.historyUndo = []; STATE.historyRedo = []; STATE.nextPieceId = 1;
+                    ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); this.updatePiecesList();
+                };
+                STATE.originalImageObj.src = targetBase;
             } else {
-                iniciarStudioDoZero(targetBase);
+                STATE.extractedPieces = []; STATE.activePieceIndex = -1; STATE.manualSelection = null; STATE.historyUndo = []; STATE.historyRedo = []; STATE.nextPieceId = 1;
+                ToolManager.setTool('magic'); this.renderFatiador(); this.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); this.updatePiecesList();
             }
-        }
-    }
+        },
 
-    function setTool(tool) {
-        currentTool = tool;
-        
-        document.getElementById('tool-btn-move').classList.remove('active');
-        document.getElementById('tool-btn-magic').classList.remove('active');
-        document.getElementById('tool-btn-slice').classList.remove('active');
+        ajustarZoom: function(fator) {
+            if (fator === 1.0) {
+                STATE.currentZoom = 1.0;
+            } else if (fator === 'in') {
+                STATE.currentZoom = Math.min(STATE.currentZoom + 0.2, 4.0);
+            } else if (fator === 'out') {
+                STATE.currentZoom = Math.max(0.4, STATE.currentZoom - 0.2);
+            } else {
+                STATE.currentZoom = fator;
+            }
+            
+            const newW = WORKBENCH_W * STATE.currentZoom; const newH = WORKBENCH_H * STATE.currentZoom;
+            DOM.canvasWrapper.style.width = `${newW}px`; DOM.canvasWrapper.style.height = `${newH}px`;
+            DOM.canvasWrapper.style.minWidth = `${newW}px`; DOM.canvasWrapper.style.minHeight = `${newH}px`;
+            document.getElementById('zoom-label').innerText = `${Math.round(STATE.currentZoom * 100)}%`;
+            
+            // Tenta centrar o scroll se for muito grande
+            const scrollArea = document.getElementById('workspace-scroll-area');
+            scrollArea.scrollLeft = (newW - scrollArea.clientWidth) / 2;
+            scrollArea.scrollTop = (newH - scrollArea.clientHeight) / 2;
+        },
 
-        if(tool === 'move') document.getElementById('tool-btn-move').classList.add('active');
-        if(tool === 'magic') document.getElementById('tool-btn-magic').classList.add('active');
-        if(tool === 'slice') document.getElementById('tool-btn-slice').classList.add('active');
-        
-        if(tool === 'magic' || tool === 'slice') {
-            wsCanvas.style.cursor = 'crosshair';
-        } else {
-            wsCanvas.style.cursor = 'grab';
-        }
-    }
+        switchZone: function(zoneIndex) {
+            STATE.currentMatryoshkaZone = zoneIndex;
+            const config = STATE.matryoshkaZones[zoneIndex];
 
-    function removerFundoBranco() {
-        const w = offscreenCanvas.width; const h = offscreenCanvas.height;
-        const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
-        const bgR = data[0]; const bgG = data[1]; const bgB = data[2]; const bgA = data[3];
-        if (bgA < 10) { showNotification("O fundo já parece ser transparente.", "warning"); return; }
-        const tolerance = 30; 
-        for (let i = 0; i < data.length; i += 4) {
-            const r = data[i]; const g = data[i+1]; const b = data[i+2];
-            if ((Math.abs(r - bgR) <= tolerance && Math.abs(g - bgG) <= tolerance && Math.abs(b - bgB) <= tolerance) ||
-                (r > 230 && g > 230 && b > 230)) { data[i+3] = 0; }
-        }
-        offscreenCtx.putImageData(imgData, 0, 0); renderFatiador(); registrarEstadoMemoria(); 
-        showNotification("✨ Fundo transparente inteligente aplicado!");
-    }
+            // Atualiza Botões UI
+            document.querySelectorAll('.zone-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (parseInt(btn.dataset.zone) === zoneIndex) {
+                    btn.classList.add('active');
+                }
+            });
 
-    function duplicarPecaAtiva() {
-        if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
-            const p = extractedPieces[activePieceIndex];
-            extractedPieces.push({ id: nextPieceId++, imgData: p.imgData, ox: undefined, oy: undefined, x: p.x + 20, y: p.y + 20, w: p.w, h: p.h });
-            activePieceIndex = extractedPieces.length - 1; setTool('move'); renderFatiador(); registrarEstadoMemoria(); 
-            showNotification("🖨️ Peça duplicada");
-        }
-    }
+            // Aplica Zoom Específico da Zona para focar o trabalho
+            this.ajustarZoom(config.zoom);
+            this.drawGridAndMold();
+            UIManager.showNotification(`🎯 Zona ${zoneIndex} ativada: Foco no mapeamento ${config.w}x${config.h}`);
+        },
 
-    function apagarPecaAtiva() {
-        if (activePieceIndex >= 0 && activePieceIndex < extractedPieces.length) {
-            const p = extractedPieces[activePieceIndex];
-            if (p.ox !== undefined && p.oy !== undefined) offscreenCtx.putImageData(p.imgData, p.ox, p.oy);
-            extractedPieces.splice(activePieceIndex, 1); activePieceIndex = -1; renderFatiador(); registrarEstadoMemoria(); 
-            showNotification("🗑️ Peça restaurada/apagada", "warning");
-        }
-    }
+        drawGridAndMold: function() {
+            gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
 
-    function confirmarCorteManual() {
-        if (!manualSelection || manualSelection.w <= 2 || manualSelection.h <= 2) {
-            showNotification("Operador, desenhe a caixa de seleção na imagem antes de clicar em Recortar.", "warning"); return;
-        }
-        let rx = Math.max(0, Math.floor(manualSelection.x)); let ry = Math.max(0, Math.floor(manualSelection.y));
-        let rw = Math.floor(manualSelection.w); let rh = Math.floor(manualSelection.h);
-        if (rx + rw > offscreenCanvas.width) rw = offscreenCanvas.width - rx;
-        if (ry + rh > offscreenCanvas.height) rh = offscreenCanvas.height - ry;
-        if (rw <= 0 || rh <= 0) return;
+            // Grade de 1px nativa
+            if (document.getElementById('show-grid-1x1').checked) {
+                gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; gCtx.lineWidth = 1; gCtx.beginPath();
+                for (let x = 0; x <= 1024; x += 1) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
+                for (let y = 0; y <= 512; y += 1) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
+                gCtx.stroke();
+            }
 
-        let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
-        let hasPixels = false;
-        for (let i = 3; i < imgD.data.length; i += 4) { if (imgD.data[i] > 10) { hasPixels = true; break; } }
-        if (!hasPixels) { showNotification("A área selecionada está vazia.", "error"); manualSelection = null; renderFatiador(); return; }
+            // Grade 16x16 Minecraft
+            if (document.getElementById('show-grid-16x16').checked) {
+                gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; gCtx.lineWidth = 1; gCtx.beginPath();
+                for (let x = 0; x <= 1024; x += 16) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
+                for (let y = 0; y <= 512; y += 16) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
+                gCtx.stroke();
+            }
 
-        offscreenCtx.clearRect(rx, ry, rw, rh);
-        extractedPieces.push({ id: nextPieceId++, imgData: imgD, ox: rx, oy: ry, x: rx, y: ry, w: rw, h: rh });
-        manualSelection = null; activePieceIndex = extractedPieces.length - 1; setTool('move'); renderFatiador(); registrarEstadoMemoria(); 
-        showNotification("✂️ Corte manual extraído com sucesso!");
-    }
+            // Fronteira Mestre de Exportação (A Regra de Ouro)
+            if (document.getElementById('show-export-zone').checked) {
+                gCtx.strokeStyle = "#ffaa00"; gCtx.lineWidth = 2; gCtx.setLineDash([12, 8]); gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); gCtx.setLineDash([]);
+                gCtx.fillStyle = "#ffaa00"; gCtx.font = "bold 16px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
+                gCtx.fillText("ZONA DE EXPORTAÇÃO MINECRAFT (1024x512)", OFFSET_X, OFFSET_Y - 5);
+            }
 
-    // DESENHO DAS ZONAS MATRYOSHKA E MOLDE DE ARMADURA
-    function drawGridAndMold() {
-        gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+            const f = 16; 
+            const drawBox = (x, y, w, h, label) => {
+                let px = OFFSET_X + (x * f); let py = OFFSET_Y + (y * f); let pw = w * f; let ph = h * f;
+                
+                gCtx.strokeStyle = "#b0279c"; gCtx.lineWidth = 2; gCtx.setLineDash([6, 4]); gCtx.strokeRect(px, py, pw, ph); gCtx.setLineDash([]);
+                gCtx.fillStyle = "rgba(176, 39, 156, 0.1)"; gCtx.fillRect(px, py, pw, ph);
+                gCtx.font = "bold 10px 'JetBrains Mono', monospace"; 
+                let txtW = gCtx.measureText(label).width + 8;
+                gCtx.fillStyle = "rgba(0,0,0,0.6)"; gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - 7, txtW, 14);
+                gCtx.fillStyle = "#ffaa00"; gCtx.textAlign = "center"; gCtx.textBaseline = "middle"; gCtx.fillText(label, px + pw/2, py + ph/2); 
+            };
 
-        // Grid 1x1
-        if (document.getElementById('show-grid-1x1') && document.getElementById('show-grid-1x1').checked) {
-            gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)";
-            gCtx.lineWidth = 1;
-            gCtx.beginPath();
-            for (let x = 0; x <= 1024; x += 1) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
-            for (let y = 0; y <= 512; y += 1) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
-            gCtx.stroke();
-        }
+            if (STATE.currentEditingLayer === 1) {
+                if (document.getElementById('uv-helmet') && document.getElementById('uv-helmet').checked) {
+                    drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
+                    drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
+                    drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
+                }
+                if (document.getElementById('uv-chest') && document.getElementById('uv-chest').checked) {
+                    drawBox(20, 16, 8, 4, "PEITO TOPO"); drawBox(28, 16, 8, 4, "PEITO BASE");
+                    drawBox(16, 20, 4, 12, "PEITO DIR"); drawBox(20, 20, 8, 12, "PEITO FRE");
+                    drawBox(28, 20, 4, 12, "PEITO ESQ"); drawBox(32, 20, 8, 12, "PEITO COS");
+                }
+                if (document.getElementById('uv-arms') && document.getElementById('uv-arms').checked) {
+                    drawBox(44, 16, 4, 4, "BR.D TOP"); drawBox(48, 16, 4, 4, "BR.D BAS");
+                    drawBox(40, 20, 4, 12, "BR.D DIR"); drawBox(44, 20, 4, 12, "BR.D FRE");
+                    drawBox(48, 20, 4, 12, "BR.D ESQ"); drawBox(52, 20, 4, 12, "BR.D COS");
 
-        // Grid 16x16
-        if (document.getElementById('show-grid-16x16') && document.getElementById('show-grid-16x16').checked) {
-            gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-            gCtx.lineWidth = 1;
-            gCtx.beginPath();
-            for (let x = 0; x <= 1024; x += 16) { gCtx.moveTo(OFFSET_X + x, OFFSET_Y); gCtx.lineTo(OFFSET_X + x, OFFSET_Y + 512); }
-            for (let y = 0; y <= 512; y += 16) { gCtx.moveTo(OFFSET_X, OFFSET_Y + y); gCtx.lineTo(OFFSET_X + 1024, OFFSET_Y + y); }
-            gCtx.stroke();
-        }
+                    drawBox(36, 48, 4, 4, "BR.E TOP"); drawBox(40, 48, 4, 4, "BR.E BAS");
+                    drawBox(32, 52, 4, 12, "BR.E DIR"); drawBox(36, 52, 4, 12, "BR.E FRE");
+                    drawBox(40, 52, 4, 12, "BR.E ESQ"); drawBox(44, 52, 4, 12, "BR.E COS");
+                }
+                if (document.getElementById('uv-boots') && document.getElementById('uv-boots').checked) {
+                    drawBox(4, 16, 4, 4, "BOT.D TOP"); drawBox(8, 16, 4, 4, "BOT.D BAS");
+                    drawBox(0, 20, 4, 12, "BOT.D DIR"); drawBox(4, 20, 4, 12, "BOT.D FRE");
+                    drawBox(8, 20, 4, 12, "BOT.D ESQ"); drawBox(12, 20, 4, 12, "BOT.D COS");
 
-        const cx = WORKBENCH_W / 2;
-        const cy = WORKBENCH_H / 2;
+                    drawBox(20, 48, 4, 4, "BOT.E TOP"); drawBox(24, 48, 4, 4, "BOT.E BAS");
+                    drawBox(16, 52, 4, 12, "BOT.E DIR"); drawBox(20, 52, 4, 12, "BOT.E FRE");
+                    drawBox(24, 52, 4, 12, "BOT.E ESQ"); drawBox(28, 52, 4, 12, "BOT.E COS");
+                }
+            } else if (STATE.currentEditingLayer === 2) {
+                if (document.getElementById('uv-waist') && document.getElementById('uv-waist').checked) {
+                    drawBox(20, 16, 8, 4, "CINT. TOPO"); drawBox(28, 16, 8, 4, "CINT. BASE");
+                    drawBox(16, 20, 4, 12, "CINT. DIR"); drawBox(20, 20, 8, 12, "CINT. FRE");
+                    drawBox(28, 20, 4, 12, "CINT. ESQ"); drawBox(32, 20, 8, 12, "CINT. COS");
+                }
+                if (document.getElementById('uv-legs') && document.getElementById('uv-legs').checked) {
+                    drawBox(4, 16, 4, 4, "PER.D TOP"); drawBox(8, 16, 4, 4, "PER.D BAS");
+                    drawBox(0, 20, 4, 12, "PER.D DIR"); drawBox(4, 20, 4, 12, "PER.D FRE");
+                    drawBox(8, 20, 4, 12, "PER.D ESQ"); drawBox(12, 20, 4, 12, "PER.D COS");
 
-        const zones = [
-            { id: 'show-zone-1024', w: 1024, h: 512, scale: 1, color: '#000000', label: '1024x512 Mestre' },
-            { id: 'show-zone-512', w: 512, h: 256, scale: 0.5, color: '#ffff00', label: '512x256' },
-            { id: 'show-zone-256', w: 256, h: 128, scale: 0.25, color: '#00ff00', label: '256x128' },
-            { id: 'show-zone-128', w: 128, h: 64, scale: 0.125, color: '#ff0000', label: '128x64' }
-        ];
-
-        const showArmor = document.getElementById('show-armor-layout') && document.getElementById('show-armor-layout').checked;
-
-        zones.forEach(zone => {
-            const cb = document.getElementById(zone.id);
-            if (cb && cb.checked) {
-                const zx = cx - zone.w / 2;
-                const zy = cy - zone.h / 2;
-
-                // Border
-                gCtx.strokeStyle = zone.color;
-                gCtx.lineWidth = zone.scale === 1 ? 4 : 2;
-                gCtx.setLineDash(zone.scale === 1 ? [] : [5, 5]);
-                gCtx.strokeRect(zx, zy, zone.w, zone.h);
-                gCtx.setLineDash([]);
-
-                // Label
-                gCtx.fillStyle = zone.color;
-                gCtx.font = "bold 14px 'JetBrains Mono', monospace";
-                gCtx.textAlign = "center";
-                gCtx.textBaseline = "bottom";
-                gCtx.fillText(zone.label, cx, zy - 5);
-
-                // Armor Layout
-                if (showArmor) {
-                    drawArmorLayout(zx, zy, zone.scale);
+                    drawBox(20, 48, 4, 4, "PER.E TOP"); drawBox(24, 48, 4, 4, "PER.E BAS");
+                    drawBox(16, 52, 4, 12, "PER.E DIR"); drawBox(20, 52, 4, 12, "PER.E FRE");
+                    drawBox(24, 52, 4, 12, "PER.E ESQ"); drawBox(28, 52, 4, 12, "PER.E COS");
                 }
             }
-        });
-    }
 
-    function drawArmorLayout(offsetX, offsetY, scale) {
-        const f = 16 * scale; 
-        
-        const drawBox = (x, y, w, h, label) => {
-            let px = offsetX + (x * f); 
-            let py = offsetY + (y * f); 
-            let pw = w * f; 
-            let ph = h * f;
-            
-            gCtx.strokeStyle = "rgba(176, 39, 156, 0.8)"; 
-            gCtx.lineWidth = 1;
-            gCtx.setLineDash([4, 2]); 
-            gCtx.strokeRect(px, py, pw, ph);
-            gCtx.setLineDash([]);
-            
-            gCtx.fillStyle = "rgba(0, 229, 255, 0.2)"; 
-            gCtx.fillRect(px, py, pw, ph);
-            
-            if (scale >= 0.5) {
-                gCtx.font = `bold ${8 * scale}px 'JetBrains Mono', monospace`; 
-                let txtW = gCtx.measureText(label).width + 4;
-                gCtx.fillStyle = "rgba(0,0,0,0.6)"; 
-                gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - (6 * scale), txtW, 12 * scale);
-
-                gCtx.fillStyle = "#00e5ff"; 
-                gCtx.textAlign = "center"; 
-                gCtx.textBaseline = "middle";
-                gCtx.fillText(label, px + pw/2, py + ph/2); 
+            // Destaca a Zona Matryoshka Atual se aplicável
+            const activeZone = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            if (activeZone) {
+                let cx = OFFSET_X + (1024 - activeZone.w) / 2;
+                let cy = OFFSET_Y + (512 - activeZone.h) / 2;
+                
+                gCtx.strokeStyle = "#00e5ff"; gCtx.lineWidth = 2; gCtx.setLineDash([4, 4]); gCtx.strokeRect(cx, cy, activeZone.w, activeZone.h); gCtx.setLineDash([]);
+                gCtx.fillStyle = "#00e5ff"; gCtx.font = "bold 10px 'JetBrains Mono', monospace"; gCtx.textAlign = "left"; gCtx.textBaseline = "bottom";
+                gCtx.fillText(`Z${STATE.currentMatryoshkaZone} (${activeZone.w}x${activeZone.h})`, cx + 2, cy + activeZone.h - 2);
             }
-        };
+        },
 
-        if (currentEditingLayer === 1) {
-            // Helmet
-            drawBox(8, 0, 8, 8, "CAP.TOPO"); drawBox(16, 0, 8, 8, "CAP.FUNDO");
-            drawBox(0, 8, 8, 8, "CAP.DIR"); drawBox(8, 8, 8, 8, "CAP.FRENTE");
-            drawBox(16, 8, 8, 8, "CAP.ESQ"); drawBox(24, 8, 8, 8, "CAP.COSTAS");
-
-            // Chest
-            drawBox(20, 16, 8, 4, "PEI.TOP"); drawBox(28, 16, 8, 4, "PEI.BAS");
-            drawBox(16, 20, 4, 12, "PEI.DIR"); drawBox(20, 20, 8, 12, "PEI.FRE");
-            drawBox(28, 20, 4, 12, "PEI.ESQ"); drawBox(32, 20, 8, 12, "PEI.COS");
-
-            // Right Arm
-            drawBox(44, 16, 4, 4, "BR.D.TOP"); drawBox(48, 16, 4, 4, "BR.D.BAS");
-            drawBox(40, 20, 4, 12, "BR.D.DIR"); drawBox(44, 20, 4, 12, "BR.D.FRE");
-            drawBox(48, 20, 4, 12, "BR.D.ESQ"); drawBox(52, 20, 4, 12, "BR.D.COS");
-
-            // Left Arm
-            drawBox(36, 48, 4, 4, "BR.E.TOP"); drawBox(40, 48, 4, 4, "BR.E.BAS");
-            drawBox(32, 52, 4, 12, "BR.E.DIR"); drawBox(36, 52, 4, 12, "BR.E.FRE");
-            drawBox(40, 52, 4, 12, "BR.E.ESQ"); drawBox(44, 52, 4, 12, "BR.E.COS");
-
-            // Right Boot
-            drawBox(4, 16, 4, 4, "BOT.D.TOP"); drawBox(8, 16, 4, 4, "BOT.D.BAS");
-            drawBox(0, 20, 4, 12, "BOT.D.DIR"); drawBox(4, 20, 4, 12, "BOT.D.FRE");
-            drawBox(8, 20, 4, 12, "BOT.D.ESQ"); drawBox(12, 20, 4, 12, "BOT.D.COS");
-
-            // Left Boot
-            drawBox(20, 48, 4, 4, "BOT.E.TOP"); drawBox(24, 48, 4, 4, "BOT.E.BAS");
-            drawBox(16, 52, 4, 12, "BOT.E.DIR"); drawBox(20, 52, 4, 12, "BOT.E.FRE");
-            drawBox(24, 52, 4, 12, "BOT.E.ESQ"); drawBox(28, 52, 4, 12, "BOT.E.COS");
-        } else {
-            // Waist (Pants Top)
-            drawBox(20, 16, 8, 4, "CINT.TOP"); drawBox(28, 16, 8, 4, "CINT.BAS");
-            drawBox(16, 20, 4, 12, "CINT.DIR"); drawBox(20, 20, 8, 12, "CINT.FRE");
-            drawBox(28, 20, 4, 12, "CINT.ESQ"); drawBox(32, 20, 8, 12, "CINT.COS");
-
-            // Right Leg
-            drawBox(4, 16, 4, 4, "PER.D.TOP"); drawBox(8, 16, 4, 4, "PER.D.BAS");
-            drawBox(0, 20, 4, 12, "PER.D.DIR"); drawBox(4, 20, 4, 12, "PER.D.FRE");
-            drawBox(8, 20, 4, 12, "PER.D.ESQ"); drawBox(12, 20, 4, 12, "PER.D.COS");
-
-            // Left Leg
-            drawBox(20, 48, 4, 4, "PER.E.TOP"); drawBox(24, 48, 4, 4, "PER.E.BAS");
-            drawBox(16, 52, 4, 12, "PER.E.DIR"); drawBox(20, 52, 4, 12, "PER.E.FRE");
-            drawBox(24, 52, 4, 12, "PER.E.ESQ"); drawBox(28, 52, 4, 12, "PER.E.COS");
-        }
-    }
-
-    function renderFatiador() {
-        wsCtx.clearRect(0, 0, wsCanvas.width, wsCanvas.height);
-        wsCtx.drawImage(offscreenCanvas, 0, 0); 
-        
-        extractedPieces.forEach((p, i) => {
-            let tempC = document.createElement('canvas'); tempC.width = p.imgData.width; tempC.height = p.imgData.height; tempC.getContext('2d').putImageData(p.imgData, 0, 0);
-            wsCtx.imageSmoothingEnabled = false; wsCtx.drawImage(tempC, p.x, p.y, p.w, p.h);
-            if (i === activePieceIndex) {
-                wsCtx.strokeStyle = "#2196F3"; wsCtx.lineWidth = 1.5; wsCtx.setLineDash([]); wsCtx.strokeRect(p.x, p.y, p.w, p.h);
-                const drawHandle = (hx, hy) => { wsCtx.beginPath(); wsCtx.arc(hx, hy, 4, 0, Math.PI * 2); wsCtx.fillStyle = "#ffffff"; wsCtx.fill(); wsCtx.lineWidth = 1.5; wsCtx.strokeStyle = "#2196F3"; wsCtx.stroke(); };
-                drawHandle(p.x, p.y); drawHandle(p.x + p.w, p.y); drawHandle(p.x, p.y + p.h); drawHandle(p.x + p.w, p.y + p.h);     
+        renderFatiador: function() {
+            wsCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
+            wsCtx.drawImage(offscreenCanvas, 0, 0); 
+            
+            STATE.extractedPieces.forEach((p, i) => {
+                let tempC = document.createElement('canvas'); tempC.width = p.imgData.width; tempC.height = p.imgData.height; tempC.getContext('2d').putImageData(p.imgData, 0, 0);
+                wsCtx.imageSmoothingEnabled = false; wsCtx.drawImage(tempC, p.x, p.y, p.w, p.h);
+                if (i === STATE.activePieceIndex) {
+                    wsCtx.strokeStyle = "#2196F3"; wsCtx.lineWidth = 1.5; wsCtx.setLineDash([]); wsCtx.strokeRect(p.x, p.y, p.w, p.h);
+                    const drawHandle = (hx, hy) => { wsCtx.beginPath(); wsCtx.arc(hx, hy, 4, 0, Math.PI * 2); wsCtx.fillStyle = "#ffffff"; wsCtx.fill(); wsCtx.lineWidth = 1.5; wsCtx.strokeStyle = "#2196F3"; wsCtx.stroke(); };
+                    drawHandle(p.x, p.y); drawHandle(p.x + p.w, p.y); drawHandle(p.x, p.y + p.h); drawHandle(p.x + p.w, p.y + p.h);     
+                }
+            });
+            if (STATE.currentTool === 'slice' && STATE.manualSelection && STATE.manualSelection.w > 0) {
+                wsCtx.strokeStyle = "var(--ai-accent)"; wsCtx.lineWidth = 2; wsCtx.setLineDash([5, 5]); wsCtx.strokeRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h); wsCtx.setLineDash([]); wsCtx.fillStyle = "rgba(255, 0, 255, 0.15)"; wsCtx.fillRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h);
             }
-        });
-        if (currentTool === 'slice' && manualSelection && manualSelection.w > 0) {
-            wsCtx.strokeStyle = "var(--ai-accent)"; wsCtx.lineWidth = 2; wsCtx.setLineDash([5, 5]); wsCtx.strokeRect(manualSelection.x, manualSelection.y, manualSelection.w, manualSelection.h); wsCtx.setLineDash([]); wsCtx.fillStyle = "rgba(255, 0, 255, 0.15)"; wsCtx.fillRect(manualSelection.x, manualSelection.y, manualSelection.w, manualSelection.h);
-        }
-    }
+        },
 
-    function selecaoMagica(sx, sy) {
-        const w = offscreenCanvas.width; const h = offscreenCanvas.height; const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
-        const startAlpha = data[(sy * w + sx) * 4 + 3]; if (startAlpha === 0) return null; 
-        const visited = new Uint8Array(w * h); const queueX = new Int32Array(w * h); const queueY = new Int32Array(w * h);
-        let head = 0, tail = 0; queueX[tail] = sx; queueY[tail] = sy; tail++; visited[sy * w + sx] = 1;
-        let minX = sx, maxX = sx, minY = sy, maxY = sy;
-        while (head < tail) {
-            const cx = queueX[head]; const cy = queueY[head]; head++;
-            if (cx < minX) minX = cx; if (cx > maxX) maxX = cx; if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    if (dx === 0 && dy === 0) continue; const nx = cx + dx; const ny = cy + dy;
-                    if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
-                        const idx = ny * w + nx;
-                        if (visited[idx] === 0) { visited[idx] = 1; if (data[idx * 4 + 3] > 30) { queueX[tail] = nx; queueY[tail] = ny; tail++; } }
+        updatePiecesList: function() {
+            const list = document.getElementById('pieces-list'); list.innerHTML = '';
+            STATE.extractedPieces.forEach((p, i) => {
+                const itemDiv = document.createElement('div'); itemDiv.className = 'piece-item' + (i === STATE.activePieceIndex ? ' selected' : '');
+                const previewDiv = document.createElement('div'); previewDiv.className = 'piece-preview';
+                previewDiv.onclick = () => { STATE.activePieceIndex = i; this.renderFatiador(); this.updatePiecesList(); };
+                const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height;
+                tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+                const img = document.createElement('img'); img.src = tempCanvas.toDataURL('image/png'); previewDiv.appendChild(img);
+                
+                const infoDiv = document.createElement('div'); infoDiv.className = 'piece-info'; infoDiv.innerHTML = `<span>Peça #${p.id}</span><span>${p.w}x${p.h}</span>`;
+                const actionsDiv = document.createElement('div'); actionsDiv.className = 'piece-actions';
+                
+                const dlBtn = document.createElement('button'); dlBtn.className = 'piece-btn'; dlBtn.textContent = '📥'; dlBtn.onclick = () => ExportManager.downloadPiece(p);
+                const delBtn = document.createElement('button'); delBtn.className = 'piece-btn delete'; delBtn.textContent = '🗑️'; 
+                delBtn.onclick = () => { STATE.activePieceIndex = i; ToolManager.apagarPecaAtiva(); };
+                
+                actionsDiv.appendChild(dlBtn); actionsDiv.appendChild(delBtn);
+                itemDiv.appendChild(previewDiv); itemDiv.appendChild(infoDiv); itemDiv.appendChild(actionsDiv); list.appendChild(itemDiv);
+            });
+        },
+
+        abrirEstudio: function() {
+            this.abrirFatiadorLivre(false);
+        }
+    };
+
+    /* =================================================================================
+       TOOL MANAGER (Brush, Move, Magic Wand, Slice, Eyedropper)
+       ================================================================================= */
+    const ToolManager = {
+        setColor: function(hex) {
+            STATE.currentPaintColor = hex;
+            document.getElementById('color-picker').value = hex;
+            this.setTool('brush');
+        },
+
+        rgbToHex: function(r, g, b) {
+            return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).padStart(6, '0');
+        },
+
+        aplicarPincelada: function(pos) {
+            let size = parseInt(document.getElementById('brush-size').value) || 2;
+            let px = Math.floor(pos.x); let py = Math.floor(pos.y);
+            offscreenCtx.fillStyle = STATE.currentPaintColor;
+            offscreenCtx.fillRect(px - Math.floor(size/2), py - Math.floor(size/2), size, size);
+            StudioCanvas.renderFatiador();
+        },
+
+        aplicarContaGotas: function(pos) {
+            let px = Math.floor(pos.x); let py = Math.floor(pos.y);
+            let pixel = wsCtx.getImageData(px, py, 1, 1).data;
+            if (pixel[3] > 0) { this.setColor(this.rgbToHex(pixel[0], pixel[1], pixel[2])); }
+        },
+
+        setTool: function(tool) {
+            STATE.currentTool = tool;
+            ['move', 'magic', 'slice', 'brush', 'eyedropper'].forEach(t => {
+                document.getElementById('tool-btn-' + t).classList.remove('active');
+            });
+            document.getElementById('tool-btn-' + tool).classList.add('active');
+            DOM.wsCanvas.style.cursor = (tool === 'brush' || tool === 'eyedropper' || tool === 'magic' || tool === 'slice') ? 'crosshair' : 'grab';
+        },
+
+        removerFundoBranco: function() {
+            const w = offscreenCanvas.width; const h = offscreenCanvas.height;
+            const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
+            const bgR = data[0]; const bgG = data[1]; const bgB = data[2]; const bgA = data[3];
+            if (bgA < 10) { UIManager.showNotification("O fundo já parece ser transparente.", "warning"); return; }
+            const tolerance = 30; 
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i]; const g = data[i+1]; const b = data[i+2];
+                if ((Math.abs(r - bgR) <= tolerance && Math.abs(g - bgG) <= tolerance && Math.abs(b - bgB) <= tolerance) || (r > 230 && g > 230 && b > 230)) { data[i+3] = 0; }
+            }
+            offscreenCtx.putImageData(imgData, 0, 0); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            UIManager.showNotification("✨ Fundo transparente inteligente aplicado!");
+        },
+
+        duplicarPecaAtiva: function() {
+            if (STATE.activePieceIndex >= 0 && STATE.activePieceIndex < STATE.extractedPieces.length) {
+                const p = STATE.extractedPieces[STATE.activePieceIndex];
+                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: p.imgData, ox: undefined, oy: undefined, x: p.x + 20, y: p.y + 20, w: p.w, h: p.h });
+                STATE.activePieceIndex = STATE.extractedPieces.length - 1; this.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("🖨️ Peça duplicada");
+            }
+        },
+
+        apagarPecaAtiva: function() {
+            if (STATE.activePieceIndex >= 0 && STATE.activePieceIndex < STATE.extractedPieces.length) {
+                const p = STATE.extractedPieces[STATE.activePieceIndex];
+                if (p.ox !== undefined && p.oy !== undefined) offscreenCtx.putImageData(p.imgData, p.ox, p.oy);
+                STATE.extractedPieces.splice(STATE.activePieceIndex, 1); STATE.activePieceIndex = -1; StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("🗑️ Peça restaurada/apagada", "warning");
+            }
+        },
+
+        confirmarCorteManual: function() {
+            if (!STATE.manualSelection || STATE.manualSelection.w <= 2 || STATE.manualSelection.h <= 2) {
+                UIManager.showNotification("Operador, desenhe a caixa de seleção na imagem antes de clicar em Recortar.", "warning"); return;
+            }
+            let rx = Math.max(0, Math.floor(STATE.manualSelection.x)); let ry = Math.max(0, Math.floor(STATE.manualSelection.y));
+            let rw = Math.floor(STATE.manualSelection.w); let rh = Math.floor(STATE.manualSelection.h);
+            if (rx + rw > offscreenCanvas.width) rw = offscreenCanvas.width - rx;
+            if (ry + rh > offscreenCanvas.height) rh = offscreenCanvas.height - ry;
+            if (rw <= 0 || rh <= 0) return;
+
+            let imgD = offscreenCtx.getImageData(rx, ry, rw, rh);
+            let hasPixels = false;
+            for (let i = 3; i < imgD.data.length; i += 4) { if (imgD.data[i] > 10) { hasPixels = true; break; } }
+            if (!hasPixels) { UIManager.showNotification("A área selecionada está vazia.", "error"); STATE.manualSelection = null; StudioCanvas.renderFatiador(); return; }
+
+            offscreenCtx.clearRect(rx, ry, rw, rh);
+            STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, ox: rx, oy: ry, x: rx, y: ry, w: rw, h: rh });
+            STATE.manualSelection = null; STATE.activePieceIndex = STATE.extractedPieces.length - 1; this.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
+            UIManager.showNotification("✂️ Corte manual extraído com sucesso!");
+        },
+
+        selecaoMagica: function(sx, sy) {
+            const w = offscreenCanvas.width; const h = offscreenCanvas.height; const imgData = offscreenCtx.getImageData(0, 0, w, h); const data = imgData.data;
+            const startAlpha = data[(sy * w + sx) * 4 + 3]; if (startAlpha === 0) return null; 
+            const visited = new Uint8Array(w * h); const queueX = new Int32Array(w * h); const queueY = new Int32Array(w * h);
+            let head = 0, tail = 0; queueX[tail] = sx; queueY[tail] = sy; tail++; visited[sy * w + sx] = 1;
+            let minX = sx, maxX = sx, minY = sy, maxY = sy;
+            while (head < tail) {
+                const cx = queueX[head]; const cy = queueY[head]; head++;
+                if (cx < minX) minX = cx; if (cx > maxX) maxX = cx; if (cy < minY) minY = cy; if (cy > maxY) maxY = cy;
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue; const nx = cx + dx; const ny = cy + dy;
+                        if (nx >= 0 && nx < w && ny >= 0 && ny < h) {
+                            const idx = ny * w + nx;
+                            if (visited[idx] === 0) { visited[idx] = 1; if (data[idx * 4 + 3] > 30) { queueX[tail] = nx; queueY[tail] = ny; tail++; } }
+                        }
                     }
                 }
             }
+            const p = 3; return { x: Math.max(0, minX - p), y: Math.max(0, minY - p), w: Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2)), h: Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2)) };
+        },
+
+        getMousePos: function(evt) {
+            const rect = DOM.wsCanvas.getBoundingClientRect(); const scaleX = DOM.wsCanvas.width / rect.width; const scaleY = DOM.wsCanvas.height / rect.height;
+            return { x: (evt.clientX - rect.left) * scaleX, y: (evt.clientY - rect.top) * scaleY };
+        },
+
+        getHoverHandle: function(x, y, p) {
+            const hs = 8; 
+            if (Math.abs(x - p.x) < hs && Math.abs(y - p.y) < hs) return 'nw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - p.y) < hs) return 'ne';
+            if (Math.abs(x - p.x) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'sw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'se'; return null;
         }
-        const p = 3; return { x: Math.max(0, minX - p), y: Math.max(0, minY - p), w: Math.min(w - Math.max(0, minX - p), (maxX - minX) + (p * 2)), h: Math.min(h - Math.max(0, minY - p), (maxY - minY) + (p * 2)) };
-    }
+    };
 
-    function getMousePos(evt) {
-        const rect = wsCanvas.getBoundingClientRect(); const scaleX = wsCanvas.width / rect.width; const scaleY = wsCanvas.height / rect.height;
-        return { x: (evt.clientX - rect.left) * scaleX, y: (evt.clientY - rect.top) * scaleY };
-    }
-
-    function getHoverHandle(x, y, p) {
-        const hs = 8; 
-        if (Math.abs(x - p.x) < hs && Math.abs(y - p.y) < hs) return 'nw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - p.y) < hs) return 'ne';
-        if (Math.abs(x - p.x) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'sw'; if (Math.abs(x - (p.x + p.w)) < hs && Math.abs(y - (p.y + p.h)) < hs) return 'se'; return null;
-    }
-
-    wsCanvas.addEventListener('mousedown', (e) => {
-        const pos = getMousePos(e); startX = pos.x; startY = pos.y;
+    /* =================================================================================
+       MOUSE EVENTS NO CANVAS DE TRABALHO
+       ================================================================================= */
+    DOM.wsCanvas.addEventListener('mousedown', (e) => {
+        const pos = ToolManager.getMousePos(e); STATE.startX = pos.x; STATE.startY = pos.y;
         
-        if (currentTool === 'move') {
-            if (activePieceIndex !== -1) {
-                let p = extractedPieces[activePieceIndex]; let handle = getHoverHandle(pos.x, pos.y, p);
-                if (handle) { isResizing = true; resizeHandle = handle; origP = {x: p.x, y: p.y, w: p.w, h: p.h}; wsCanvas.style.cursor = handle + '-resize'; return; }
+        if (STATE.currentTool === 'brush') { STATE.isPainting = true; ToolManager.aplicarPincelada(pos); return; }
+        if (STATE.currentTool === 'eyedropper') { ToolManager.aplicarContaGotas(pos); return; }
+
+        if (STATE.currentTool === 'move') {
+            if (STATE.activePieceIndex !== -1) {
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; let handle = ToolManager.getHoverHandle(pos.x, pos.y, p);
+                if (handle) { STATE.isResizing = true; STATE.resizeHandle = handle; STATE.origP = {x: p.x, y: p.y, w: p.w, h: p.h}; DOM.wsCanvas.style.cursor = handle + '-resize'; return; }
             }
-            activePieceIndex = -1;
-            for (let i = extractedPieces.length - 1; i >= 0; i--) {
-                let p = extractedPieces[i];
+            STATE.activePieceIndex = -1;
+            for (let i = STATE.extractedPieces.length - 1; i >= 0; i--) {
+                let p = STATE.extractedPieces[i];
                 if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) {
-                    activePieceIndex = i; isDragging = true; wsCanvas.style.cursor = 'grabbing';
-                    let target = extractedPieces.splice(i, 1)[0]; extractedPieces.push(target); activePieceIndex = extractedPieces.length - 1; break;
+                    STATE.activePieceIndex = i; STATE.isDragging = true; DOM.wsCanvas.style.cursor = 'grabbing';
+                    let target = STATE.extractedPieces.splice(i, 1)[0]; STATE.extractedPieces.push(target); STATE.activePieceIndex = STATE.extractedPieces.length - 1; break;
                 }
             }
-            renderFatiador();
-        } else if (currentTool === 'magic') {
+            StudioCanvas.renderFatiador();
+        } else if (STATE.currentTool === 'magic') {
             let sx = Math.floor(pos.x); let sy = Math.floor(pos.y);
             sx = Math.max(0, Math.min(offscreenCanvas.width - 1, sx)); sy = Math.max(0, Math.min(offscreenCanvas.height - 1, sy));
-            const box = selecaoMagica(sx, sy);
+            const box = ToolManager.selecaoMagica(sx, sy);
             if (box && box.w > 5 && box.h > 5) {
                 let imgD = offscreenCtx.getImageData(box.x, box.y, box.w, box.h); offscreenCtx.clearRect(box.x, box.y, box.w, box.h);
-                extractedPieces.push({ id: nextPieceId++, imgData: imgD, ox: box.x, oy: box.y, x: box.x, y: box.y, w: box.w, h: box.h });
-                activePieceIndex = extractedPieces.length - 1; setTool('move'); renderFatiador(); registrarEstadoMemoria(); 
+                STATE.extractedPieces.push({ id: STATE.nextPieceId++, imgData: imgD, ox: box.x, oy: box.y, x: box.x, y: box.y, w: box.w, h: box.h });
+                STATE.activePieceIndex = STATE.extractedPieces.length - 1; ToolManager.setTool('move'); StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
             }
-        } else if (currentTool === 'slice') { isDragging = true; manualSelection = null; renderFatiador(); }
+        } else if (STATE.currentTool === 'slice') { STATE.isDragging = true; STATE.manualSelection = null; StudioCanvas.renderFatiador(); }
     });
 
-    wsCanvas.addEventListener('mousemove', (e) => {
-        const pos = getMousePos(e);
-        
-        if (!isDragging && !isResizing && currentTool === 'move') {
+    DOM.wsCanvas.addEventListener('mousemove', (e) => {
+        const pos = ToolManager.getMousePos(e);
+        if (STATE.isPainting && STATE.currentTool === 'brush') { ToolManager.aplicarPincelada(pos); return; }
+
+        if (!STATE.isDragging && !STATE.isResizing && STATE.currentTool === 'move') {
             let hoveringHandle = false;
-            if (activePieceIndex !== -1) {
-                let p = extractedPieces[activePieceIndex]; let handle = getHoverHandle(pos.x, pos.y, p);
-                if (handle) { wsCanvas.style.cursor = handle + '-resize'; hoveringHandle = true; }
+            if (STATE.activePieceIndex !== -1) {
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; let handle = ToolManager.getHoverHandle(pos.x, pos.y, p);
+                if (handle) { DOM.wsCanvas.style.cursor = handle + '-resize'; hoveringHandle = true; }
             }
             if (!hoveringHandle) {
                 let hoverPiece = false;
-                for (let i = extractedPieces.length - 1; i >= 0; i--) {
-                    let p = extractedPieces[i];
+                for (let i = STATE.extractedPieces.length - 1; i >= 0; i--) {
+                    let p = STATE.extractedPieces[i];
                     if (pos.x >= p.x && pos.x <= p.x + p.w && pos.y >= p.y && pos.y <= p.y + p.h) { hoverPiece = true; break; }
                 }
-                wsCanvas.style.cursor = hoverPiece ? 'grab' : 'default';
+                DOM.wsCanvas.style.cursor = hoverPiece ? 'grab' : 'default';
             }
         }
-        if (isResizing && activePieceIndex !== -1) {
-            let p = extractedPieces[activePieceIndex]; let dx = pos.x - startX; let dy = pos.y - startY;
-            if (resizeHandle === 'se') { p.w = Math.max(5, origP.w + dx); p.h = Math.max(5, origP.h + dy); } 
-            else if (resizeHandle === 'sw') { p.x = origP.x + dx; p.w = Math.max(5, origP.w - dx); p.h = Math.max(5, origP.h + dy); } 
-            else if (resizeHandle === 'ne') { p.y = origP.y + dy; p.w = Math.max(5, origP.w + dx); p.h = Math.max(5, origP.h - dy); } 
-            else if (resizeHandle === 'nw') { p.x = origP.x + dx; p.y = origP.y + dy; p.w = Math.max(5, origP.w - dx); p.h = Math.max(5, origP.h - dy); }
-            renderFatiador(); return;
+        if (STATE.isResizing && STATE.activePieceIndex !== -1) {
+            let p = STATE.extractedPieces[STATE.activePieceIndex]; let dx = pos.x - STATE.startX; let dy = pos.y - STATE.startY;
+            if (STATE.resizeHandle === 'se') { p.w = Math.max(5, STATE.origP.w + dx); p.h = Math.max(5, STATE.origP.h + dy); } 
+            else if (STATE.resizeHandle === 'sw') { p.x = STATE.origP.x + dx; p.w = Math.max(5, STATE.origP.w - dx); p.h = Math.max(5, STATE.origP.h + dy); } 
+            else if (STATE.resizeHandle === 'ne') { p.y = STATE.origP.y + dy; p.w = Math.max(5, STATE.origP.w + dx); p.h = Math.max(5, STATE.origP.h - dy); } 
+            else if (STATE.resizeHandle === 'nw') { p.x = STATE.origP.x + dx; p.y = STATE.origP.y + dy; p.w = Math.max(5, STATE.origP.w - dx); p.h = Math.max(5, STATE.origP.h - dy); }
+            StudioCanvas.renderFatiador(); return;
         }
-        if (!isDragging) return;
+        if (!STATE.isDragging) return;
         
-        if (currentTool === 'move' && activePieceIndex !== -1) {
-            let p = extractedPieces[activePieceIndex]; p.x += pos.x - startX; p.y += pos.y - startY; startX = pos.x; startY = pos.y; renderFatiador();
-        } else if (currentTool === 'slice') {
-            currentRectW = pos.x - startX; currentRectH = pos.y - startY;
-            let rx = Math.floor(currentRectW < 0 ? startX + currentRectW : startX); let ry = Math.floor(currentRectH < 0 ? startY + currentRectH : startY);
+        if (STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
+            let p = STATE.extractedPieces[STATE.activePieceIndex]; p.x += pos.x - STATE.startX; p.y += pos.y - STATE.startY; STATE.startX = pos.x; STATE.startY = pos.y; StudioCanvas.renderFatiador();
+        } else if (STATE.currentTool === 'slice') {
+            currentRectW = pos.x - STATE.startX; currentRectH = pos.y - STATE.startY;
+            let rx = Math.floor(currentRectW < 0 ? STATE.startX + currentRectW : STATE.startX); let ry = Math.floor(currentRectH < 0 ? STATE.startY + currentRectH : STATE.startY);
             let rw = Math.floor(Math.abs(currentRectW)); let rh = Math.floor(Math.abs(currentRectH));
-            manualSelection = {x: rx, y: ry, w: rw, h: rh}; renderFatiador();
+            STATE.manualSelection = {x: rx, y: ry, w: rw, h: rh}; StudioCanvas.renderFatiador();
         }
     });
 
-    wsCanvas.addEventListener('mouseup', (e) => {
-        if (isResizing) {
-            isResizing = false; resizeHandle = '';
-            if (document.getElementById('snap-grid').checked && activePieceIndex !== -1) {
-                let p = extractedPieces[activePieceIndex]; 
+    DOM.wsCanvas.addEventListener('mouseup', (e) => {
+        if (STATE.isPainting) { STATE.isPainting = false; MemoryManager.registrarEstadoMemoria(); return; }
+
+        if (STATE.isResizing) {
+            STATE.isResizing = false; STATE.resizeHandle = '';
+            if (document.getElementById('snap-grid').checked && STATE.activePieceIndex !== -1) {
+                let p = STATE.extractedPieces[STATE.activePieceIndex]; 
                 let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
                 let right = Math.round((relX + p.w) / 16) * 16; let bottom = Math.round((relY + p.h) / 16) * 16;
                 relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
                 p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; p.w = Math.max(16, right - relX); p.h = Math.max(16, bottom - relY);
             }
-            renderFatiador(); registrarEstadoMemoria(); return;
+            StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); return;
         }
-        if (isDragging) {
-            isDragging = false;
-            if (currentTool === 'move' && activePieceIndex !== -1) {
-                wsCanvas.style.cursor = 'grab';
+        if (STATE.isDragging) {
+            STATE.isDragging = false;
+            if (STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
+                DOM.wsCanvas.style.cursor = 'grab';
                 if (document.getElementById('snap-grid').checked) {
-                    let p = extractedPieces[activePieceIndex]; 
+                    let p = STATE.extractedPieces[STATE.activePieceIndex]; 
                     let relX = p.x - OFFSET_X; let relY = p.y - OFFSET_Y;
                     relX = Math.round(relX / 16) * 16; relY = Math.round(relY / 16) * 16;
                     p.x = OFFSET_X + relX; p.y = OFFSET_Y + relY; 
                 }
-                renderFatiador(); registrarEstadoMemoria(); 
+                StudioCanvas.renderFatiador(); MemoryManager.registrarEstadoMemoria(); 
             }
         }
     });
 
-    function updatePiecesList() {
-        const list = document.getElementById('pieces-list'); list.innerHTML = '';
-        extractedPieces.forEach((p, i) => {
-            const itemDiv = document.createElement('div'); itemDiv.className = 'piece-item' + (i === activePieceIndex ? ' selected' : '');
-            const previewDiv = document.createElement('div'); previewDiv.className = 'piece-preview';
-            previewDiv.onclick = () => { activePieceIndex = i; renderFatiador(); updatePiecesList(); };
-            const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height;
-            tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
-            const img = document.createElement('img'); img.src = tempCanvas.toDataURL('image/png'); previewDiv.appendChild(img);
+    /* =================================================================================
+       EXPORT & IMPORT MANAGER (A Regra de Ouro da Exportação 1024x512)
+       ================================================================================= */
+    const ExportManager = {
+        triggerUpload: function(targetId) { 
+            STATE.uploadTarget = targetId; if (targetId === 1 || targetId === 2) STATE.currentEditingLayer = targetId;
+            DOM.fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg"; DOM.fileInput.click(); 
+        },
+
+        downloadPiece: function(piece) {
+            const tempCanvas = document.createElement('canvas'); tempCanvas.width = piece.imgData.width; tempCanvas.height = piece.imgData.height; tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
+            tempCanvas.toBlob((blob) => {
+                if(!blob) return;
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+                a.href = url; a.download = `peça_${piece.id}.png`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                UIManager.showNotification(`✓ Peça #${piece.id} baixada!`);
+            }, 'image/png');
+        },
+
+        // EXPORTAÇÃO MESTRE: Imutável para o tamanho 1024x512
+        downloadAllPieces: function() {
+            if (STATE.extractedPieces.length === 0) { UIManager.showNotification("Nenhuma peça extraída para baixar.", "error"); return; }
+            UIManager.showNotification(`✓ Criando pacote Vexanium (ZIP + JSON)...`);
+
+            const zip = new JSZip();
+            const folder = zip.folder("vexanium_armor_pack");
+            const imagesFolder = folder.folder("textures");
             
-            const infoDiv = document.createElement('div'); infoDiv.className = 'piece-info'; infoDiv.innerHTML = `<span>Peça #${p.id}</span><span>${p.w}x${p.h}</span>`;
-            const actionsDiv = document.createElement('div'); actionsDiv.className = 'piece-actions';
-            
-            const dlBtn = document.createElement('button'); dlBtn.className = 'piece-btn'; dlBtn.textContent = '📥'; dlBtn.onclick = () => downloadPiece(p);
-            
-            const delBtn = document.createElement('button'); delBtn.className = 'piece-btn delete'; delBtn.textContent = '🗑️'; 
-            delBtn.onclick = () => { activePieceIndex = i; apagarPecaAtiva(); };
-            
-            actionsDiv.appendChild(dlBtn); actionsDiv.appendChild(delBtn);
-            itemDiv.appendChild(previewDiv); itemDiv.appendChild(infoDiv); itemDiv.appendChild(actionsDiv); list.appendChild(itemDiv);
-        });
-    }
-
-    function downloadPiece(piece) {
-        const tempCanvas = document.createElement('canvas'); tempCanvas.width = piece.imgData.width; tempCanvas.height = piece.imgData.height; tempCanvas.getContext('2d').putImageData(piece.imgData, 0, 0);
-        tempCanvas.toBlob((blob) => {
-            if(!blob) return;
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
-            a.href = url; a.download = `peça_${piece.id}.png`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            showNotification(`✓ Peça #${piece.id} baixada!`);
-        }, 'image/png');
-    }
-
-    function downloadAllPieces() {
-        if (extractedPieces.length === 0) { showNotification("Nenhuma peça extraída para baixar.", "error"); return; }
-        showNotification(`✓ Criando pacote Vexanium (ZIP + JSON)...`);
-
-        const zip = new JSZip();
-        const folder = zip.folder("vexanium_armor_pack");
-        const imagesFolder = folder.folder("textures");
-        
-        extractedPieces.forEach((p) => {
-            const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height; tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
-            const base64 = tempCanvas.toDataURL('image/png').split(',')[1];
-            imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
-        });
-
-        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
-        extractedPieces.forEach(p => {
-            const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-            outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
-        });
-        const layerBase64 = outCanvas.toDataURL('image/png').split(',')[1];
-        imagesFolder.file(`parasita_layer_${currentEditingLayer}_compiled.png`, layerBase64, {base64: true});
-
-        const metadata = {
-            "armor_name": "Vexanium Base Build",
-            "layer_type": currentEditingLayer === 1 ? "helmet_chest_boots" : "leggings",
-            "pipeline_phase": "Phase 3/4 (Frontend Export)",
-            "pieces_count": extractedPieces.length,
-            "format": "1024x512 HD Scaled",
-            "pieces_coordinates": extractedPieces.map(p => ({
-                "id": p.id, "mc_x": p.x - OFFSET_X, "mc_y": p.y - OFFSET_Y, "w": p.w, "h": p.h
-            }))
-        };
-        folder.file("metadata.json", JSON.stringify(metadata, null, 2));
-
-        zip.generateAsync({type: "blob"}).then((blob) => {
-            const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `vexanium_armor_pack_${new Date().getTime()}.zip`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
-            showNotification(`✓ Pacote ZIP baixado com sucesso!`);
-        });
-    }
-
-    async function salvarPresetJSON() {
-        if (extractedPieces.length === 0) { showNotification("Não existem peças extraídas para salvar.", "warning"); return; }
-        const preset = {
-            layer: currentEditingLayer, baseImage: offscreenCanvas.toDataURL('image/png'),
-            pieces: extractedPieces.map(p => {
-                const temp = document.createElement('canvas'); temp.width = p.w; temp.height = p.h; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-                return { id: p.id, ox: p.ox, oy: p.oy, x: p.x, y: p.y, w: p.w, h: p.h, base64: temp.toDataURL('image/png') };
-            })
-        };
-        const blob = new Blob([JSON.stringify(preset)], {type: "application/json"}); const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
-        a.download = `vexanium_preset_layer${currentEditingLayer}.json`; a.click();
-    }
-
-    document.getElementById('file-input-preset').onchange = (e) => {
-        const file = e.target.files[0]; if (!file) return;
-        const reader = new FileReader();
-        reader.onload = async (evt) => {
-            try {
-                const preset = JSON.parse(evt.target.result);
-                if (preset.armor_name || preset.pieces_coordinates) {
-                    showNotification("⚠️ AVISO: Tentou carregar metadata.json em vez do Preset gravado.", "error"); return;
-                }
-                if(preset.layer !== currentEditingLayer) showNotification(`Aviso: Este Preset foi gravado para a Camada ${preset.layer}, mas o estúdio está na Camada ${currentEditingLayer}.`, "warning");
-                const img = new Image();
-                img.onload = async () => {
-                    offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); offscreenCtx.drawImage(img, 0, 0);
-                    extractedPieces = [];
-                    for (let p of preset.pieces) {
-                        await new Promise(r => {
-                            const pImg = new Image();
-                            pImg.onload = () => {
-                                const temp = document.createElement('canvas'); temp.width = p.w; temp.height = p.h; temp.getContext('2d').drawImage(pImg, 0, 0);
-                                extractedPieces.push({ id: p.id, ox: p.ox, oy: p.oy, x: p.x, y: p.y, w: p.w, h: p.h, imgData: temp.getContext('2d').getImageData(0,0,p.w,p.h) });
-                                r();
-                            }; pImg.src = p.base64;
-                        });
-                    }
-                    registrarEstadoMemoria(); renderFatiador(); drawGridAndMold(); showNotification("✨ Preset restaurado! Simbiose visual recuperada.");
-                }; img.src = preset.baseImage;
-            } catch (err) { showNotification("Falha ao ler ficheiro JSON.", "error"); }
-        }; reader.readAsText(file); e.target.value = "";
-    };
-
-    function aplicarMontagemUVLivre() {
-        const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
-        const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
-        extractedPieces.forEach(p => {
-            const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
-            outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
-        });
-        const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
-        if (currentEditingLayer === 1) { finalImageL1 = finalArmaduraBase64; showNotification("✓ CAMADA 1 (L1) ATUALIZADA!"); } 
-        else { finalImageL2 = finalArmaduraBase64; showNotification("✓ CAMADA 2 (L2) ATUALIZADA!"); }
-        
-        updateDiagnosticPanel();
-        atualizarPreview3D(); 
-        closeModal('slicer-modal');
-    }
-
-    function atualizarPreview3D() {
-        const previewCanvas = document.createElement('canvas'); previewCanvas.width = 1024; previewCanvas.height = 1024; 
-        const pCtx = previewCanvas.getContext('2d'); pCtx.imageSmoothingEnabled = false;
-        const f = 16;
-        const copyRegion = (img, sx, sy, sw, sh, dx, dy) => { pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); };
-        const loadImage = (base64Str) => { return new Promise((resolve) => { if (!base64Str) { resolve(null); return; } const img = new Image(); img.onload = () => resolve(img); img.src = base64Str; }); };
-
-        pCtx.fillStyle = "#111111"; pCtx.fillRect(0, 0, 32*f, 16*f); pCtx.fillRect(16*f, 16*f, 24*f, 16*f); pCtx.fillRect(40*f, 16*f, 16*f, 16*f); pCtx.fillRect(32*f, 48*f, 16*f, 16*f); pCtx.fillRect(0, 16*f, 16*f, 16*f); pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
-
-        Promise.all([loadImage(finalImageL1), loadImage(finalImageL2)]).then(([imgL1, imgL2]) => {
-            if (imgL2) { 
-                copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
-                copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
-                copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
-            }
-            if (imgL1) { 
-                copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
-                copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
-                copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
-                copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
-                copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
-                copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
-            }
-            skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => {
-                console.error("Erro ao processar preview WebGL:", err);
+            STATE.extractedPieces.forEach((p) => {
+                const tempCanvas = document.createElement('canvas'); tempCanvas.width = p.imgData.width; tempCanvas.height = p.imgData.height; tempCanvas.getContext('2d').putImageData(p.imgData, 0, 0);
+                const base64 = tempCanvas.toDataURL('image/png').split(',')[1];
+                imagesFolder.file(`peça_${p.id}.png`, base64, {base64: true});
             });
-        });
-    }
 
-    function baixarTextura(layer) {
-        let imageData = layer === 1 ? finalImageL1 : finalImageL2; 
-        let fileName = layer === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
-        
-        if (!imageData) { 
-            showNotification(`A Camada ${layer} ainda não foi gerada no Estúdio.`, "error"); 
-            return; 
-        }
+            // Geração da Camada Final com base estritamente em 1024x512
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512; const outCtx = outCanvas.getContext('2d');
+            STATE.extractedPieces.forEach(p => {
+                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
+                // Retira o Offset visual da tela para gravar no Molde Base na coordenada exata
+                outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
+            });
+            const layerBase64 = outCanvas.toDataURL('image/png').split(',')[1];
+            imagesFolder.file(`parasita_layer_${STATE.currentEditingLayer}_compiled.png`, layerBase64, {base64: true});
 
-        fetch(imageData)
-            .then(res => res.blob())
-            .then(blob => {
+            const metadata = {
+                "armor_name": "Vexanium Base Build",
+                "layer_type": STATE.currentEditingLayer === 1 ? "helmet_chest_boots" : "leggings",
+                "pipeline_phase": "Phase 3/4 (Frontend Export)",
+                "pieces_count": STATE.extractedPieces.length,
+                "format": "1024x512 HD Scaled", // Regra de Ouro garantida
+                "pieces_coordinates": STATE.extractedPieces.map(p => ({
+                    "id": p.id, "mc_x": p.x - OFFSET_X, "mc_y": p.y - OFFSET_Y, "w": p.w, "h": p.h
+                }))
+            };
+            folder.file("metadata.json", JSON.stringify(metadata, null, 2));
+
+            zip.generateAsync({type: "blob"}).then((blob) => {
+                const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `vexanium_armor_pack_${new Date().getTime()}.zip`;
+                document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+                UIManager.showNotification(`✓ Pacote ZIP baixado com sucesso!`);
+            });
+        },
+
+        baixarTextura: function(layer) {
+            let imageData = layer === 1 ? STATE.finalImageL1 : STATE.finalImageL2; 
+            let fileName = layer === 1 ? 'parasita_layer_1.png' : 'parasita_layer_2.png';
+            
+            if (!imageData) { 
+                UIManager.showNotification(`A Camada ${layer} ainda não foi gerada no Estúdio.`, "error"); 
+                return; 
+            }
+
+            fetch(imageData).then(res => res.blob()).then(blob => {
                 const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
                 a.href = url; a.download = fileName; document.body.appendChild(a); a.click(); document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showNotification(`✓ SUCESSO: Arquivo ${fileName} exportado!`);
-            })
-            .catch(err => {
-                showNotification("O sistema falhou ao empacotar a textura HD.", "error");
+                UIManager.showNotification(`✓ SUCESSO: Arquivo ${fileName} exportado!`);
+            }).catch(err => { UIManager.showNotification("O sistema falhou ao empacotar a textura HD.", "error"); });
+        },
+
+        aplicarMontagemUVLivre: function() {
+            // Regra de Ouro (Apenas 1024x512 processado internamente)
+            const outCanvas = document.createElement('canvas'); outCanvas.width = 1024; outCanvas.height = 512;
+            const outCtx = outCanvas.getContext('2d'); outCtx.imageSmoothingEnabled = false; 
+            STATE.extractedPieces.forEach(p => {
+                const temp = document.createElement('canvas'); temp.width = p.imgData.width; temp.height = p.imgData.height; temp.getContext('2d').putImageData(p.imgData, 0, 0);
+                outCtx.drawImage(temp, p.x - OFFSET_X, p.y - OFFSET_Y, p.w, p.h);
             });
-    }
+            const finalArmaduraBase64 = outCanvas.toDataURL('image/png');
+            if (STATE.currentEditingLayer === 1) { STATE.finalImageL1 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 1 (L1) ATUALIZADA!"); } 
+            else { STATE.finalImageL2 = finalArmaduraBase64; UIManager.showNotification("✓ CAMADA 2 (L2) ATUALIZADA!"); }
+            
+            UIManager.updateDiagnosticPanel();
+            this.atualizarPreview3D(); 
+            UIManager.closeModal('slicer-modal');
+        },
 
-    function triggerUpload(targetId) { 
-        uploadTarget = targetId; if (targetId === 1 || targetId === 2) currentEditingLayer = targetId;
-        fileInput.accept = (targetId === 3) ? ".gltf,.glb" : "image/png,image/jpeg"; fileInput.click(); 
-    }
+        atualizarPreview3D: function() {
+            const previewCanvas = document.createElement('canvas'); previewCanvas.width = 1024; previewCanvas.height = 1024; 
+            const pCtx = previewCanvas.getContext('2d'); pCtx.imageSmoothingEnabled = false;
+            const f = 16;
+            const copyRegion = (img, sx, sy, sw, sh, dx, dy) => { pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); };
+            const loadImage = (base64Str) => { return new Promise((resolve) => { if (!base64Str) { resolve(null); return; } const img = new Image(); img.onload = () => resolve(img); img.src = base64Str; }); };
 
-    fileInput.onchange = (e) => {
+            pCtx.fillStyle = "#111111"; pCtx.fillRect(0, 0, 32*f, 16*f); pCtx.fillRect(16*f, 16*f, 24*f, 16*f); pCtx.fillRect(40*f, 16*f, 16*f, 16*f); pCtx.fillRect(32*f, 48*f, 16*f, 16*f); pCtx.fillRect(0, 16*f, 16*f, 16*f); pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
+
+            Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
+                if (imgL2) { copyRegion(imgL2, 16, 16, 24, 16, 16, 16); copyRegion(imgL2, 0, 16, 16, 16, 0, 16); copyRegion(imgL2, 0, 16, 16, 16, 16, 48); }
+                if (imgL1) { 
+                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0); copyRegion(imgL1, 16, 16, 24, 16, 16, 32); copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
+                    copyRegion(imgL1, 40, 16, 16, 16, 48, 48); copyRegion(imgL1, 0, 16, 16, 16, 0, 32); copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
+                }
+                skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => { console.error("Erro ao processar preview WebGL:", err); });
+            });
+        }
+    };
+
+    DOM.fileInput.onchange = (e) => {
         const file = e.target.files[0]; if (!file) return;
         const url = URL.createObjectURL(file);
-        if (currentMode === 'armor' && file.type.startsWith("image/")) {
+        if (STATE.currentMode === 'armor' && file.type.startsWith("image/")) {
             const reader = new FileReader();
             reader.onload = (evt) => {
-                if (uploadTarget === 1) { baseImageL1 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); } 
-                else if (uploadTarget === 2) { baseImageL2 = evt.target.result; abrirFatiadorLivre(true); updateDiagnosticPanel(); }
+                if (STATE.uploadTarget === 1) { STATE.baseImageL1 = evt.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); } 
+                else if (STATE.uploadTarget === 2) { STATE.baseImageL2 = evt.target.result; StudioCanvas.abrirFatiadorLivre(true); UIManager.updateDiagnosticPanel(); }
             }; reader.readAsDataURL(file);
-        } else if (currentMode === 'model' || currentMode === 'item') {
+        } else if (STATE.currentMode === 'model' || STATE.currentMode === 'item') {
             new THREE.GLTFLoader().load(url, (gltf) => {
                 if (currentModel) scene.remove(currentModel); currentModel = gltf.scene;
                 const box = new THREE.Box3().setFromObject(currentModel); const size = box.getSize(new THREE.Vector3()); const scale = 3.5 / Math.max(size.x, size.y, size.z);
                 currentModel.scale.set(scale, scale, scale); currentModel.position.set(0, -1, 0); scene.add(currentModel);
-                
-                if(currentMode === 'item') {
-                    scene.remove(cajadoGroup);
-                }
-
-                if (statusOverlay) statusOverlay.innerText = "✓ GEOMETRIA DE ENTIDADE IMPORTADA";
+                if(STATE.currentMode === 'item') { scene.remove(cajadoGroup); }
+                UIManager.showNotification("✓ GEOMETRIA DE ENTIDADE IMPORTADA");
             });
         }
         e.target.value = ""; 
     };
 
-    setTimeout(() => {
-        showNotification("Terminal J.A.V.I.S. Sincronizado e Pronto", "success");
-    }, 500);
+    /* =================================================================================
+       IA & LLM INTEGRATION (Gemini API)
+       ================================================================================= */
+    async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
+        if (DOM.loader) DOM.loader.style.display = 'block'; if (DOM.scanner) DOM.scanner.style.display = 'block';
+        let retries = 0; const maxRetries = 5;
+        while (retries < maxRetries) {
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${endpoint}?key=${STATE.apiKey}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                if (!response.ok) throw new Error("Connection failed");
+                const data = await response.json(); return data;
+            } catch (e) { retries++; await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000)); } 
+            finally { if (retries === maxRetries || (DOM.loader && !DOM.loader.style.display)) { if (DOM.loader) DOM.loader.style.display = 'none'; if (DOM.scanner) DOM.scanner.style.display = 'none'; } }
+        } return null;
+    }
+
+    async function executarGeracaoIA() {
+        const promptInput = document.getElementById('gen-prompt-input');
+        const tema = promptInput ? promptInput.value : "";
+        if (!tema || tema.trim() === '') { UIManager.showNotification("Operador, descreva o design da armadura antes de iniciar a Forja.", "warning"); return; }
+        UIManager.closeModal('gen-modal');
+        UIManager.showNotification("⏳ INICIANDO FORJA IA (GERANDO TEXTURA)...");
+
+        const layoutInstructions = STATE.currentEditingLayer === 1
+            ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)."
+            : "Leggings/Pants: Waist Front(0,256), Waist Back(128,256), Leg Side(256,256), Leg Front(320,256).";
+        const strictPrompt = `Minecraft armor texture map, flat 2D layout. CRITICAL INSTRUCTION: Generate ONLY Layer ${STATE.currentEditingLayer}. DO NOT draw the background, keep it solid white. Pixel art style. STRICT COORDINATES TO FOLLOW EXACTLY: ${layoutInstructions}. Theme: ${tema} (Must be exactly 2:1 aspect ratio)`;
+        const payload = { instances: { prompt: strictPrompt }, parameters: { sampleCount: 1 } };
+        const data = await callGemini(payload, "imagen-4.0-generate-001:predict");
+
+        if (data && data.predictions && data.predictions.length > 0) {
+            const base64Image = data.predictions[0].bytesBase64Encoded;
+            const imageUrl = `data:image/png;base64,${base64Image}`;
+            const img = new Image();
+            img.onload = () => {
+                offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
+                StudioCanvas.renderFatiador(); StudioCanvas.drawGridAndMold(); MemoryManager.registrarEstadoMemoria(); 
+                UIManager.showNotification("✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!");
+            }; img.src = imageUrl;
+            if (STATE.currentEditingLayer === 1) STATE.baseImageL1 = imageUrl; else STATE.baseImageL2 = imageUrl;
+            STATE.originalImageObj.src = imageUrl;
+            UIManager.updateDiagnosticPanel(); StudioCanvas.abrirFatiadorLivre(true);
+        } else {
+            UIManager.showNotification("Falha na Forja. A IA não conseguiu gerar a armadura.", "error");
+        }
+    }
+
+    async function analisarArteBase() {
+        if (!STATE.originalImageObj || !STATE.originalImageObj.src || STATE.originalImageObj.src === "") { UIManager.showNotification("Operador, carregue ou gere uma Imagem Base primeiro.", "warning"); return; }
+        const base64Data = STATE.originalImageObj.src.split(',')[1]; let mimeType = "image/png";
+        if(STATE.originalImageObj.src.startsWith("data:image/jpeg")) mimeType = "image/jpeg";
+        UIManager.showModal("ai-modal", "✨ ANÁLISE VISUAL DE ARTE (VISION)", "A processar padrões visuais e biologia da armadura...");
+        const prompt = "Aja como J.A.V.I.S., uma IA tática de engenharia biomecânica. Analise visualmente esta textura de armadura de Minecraft. Descreva de forma técnica e sombria a paleta de cores, a biologia aparente e como estas peças se enquadram na temática do 'Vexanium' (um mod de parasitas espaciais e tecnologia alienígena nas profundezas do Deep Dark).";
+        const payload = { contents: [{ role: "user", parts: [ { text: prompt }, { inlineData: { mimeType: mimeType, data: base64Data } } ] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português com formatação clara e tática." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    async function gerarAtributos() {
+        UIManager.showModal("ai-modal", "✨ FORJA DE ATRIBUTOS TÁTICOS", "A calcular integridade estrutural e sinergia do hospedeiro...");
+        const prompt = STATE.currentMode === 'armor' ? "Gere uma lista técnica de atributos de combate para o Minecraft (Armor, Toughness, Knockback Resistance, Habilidades Especiais Passivas, Maldições/Debuffs) para uma Armadura Parasita do tipo Vexanium. Equilibre para ser incrivelmente poderosa no late-game, mas com custos biológicos para o hospedeiro." : "Gere uma lista de atributos técnicos e estatísticas (HP, Dano Base, Velocidade de Movimento, Padrão de Ataque, Habilidades Especiais) para um Mob Hostil Biomecânico implacável do mod Vexanium. Crie uma mecânica de ataque única e aterrorizante.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português usando pontos táticos e liste os valores como se fossem variáveis de código do Minecraft." }] } };
+        const data = await callGemini(payload); const stats = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = stats;
+    }
+
+    async function generateLore() {
+        UIManager.showModal("ai-modal", "✨ ANÁLISE DE LORE BIOMECÂNICA", "A consultar o diário do Dr. Aldrich...");
+        const prompt = STATE.currentMode === 'armor' ? "Gere um fragmento de diário de pesquisa (Lore) intenso e sombrio sobre a descoberta de uma Armadura Parasita Alienígena no Minecraft." : "Descreva as origens sombrias e os horrores de um Mob biomecânico que habita o vácuo profundo do mod Vexanium.";
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S. Responda em Português. Mantenha o tom sombrio, de ficção científica de terror." }] } };
+        const data = await callGemini(payload); const lore = data ? data.candidates[0].content.parts[0].text : "Falha na geração.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = lore;
+    }
+
+    async function processarTelemetriaInGame() {
+        const telemetriaInput = document.getElementById('jarvis-telemetry-input'); const telemetria = telemetriaInput ? telemetriaInput.value : "";
+        if (!telemetria || telemetria.trim() === '') { UIManager.showNotification("Operador, por favor insira os dados de telemetria na caixa primeiro.", "warning"); return; }
+        UIManager.closeModal('ingame-modal'); UIManager.showModal("ai-modal", "📡 PROCESSANDO TELEMETRIA DO JOGO", "A estabelecer conexão com a MekaSuit...");
+        const prompt = `Aqui está o relatório de telemetria atual do mundo do jogador no Minecraft:\n\n${telemetria}\n\nCom base nestes dados exatos, aja como a IA J.A.V.I.S., faça um diagnóstico da situação, avise o jogador sobre o estado da armadura, ameaças no radar e condições ambientais. Seja imersivo, tático e aja como se estivesse a falar diretamente para o visor da armadura do Operador.`;
+        const payload = { contents: [{ parts: [{ text: prompt }] }], systemInstruction: { parts: [{ text: "Você é J.A.V.I.S., a IA tática do mod Vexanium. Você recebe dados brutos do jogo e responde ao Operador com análises situacionais e táticas." }] } };
+        const data = await callGemini(payload); const analise = data ? data.candidates[0].content.parts[0].text : "Falha na análise.";
+        const respText = document.getElementById('ai-response-text'); if(respText) respText.innerText = analise;
+    }
+
+    // Atalhos de Teclado
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) { e.preventDefault(); StudioCanvas.ajustarZoom('in'); } 
+        else if ((e.ctrlKey || e.metaKey) && e.key === '-') { e.preventDefault(); StudioCanvas.ajustarZoom('out'); } 
+        else if ((e.ctrlKey || e.metaKey) && e.key === '0') { e.preventDefault(); StudioCanvas.ajustarZoom(1.0); } 
+        else if (e.key === 'Delete') { e.preventDefault(); ToolManager.apagarPecaAtiva(); }
+    });
 
 </script>
 </body>
