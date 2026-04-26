@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Código Mestre Profissional)</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Escala Inversa Profissional)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -99,7 +99,7 @@
         }
 
         /* =================================================================================
-           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE (1920x1080)
+           ESTÚDIO DE CIRURGIA UV E WORKSPACE MESTRE
            ================================================================================= */
         #slicer-modal { 
             width: 98vw; 
@@ -133,22 +133,15 @@
             position: relative; 
             display: flex; 
             flex-direction: column; 
-            overflow: hidden; 
+            overflow: auto; 
             border-radius: 6px; 
             background-color: #030508; 
             border: 1px solid #222; 
+            padding: 20px;
         }
 
-        .editor-workspace { 
-            flex: 1; 
-            display: flex; 
-            overflow: auto; 
-            position: relative; 
-            padding: 20px; 
-            box-sizing: border-box; 
-        }
-        
         #canvas-wrapper { 
+            /* Fix: Dimensões fixas base. O redimensionamento é feito via CSS. */
             width: 1920px; 
             height: 1080px; 
             min-width: 1920px; 
@@ -177,8 +170,7 @@
         #grid-canvas { 
             pointer-events: none; 
             z-index: 15; 
-            /* A grelha precisa ser suave para manter a escala correta de 1px em ecrãs grandes */
-            image-rendering: auto; 
+            image-rendering: auto; /* IMPORTANTE: Mantém as linhas da grade finas e nítidas no Zoom */
         }
 
         /* =================================================================================
@@ -756,19 +748,23 @@
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold;">
                     <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold;">
-                    <input type="checkbox" id="show-grid-1x1" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade 1x1
-                </label>
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold;">
-                    <input type="checkbox" id="show-grid-16x16" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Grade 16x16
-                </label>
                 
+                <!-- OTIMIZAÇÃO: Novo menu ajustável de Grelha Profissional -->
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-top:8px;">
+                    <input type="checkbox" id="show-custom-grid" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Mostrar Grade
+                </label>
+
                 <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
-                    Espessura da Grade: <span id="grid-size-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">1</span>px
+                    Tamanho da Célula: <span id="grid-px-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">4</span>px
+                    <input type="range" id="grid-px" min="1" max="32" step="1" value="4" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-px-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
+                </label>
+
+                <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
+                    Espessura da Linha: <span id="grid-size-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">1</span>px
                     <input type="range" id="grid-size" min="0.5" max="3" step="0.5" value="1" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-size-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
                 </label>
 
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--sculk-core); font-weight:bold; margin-top:8px;">
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--sculk-core); font-weight:bold; margin-top:12px;">
                     <input type="checkbox" id="show-matryoshka" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--sculk-core);"> 🪆 ZONAS MATRYOSHKA
                 </label>
 
@@ -794,8 +790,8 @@
                 <div class="editor-workspace" id="workspace-scroll-area">
                     <div id="canvas-wrapper">
                         <canvas id="workspace-canvas" width="1920" height="1080"></canvas>
-                        <!-- A Grade agora redimensiona-se nativamente e sobrepõe-se à arte -->
-                        <canvas id="grid-canvas"></canvas>
+                        <!-- A Grade sobrepõe-se e tem image-rendering auto para manter linhas lisas -->
+                        <canvas id="grid-canvas" width="1920" height="1080"></canvas>
                     </div>
                 </div>
                 
@@ -977,12 +973,12 @@
         autoRotateGltf: true,
         currentMatryoshkaZone: 1,
         matryoshkaZones: {
-            1: { w: 1024, h: 512, zoom: 0.8 },
-            2: { w: 512,  h: 256, zoom: 1.6 },
-            3: { w: 256,  h: 128, zoom: 3.2 },
-            4: { w: 128,  h: 64,  zoom: 6.4 },
-            5: { w: 64,   h: 32,  zoom: 12.8 },
-            6: { w: 32,   h: 16,  zoom: 25.6 }
+            1: { w: 1024, h: 512, zoom: 1.0 },
+            2: { w: 512,  h: 256, zoom: 1.8 },
+            3: { w: 256,  h: 128, zoom: 3.5 },
+            4: { w: 128,  h: 64,  zoom: 7.0 },
+            5: { w: 64,   h: 32,  zoom: 14.0 },
+            6: { w: 32,   h: 16,  zoom: 28.0 }
         }
     };
 
@@ -1190,23 +1186,27 @@
         iniciarStudioDoZero: function(targetBase) {
             DOM.wsCanvas.width = WORKBENCH_W; 
             DOM.wsCanvas.height = WORKBENCH_H; 
+            
+            // O Canvas da Grelha mantém-se fixo na resolução máxima para evitar pixels grossos
+            DOM.gridCanvas.width = WORKBENCH_W; 
+            DOM.gridCanvas.height = WORKBENCH_H; 
+            
             offscreenCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             
             if(targetBase) {
                 const img = new Image(); 
                 img.onload = () => {
-                    let aspect = img.width / img.height;
                     let targetZone = 1;
                     
-                    // Deteta a zona perfeita sem esticar (Apenas Centraliza)
+                    // Deteta a zona perfeita sem esticar (Apenas Centraliza a Imagem Original)
                     Object.keys(STATE.matryoshkaZones).forEach(key => {
                         if (STATE.matryoshkaZones[key].w === img.width) targetZone = parseInt(key);
                     });
 
-                    const aZ = STATE.matryoshkaZones[targetZone];
                     const zX = OFFSET_X + (1024 - img.width) / 2;
                     const zY = OFFSET_Y + (512 - img.height) / 2;
 
+                    // A imagem é desenhada NO SEU TAMANHO ORIGINAL, sem upscale, no centro da mesa
                     offscreenCtx.drawImage(img, zX, zY, img.width, img.height);
                     
                     STATE.extractedPieces = []; 
@@ -1245,18 +1245,16 @@
             const z = STATE.currentZoom;
             
             if (DOM.canvasWrapper) {
+                // A magia do Zoom ocorre via redimensionamento CSS do Container
+                // Isto ativa as barras de Scroll nativas e evita crashear o WebGL
                 DOM.canvasWrapper.style.width = `${WORKBENCH_W * z}px`;
                 DOM.canvasWrapper.style.height = `${WORKBENCH_H * z}px`;
-            }
-            
-            if (DOM.gridCanvas) {
-                DOM.gridCanvas.width = WORKBENCH_W * z;
-                DOM.gridCanvas.height = WORKBENCH_H * z;
             }
             
             const zl = document.getElementById('zoom-label'); 
             if (zl) zl.innerText = `${Math.round(z * 100)}%`;
             
+            // INVERSE SCALE FIX: Ao redesenhar, as linhas vão ser compensadas pela espessura do zoom
             this.drawGridAndMold();
             this.renderFatiador();
         },
@@ -1274,28 +1272,26 @@
         },
 
         drawGridAndMold: function() {
-            const z = STATE.currentZoom; 
-            gCtx.clearRect(0, 0, DOM.gridCanvas.width, DOM.gridCanvas.height);
-            
-            gCtx.save();
-            gCtx.scale(z, z); 
+            gCtx.clearRect(0, 0, WORKBENCH_W, WORKBENCH_H);
             
             const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
             let zX = OFFSET_X + (1024 - aZ.w) / 2; 
             let zY = OFFSET_Y + (512 - aZ.h) / 2;
-            const f = aZ.w / 64; 
+            
+            // INVERSE SCALE FIX: As coordenadas originais são 1920x1080.
+            // Para a linha não parecer gigante após o Zoom CSS (transform scale de Width/Height),
+            // a espessura nativa desenhada no canvas tem que ser dividida por 'z'.
+            const z = STATE.currentZoom; 
+            const hideText = z >= 4.0; // Oculta o texto das etiquetas (ex: PEI.FRE) se o zoom for excessivo para focar nos píxeis
             
             let gridThickness = parseFloat(document.getElementById('grid-size')?.value || 1);
+            let cellSize = parseInt(document.getElementById('grid-px')?.value || 4); // Ajuste Dinâmico da Grade Solicitado
 
             const cbMat = document.getElementById('show-matryoshka');
             if (cbMat && cbMat.checked) {
                 const colors = {
-                    1:"rgba(255,170,0,0.3)", 
-                    2:"rgba(0,229,255,0.4)", 
-                    3:"rgba(255,0,255,0.5)", 
-                    4:"rgba(0,255,170,0.6)", 
-                    5:"rgba(255,255,0,0.7)", 
-                    6:"rgba(255,0,0,0.8)"
+                    1:"rgba(255,170,0,0.3)", 2:"rgba(0,229,255,0.4)", 3:"rgba(255,0,255,0.5)", 
+                    4:"rgba(0,255,170,0.6)", 5:"rgba(255,255,0,0.7)", 6:"rgba(255,0,0,0.8)"
                 };
                 
                 for(let i=1; i<=6; i++) {
@@ -1308,39 +1304,27 @@
                     gCtx.setLineDash([4/z, 4/z]); 
                     gCtx.strokeRect(cx, cy, mz.w, mz.h);
                     
-                    if(i !== 1) { 
+                    if(i !== 1 && !hideText) { 
                         gCtx.fillStyle = colors[i]; 
-                        gCtx.font = `bold ${10/z}px monospace`; 
+                        gCtx.font = `bold ${Math.max(1, 10/z)}px monospace`; 
                         gCtx.fillText(`Z${i}`, cx+(2/z), cy+(10/z)); 
                     }
                 }
                 gCtx.setLineDash([]);
             }
 
-            if (document.getElementById('show-grid-1x1')?.checked && z >= 2.0) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.05)"; 
-                gCtx.lineWidth = gridThickness / z; 
+            const showCustomGrid = document.getElementById('show-custom-grid');
+            if (showCustomGrid && showCustomGrid.checked && z >= 1.0) {
+                gCtx.strokeStyle = "rgba(255, 255, 255, 0.2)"; 
+                gCtx.lineWidth = gridThickness / z; // Proporção Inversa aplicada à Grade Ajustável
                 gCtx.beginPath();
-                for (let x = 0; x <= aZ.w; x += 1) { 
+                
+                // Desenha a Grade baseada no Slider (Tamanho de Célula), respeitando estritamente o espaço da Zona Ativa
+                for (let x = 0; x <= aZ.w; x += cellSize) { 
                     gCtx.moveTo(zX + x, zY); 
                     gCtx.lineTo(zX + x, zY + aZ.h); 
                 }
-                for (let y = 0; y <= aZ.h; y += 1) { 
-                    gCtx.moveTo(zX, zY + y); 
-                    gCtx.lineTo(zX + aZ.w, zY + y); 
-                }
-                gCtx.stroke();
-            }
-
-            if (document.getElementById('show-grid-16x16')?.checked) {
-                gCtx.strokeStyle = "rgba(255, 255, 255, 0.15)"; 
-                gCtx.lineWidth = (gridThickness + 0.5) / z; 
-                gCtx.beginPath();
-                for (let x = 0; x <= aZ.w; x += f) { 
-                    gCtx.moveTo(zX + x, zY); 
-                    gCtx.lineTo(zX + x, zY + aZ.h); 
-                }
-                for (let y = 0; y <= aZ.h; y += f) { 
+                for (let y = 0; y <= aZ.h; y += cellSize) { 
                     gCtx.moveTo(zX, zY + y); 
                     gCtx.lineTo(zX + aZ.w, zY + y); 
                 }
@@ -1353,12 +1337,16 @@
                 gCtx.setLineDash([12/z, 8/z]); 
                 gCtx.strokeRect(OFFSET_X, OFFSET_Y, 1024, 512); 
                 gCtx.setLineDash([]);
-                gCtx.fillStyle = "#ffaa00"; 
-                gCtx.font = `bold ${16/z}px 'JetBrains Mono', monospace`; 
-                gCtx.fillText("MOLDE MESTRE (1024x512)", OFFSET_X, OFFSET_Y - (5/z));
+                
+                if (!hideText) {
+                    gCtx.fillStyle = "#ffaa00"; 
+                    gCtx.font = `bold ${Math.max(2, 16/z)}px 'JetBrains Mono', monospace`; 
+                    gCtx.fillText("MOLDE MESTRE (1024x512)", OFFSET_X, OFFSET_Y - (5/z));
+                }
             }
             
             const drawBox = (x, y, w, h, label) => {
+                const f = aZ.w / 64; // Multiplicador base de Minecraft para a zona selecionada
                 let px = zX + (x * f); 
                 let py = zY + (y * f); 
                 let pw = w * f; 
@@ -1373,16 +1361,16 @@
                 gCtx.fillStyle = "rgba(176, 39, 156, 0.1)"; 
                 gCtx.fillRect(px, py, pw, ph);
                 
-                gCtx.font = `bold ${9/z}px 'JetBrains Mono', monospace`; 
-                let txtW = gCtx.measureText(label).width + (8/z);
-                
-                gCtx.fillStyle = "rgba(0,0,0,0.6)"; 
-                gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - (7/z), txtW, (14/z));
-                
-                gCtx.fillStyle = "#ffaa00"; 
-                gCtx.textAlign = "center"; 
-                gCtx.textBaseline = "middle"; 
-                gCtx.fillText(label, px + pw/2, py + ph/2); 
+                if (!hideText) {
+                    gCtx.font = `bold ${Math.max(1, 9/z)}px 'JetBrains Mono', monospace`; 
+                    let txtW = gCtx.measureText(label).width + (8/z);
+                    gCtx.fillStyle = "rgba(0,0,0,0.6)"; 
+                    gCtx.fillRect(px + pw/2 - txtW/2, py + ph/2 - (7/z), txtW, (14/z));
+                    gCtx.fillStyle = "#ffaa00"; 
+                    gCtx.textAlign = "center"; 
+                    gCtx.textBaseline = "middle"; 
+                    gCtx.fillText(label, px + pw/2, py + ph/2); 
+                }
             };
 
             if (STATE.currentEditingLayer === 1) {
@@ -1407,6 +1395,7 @@
                 }
             }
 
+            // Handles de Seleção também recebem Escala Inversa
             STATE.extractedPieces.forEach((p, i) => {
                 if (i === STATE.activePieceIndex) { 
                     gCtx.strokeStyle = "#00e5ff"; 
@@ -1438,8 +1427,6 @@
                 gCtx.fillStyle = "rgba(255, 0, 255, 0.15)"; 
                 gCtx.fillRect(STATE.manualSelection.x, STATE.manualSelection.y, STATE.manualSelection.w, STATE.manualSelection.h);
             }
-            
-            gCtx.restore();
         },
 
         renderFatiador: function() {
@@ -1471,7 +1458,7 @@
                 previewDiv.onclick = () => { 
                     STATE.activePieceIndex = i; 
                     this.renderFatiador(); 
-                    this.drawGridAndMold(); // Force redrawing handles
+                    this.drawGridAndMold(); 
                     this.updatePiecesList(); 
                 };
                 
@@ -1531,8 +1518,8 @@
                 return; 
             }
             
-            if (STATE.currentEditingLayer !== STATE.lastEditingLayer) { 
-                MemoryManager.salvarEstadoDaLayerAtual(); 
+            if (STATE.currentEditingLayer !== STATE.lastEditingLayer) {
+                MemoryManager.salvarEstadoDaLayerAtual();
             }
             
             STATE.lastEditingLayer = STATE.currentEditingLayer;
@@ -1573,19 +1560,19 @@
         
         aplicarPincelada: function(pos) {
             const sizeEl = document.getElementById('brush-size'); 
-            let size = sizeEl ? parseInt(sizeEl.value) : 2;
-            const z = STATE.currentZoom; 
-            const realSize = size / z; 
+            let size = sizeEl ? parseInt(sizeEl.value) : 1;
             
+            // Não divide a espessura do pincel pelo Zoom! 
+            // 1 pixel desenhado no canvas nativo de 1920x1080 é perfeitamente exato.
             offscreenCtx.fillStyle = STATE.currentPaintColor; 
-            offscreenCtx.fillRect(pos.x - realSize/2, pos.y - realSize/2, realSize, realSize);
+            offscreenCtx.fillRect(Math.floor(pos.x - size/2), Math.floor(pos.y - size/2), size, size);
             StudioCanvas.renderFatiador();
         },
         
         aplicarContaGotas: function(pos) {
             let pixel = wsCtx.getImageData(pos.x, pos.y, 1, 1).data;
             if (pixel[3] > 0) {
-                this.setColor("#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).padStart(6, '0'));
+                this.setColor("#" + (1 << 24 | pixel[0] << 16 | pixel[1] << 8 | pixel[2]).toString(16).slice(1));
             }
         },
         
@@ -1598,9 +1585,9 @@
             }
             
             for (let i = 0; i < data.length; i += 4) { 
-                if ((Math.abs(data[i]-data[0]) <= 30 && Math.abs(data[i+1]-data[1]) <= 30) || (data[i] > 230 && data[i+1] > 230)) { 
+                if ((Math.abs(data[i]-data[0]) <= 30 && Math.abs(data[i+1]-data[1]) <= 30) || (data[i] > 230 && data[i+1] > 230)) {
                     data[i+3] = 0; 
-                } 
+                }
             }
             
             offscreenCtx.putImageData(imgData, 0, 0); 
@@ -1708,6 +1695,8 @@
         
         getMousePos: function(evt) {
             const rect = DOM.wsCanvas.getBoundingClientRect();
+            // A largura do rect reflete o zoom CSS (rect.width = 1920 * zoom). 
+            // O cálculo devolve-nos o clique exatamente nas coordenadas nativas 1920x1080 da mesa de trabalho
             return { 
                 x: (evt.clientX - rect.left) * (WORKBENCH_W / rect.width), 
                 y: (evt.clientY - rect.top) * (WORKBENCH_H / rect.height) 
@@ -1716,7 +1705,7 @@
     };
 
     /* =================================================================================
-       EXPORT & MATRYOSHKA NATIVE MANAGER
+       EXPORT & MATRYOSHKA NATIVE MANAGER (Sem Upscale Destrutivo)
        ================================================================================= */
     const ExportManager = {
         triggerUpload: function(t) { 
@@ -1767,6 +1756,7 @@
             const zX = OFFSET_X + (1024 - aZ.w) / 2; 
             const zY = OFFSET_Y + (512 - aZ.h) / 2;
 
+            // Recorta a zona ativa da mesa mestre NO SEU TAMANHO EXATO DA ZONA (EX: 64x32)
             const zoneCanvas = document.createElement('canvas'); 
             zoneCanvas.width = aZ.w; 
             zoneCanvas.height = aZ.h;
@@ -1775,6 +1765,7 @@
             zCtx.imageSmoothingEnabled = false;
             zCtx.drawImage(offscreenCanvas, zX, zY, aZ.w, aZ.h, 0, 0, aZ.w, aZ.h);
             
+            // Pinta as peças por cima
             STATE.extractedPieces.forEach(p => {
                 const pCanv = document.createElement('canvas'); 
                 pCanv.width = p.imgData.width; 
@@ -1783,15 +1774,8 @@
                 zCtx.drawImage(pCanv, p.x - zX, p.y - zY, p.w, p.h);
             });
 
-            const masterCanvas = document.createElement('canvas'); 
-            masterCanvas.width = 1024; 
-            masterCanvas.height = 512;
-            
-            const mCtx = masterCanvas.getContext('2d'); 
-            mCtx.imageSmoothingEnabled = false; 
-            mCtx.drawImage(zoneCanvas, 0, 0, aZ.w, aZ.h, 0, 0, 1024, 512);
-
-            const finalBase64 = masterCanvas.toDataURL('image/png');
+            // NÃO FAZ UPSCALE PARA O METADATA, MANTÉM ORIGINAL
+            const finalBase64 = zoneCanvas.toDataURL('image/png');
             
             if (STATE.currentEditingLayer === 1) { 
                 STATE.finalImageL1 = finalBase64; 
@@ -1818,9 +1802,10 @@
 
             Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
                 if (!imgL1 && !imgL2) return;
-                
-                let baseW = imgL1 ? imgL1.width : imgL2.width; 
-                let f = baseW / 64;
+
+                // Skinview3d ou modelos aceitam o formato exato da armadura. Usamos a dimensão para calibrar
+                let baseW = imgL1 ? imgL1.width : imgL2.width;
+                let f = baseW / 64; 
                 
                 const previewCanvas = document.createElement('canvas'); 
                 previewCanvas.width = 64 * f; 
@@ -1828,7 +1813,7 @@
                 
                 const pCtx = previewCanvas.getContext('2d'); 
                 pCtx.imageSmoothingEnabled = false;
-                
+
                 const copyRegion = (img, sx, sy, sw, sh, dx, dy) => { 
                     pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); 
                 };
@@ -1840,20 +1825,20 @@
                 pCtx.fillRect(32*f, 48*f, 16*f, 16*f); 
                 pCtx.fillRect(0, 16*f, 16*f, 16*f); 
                 pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
-                
+
                 if (imgL2) { 
                     copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
-                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16); 
-                    copyRegion(imgL2, 0, 16, 16, 16, 16, 48); 
+                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
+                    copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
                 }
                 
                 if (imgL1) { 
-                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0); 
+                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
                     copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
                     copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
                     copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
-                    copyRegion(imgL1, 0, 16, 16, 16, 0, 32); 
-                    copyRegion(imgL1, 0, 16, 16, 16, 0, 48); 
+                    copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
+                    copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
                 }
                 
                 skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => console.warn("Erro WebGL:", err));
@@ -1866,6 +1851,7 @@
                 UIManager.showNotification(`A Camada L${layer} não foi compilada no Estúdio.`, "error"); 
                 return; 
             }
+            
             const link = document.createElement('a'); 
             link.href = data; 
             link.download = `vexanium_L${layer}_compiled.png`; 
@@ -1874,10 +1860,10 @@
     };
 
     /* =================================================================================
-       IA & LORE INTEGRATION
+       IA & LORE INTEGRATION (GEMINI API)
        ================================================================================= */
     async function callGemini(payload, endpoint = "gemini-2.5-flash-preview-09-2025:generateContent") {
-        const loader = document.getElementById('ai-loader'); 
+        const loader = document.getElementById('ai-loader');
         const scanner = document.getElementById('scanning-overlay');
         
         if (loader) loader.style.display = 'block'; 
@@ -1895,7 +1881,8 @@
                 });
                 
                 if (!response.ok) throw new Error("Connection failed");
-                return await response.json(); 
+                const data = await response.json(); 
+                return data;
             } catch (e) { 
                 retries++; 
                 await new Promise(res => setTimeout(res, Math.pow(2, retries) * 1000)); 
@@ -1910,50 +1897,49 @@
     }
 
     async function executarGeracaoIA() { 
-        const promptInput = document.getElementById('gen-prompt-input'); 
+        const promptInput = document.getElementById('gen-prompt-input');
         const tema = promptInput ? promptInput.value : "";
         
         if (!tema || tema.trim() === '') { 
-            UIManager.showNotification("Operador, descreva o design.", "warning"); 
+            UIManager.showNotification("Operador, descreva o design da armadura antes de iniciar a Forja.", "warning"); 
             return; 
         }
         
-        UIManager.closeModal('gen-modal'); 
-        UIManager.showNotification("⏳ INICIANDO FORJA IA...");
-        
-        const layoutInstructions = STATE.currentEditingLayer === 1 
-            ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)." 
+        UIManager.closeModal('gen-modal');
+        UIManager.showNotification("⏳ INICIANDO FORJA IA (GERANDO TEXTURA)...");
+
+        const layoutInstructions = STATE.currentEditingLayer === 1
+            ? "Helmet: Top(128,0), Bottom(256,0), Right(0,128), Front(128,128), Left(256,128), Back(384,128). Chest: Front(0,256), Back(128,256). Arm: Side(256,256), Front(320,256). Boot: Side(384,256), Front(448,256)."
             : "Leggings/Pants: Waist Front(0,256), Waist Back(128,256), Leg Side(256,256), Leg Front(320,256).";
         
-        const payload = { 
-            instances: { 
-                prompt: `Minecraft armor texture map, flat 2D layout. CRITICAL INSTRUCTION: Generate ONLY Layer ${STATE.currentEditingLayer}. DO NOT draw the background, keep it solid white. Pixel art style. STRICT COORDINATES: ${layoutInstructions}. Theme: ${tema} (Must be exactly 2:1 aspect ratio)` 
-            }, 
-            parameters: { sampleCount: 1 } 
-        };
+        const strictPrompt = `Minecraft armor texture map, flat 2D layout. CRITICAL INSTRUCTION: Generate ONLY Layer ${STATE.currentEditingLayer}. DO NOT draw the background, keep it solid white. Pixel art style. STRICT COORDINATES TO FOLLOW EXACTLY: ${layoutInstructions}. Theme: ${tema} (Must be exactly 2:1 aspect ratio)`;
         
+        const payload = { instances: { prompt: strictPrompt }, parameters: { sampleCount: 1 } };
         const data = await callGemini(payload, "imagen-4.0-generate-001:predict");
-        
+
         if (data && data.predictions && data.predictions.length > 0) {
-            const imageUrl = `data:image/png;base64,${data.predictions[0].bytesBase64Encoded}`; 
+            const base64Image = data.predictions[0].bytesBase64Encoded;
+            const imageUrl = `data:image/png;base64,${base64Image}`;
             const img = new Image();
-            img.onload = () => { 
+            
+            img.onload = () => {
                 offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
-                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512); 
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
                 StudioCanvas.renderFatiador(); 
                 StudioCanvas.drawGridAndMold(); 
                 MemoryManager.registrarEstadoMemoria(); 
-                UIManager.showNotification("✓ SUCESSO: ARTE INJETADA!"); 
+                UIManager.showNotification("✓ SUCESSO: ARTE GERADA E INJETADA NA MESA!");
             }; 
             img.src = imageUrl;
             
             if (STATE.currentEditingLayer === 1) STATE.baseImageL1 = imageUrl; 
             else STATE.baseImageL2 = imageUrl;
             
+            STATE.originalImageObj.src = imageUrl;
             UIManager.updateDiagnosticPanel(); 
             StudioCanvas.abrirFatiadorLivre(true);
-        } else { 
-            UIManager.showNotification("Falha na Forja. (API Key Ausente).", "error"); 
+        } else {
+            UIManager.showNotification("Falha na Forja. A IA não conseguiu gerar a armadura (Chave API Ausente ou Erro).", "error");
         }
     }
     
@@ -1979,7 +1965,12 @@
     /* =================================================================================
        VISUALIZADORES 3D
        ================================================================================= */
-    const skinViewer = new skinview3d.SkinViewer({ canvas: document.getElementById('skinViewer'), width: 800, height: 600, alpha: true });
+    const skinViewer = new skinview3d.SkinViewer({ 
+        canvas: document.getElementById('skinViewer'), 
+        width: 800, 
+        height: 600, 
+        alpha: true 
+    });
     skinViewer.loadSkin('https://crafatar.com/skins/MHF_Steve').catch(() => {});
 
     const gltfCanvas = document.getElementById('gltfViewer');
@@ -2007,7 +1998,6 @@
         DOM.fileInput.onchange = (e) => {
             const file = e.target.files[0]; 
             if(!file) return;
-            
             const reader = new FileReader(); 
             reader.onload = (ev) => {
                 if(STATE.uploadTarget === 1) STATE.baseImageL1 = ev.target.result;
@@ -2055,6 +2045,7 @@
                     STATE.activePieceIndex = i; 
                     STATE.isDragging = true; 
                     DOM.wsCanvas.style.cursor = 'grabbing';
+                    // Coloca a peça no topo do array para ser desenhada por último (ficar por cima)
                     STATE.extractedPieces.push(STATE.extractedPieces.splice(i,1)[0]); 
                     STATE.activePieceIndex = STATE.extractedPieces.length-1; 
                     break;
@@ -2066,11 +2057,9 @@
 
     DOM.wsCanvas.onmousemove = (e) => {
         const pos = ToolManager.getMousePos(e);
-        
         if (STATE.isPainting && STATE.currentTool === 'brush') { 
             ToolManager.aplicarPincelada(pos); 
         }
-        
         if (STATE.isDragging) {
             if(STATE.currentTool === 'move' && STATE.activePieceIndex !== -1) {
                 const p = STATE.extractedPieces[STATE.activePieceIndex]; 
@@ -2100,23 +2089,24 @@
             STATE.isPainting = false; 
             MemoryManager.registrarEstadoMemoria(); 
         }
-        
         if(STATE.isDragging) {
             STATE.isDragging = false; 
             DOM.wsCanvas.style.cursor = 'crosshair';
-            const snapToggle = document.getElementById('snap-grid');
             
+            const snapToggle = document.getElementById('snap-grid');
             if(STATE.currentTool === 'move' && snapToggle && snapToggle.checked && STATE.activePieceIndex !== -1) {
                 const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
                 const zX = OFFSET_X + (1024 - aZ.w) / 2; 
                 const zY = OFFSET_Y + (512 - aZ.h) / 2;
-                const snapF = Math.max(1, aZ.w / 64);
+                
+                // O Snap Magnético agora obedece rigorosamente ao slider de "Tamanho da Célula" da Grade
+                const cellSizeEl = document.getElementById('grid-px');
+                const snapF = cellSizeEl ? parseInt(cellSizeEl.value) : 4;
                 
                 let p = STATE.extractedPieces[STATE.activePieceIndex];
                 p.x = zX + Math.round((p.x - zX) / snapF) * snapF; 
                 p.y = zY + Math.round((p.y - zY) / snapF) * snapF;
             }
-            
             StudioCanvas.renderFatiador(); 
             StudioCanvas.drawGridAndMold(); 
             MemoryManager.registrarEstadoMemoria();
@@ -2165,6 +2155,9 @@
         };
     }
 
+    /* =================================================================================
+       INICIALIZAÇÃO E ATALHOS DE TECLADO
+       ================================================================================= */
     function resize() {
         const w = window.innerWidth; 
         const h = window.innerHeight;
