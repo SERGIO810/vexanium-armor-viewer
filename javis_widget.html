@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Engenharia UV Perfeita)</title>
+    <title>Vexanium Viewer - Terminal J.A.V.I.S. (Precisão 2:1 e UI Vetorial)</title>
     
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -116,7 +116,7 @@
         }
 
         .editor-toolbar { 
-            flex: 0 0 260px; 
+            flex: 0 0 250px; 
             background: rgba(0,0,0,0.6); 
             border: 1px solid var(--warden-bone-dim); 
             border-radius: 6px; 
@@ -149,15 +149,16 @@
         }
         
         #canvas-wrapper { 
-            /* A ROCHA DO SISTEMA: Garante que a mesa nunca é achatada ou distorcida */
             width: 1024px; 
             height: 512px; 
+            min-width: 1024px; 
+            min-height: 512px; 
             margin: auto; 
             background-color: #0d141c; 
             box-shadow: 0 0 30px rgba(0,0,0,0.5); 
             position: relative; 
             transform-origin: center center;
-            flex-shrink: 0; 
+            flex-shrink: 0;
         }
 
         #workspace-canvas, #grid-svg { 
@@ -208,6 +209,46 @@
             to { opacity: 1; transform: translateX(-50%) translateY(0); } 
         }
 
+        .zones-container { 
+            display: flex; 
+            gap: 4px; 
+            align-items: center; 
+        }
+
+        .zone-btn {
+            width: 38px; 
+            height: 38px; 
+            border: 1px solid rgba(19, 201, 201, 0.2); 
+            background: rgba(19, 201, 201, 0.05);
+            border-radius: 8px; 
+            cursor: pointer; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+            transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); 
+            color: var(--warden-bone-dim); 
+            font-size: 11px;
+            font-weight: 700; 
+            letter-spacing: 1px; 
+            font-family: 'JetBrains Mono', monospace; 
+            flex-shrink: 0; 
+            position: relative;
+        }
+
+        .zone-btn:hover { 
+            background: rgba(19, 201, 201, 0.15); 
+            border-color: var(--sculk-core); 
+            color: var(--sculk-core); 
+            transform: scale(1.1); 
+        }
+
+        .zone-btn.active { 
+            background: rgba(19, 201, 201, 0.3); 
+            border-color: var(--sculk-core); 
+            color: var(--sculk-core); 
+            box-shadow: 0 0 12px rgba(19, 201, 201, 0.4); 
+        }
+
         .toolbar-btn {
             width: 42px; 
             height: 42px; 
@@ -238,6 +279,7 @@
             background: rgba(255, 170, 0, 0.2); 
             color: var(--calib-accent); 
             box-shadow: 0 0 10px rgba(255,170,0,0.3); 
+            animation: pulse 1.5s ease-in-out infinite; 
         }
 
         .toolbar-divider { 
@@ -248,7 +290,12 @@
             border-radius: 1px;
         }
 
-        .toolbar-btn::after {
+        @keyframes pulse { 
+            0%, 100% { opacity: 1; } 
+            50% { opacity: 0.6; } 
+        }
+
+        .toolbar-btn::after, .zone-btn::after {
             content: attr(data-tooltip); 
             position: absolute; 
             bottom: calc(100% + 12px); 
@@ -271,11 +318,30 @@
             text-transform: uppercase;
         }
 
-        .toolbar-btn:hover::after { 
+        .toolbar-btn::before, .zone-btn::before {
+            content: ''; 
+            position: absolute; 
+            bottom: calc(100% + 7px); 
+            left: 50%; 
+            transform: translateX(-50%); 
+            border-left: 5px solid transparent; 
+            border-right: 5px solid transparent; 
+            border-top: 5px solid var(--sculk-core);
+            opacity: 0; 
+            transition: all 0.2s ease; 
+            z-index: 10000; 
+            pointer-events: none;
+        }
+
+        .toolbar-btn:hover::after, 
+        .zone-btn:hover::after, 
+        .toolbar-btn:hover::before, 
+        .zone-btn:hover::before { 
             opacity: 1; 
             transform: translateX(-50%) translateY(0); 
         }
 
+        /* SVG Global Configuration */
         svg {
             flex-shrink: 0;
             width: 16px; 
@@ -325,8 +391,15 @@
             to { opacity: 1; transform: translateX(0); } 
         }
 
-        .notification.error { background: rgba(255, 51, 51, 0.9); border-left-color: rgba(255, 51, 51, 1); }
-        .notification.warning { background: rgba(255, 170, 0, 0.9); border-left-color: rgba(255, 170, 0, 1); }
+        .notification.error { 
+            background: rgba(255, 51, 51, 0.9); 
+            border-left-color: rgba(255, 51, 51, 1); 
+        }
+
+        .notification.warning { 
+            background: rgba(255, 170, 0, 0.9); 
+            border-left-color: rgba(255, 170, 0, 1); 
+        }
 
         .modal { 
             position: absolute; 
@@ -372,7 +445,11 @@
             z-index: 10; 
         }
 
-        .btn-group { display: flex; gap: 8px; align-items: center; }
+        .btn-group { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+        }
 
         .btn { 
             background: var(--sculk-surface); 
@@ -393,12 +470,46 @@
             text-transform: uppercase; 
         }
 
-        .btn:hover { background: #13202b; border-color: var(--warden-bone); transform: translateY(-1px); }
-        .btn.active { border-color: var(--sculk-core); color: var(--sculk-core); background: rgba(12, 138, 140, 0.1); }
-        .divider { width: 1px; height: 26px; background: #1a2a3a; margin: 0 5px; }
+        .btn:hover { 
+            background: #13202b; 
+            border-color: var(--warden-bone); 
+            transform: translateY(-1px); 
+        }
 
-        #javis-branding { font-size: 11px; color: var(--warden-bone-dim); text-decoration: none; display: flex; align-items: center; gap: 5px; letter-spacing: 1px; text-transform: uppercase; margin-left: auto; }
-        #javis-branding b { color: var(--sculk-core); font-size: 13px; letter-spacing: 2px; }
+        .btn.active { 
+            border-color: var(--sculk-core); 
+            color: var(--sculk-core); 
+            background: rgba(12, 138, 140, 0.1); 
+        }
+
+        .divider { 
+            width: 1px; 
+            height: 26px; 
+            background: #1a2a3a; 
+            margin: 0 5px; 
+        }
+
+        #javis-branding { 
+            font-size: 11px; 
+            color: var(--warden-bone-dim); 
+            text-decoration: none; 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            letter-spacing: 1px; 
+            text-transform: uppercase; 
+            margin-left: auto; 
+        }
+
+        #javis-branding b { 
+            color: var(--sculk-core); 
+            font-size: 13px; 
+            letter-spacing: 2px; 
+        }
+
+        #file-input, #file-input-preset, #file-input-add { 
+            display: none; 
+        }
 
         #status-overlay { 
             position: absolute; 
@@ -435,9 +546,25 @@
             text-transform: uppercase; 
         }
 
-        .status-panel div { margin-bottom: 5px; }
-        .status-panel strong { color: var(--sculk-core); display: inline-block; width: 65px; }
-        .status-header { color: var(--calib-accent); font-size: 10px; font-weight: 800; letter-spacing: 1px; border-bottom: 1px solid rgba(255, 170, 0, 0.3); padding-bottom: 5px; margin-bottom: 10px !important; }
+        .status-panel div { 
+            margin-bottom: 5px; 
+        }
+
+        .status-panel strong { 
+            color: var(--sculk-core); 
+            display: inline-block; 
+            width: 65px; 
+        }
+
+        .status-header { 
+            color: var(--calib-accent); 
+            font-size: 10px; 
+            font-weight: 800; 
+            letter-spacing: 1px; 
+            border-bottom: 1px solid rgba(255, 170, 0, 0.3); 
+            padding-bottom: 5px; 
+            margin-bottom: 10px !important; 
+        }
 
         /* =================================================================================
            PAINEL DE PEÇAS DIREITO (CAIXA DE FERRAMENTAS)
@@ -468,8 +595,14 @@
             gap: 8px;
         }
 
-        .pieces-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        
+        .pieces-list { 
+            flex: 1; 
+            overflow-y: auto; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+        }
+
         .piece-item { 
             background: rgba(18, 30, 41, 0.8); 
             border: 1px solid var(--warden-bone-dim); 
@@ -481,9 +614,16 @@
             transition: 0.2s; 
         }
 
-        .piece-item:hover { background: rgba(31, 52, 71, 0.9); border-color: var(--calib-accent); }
-        .piece-item.selected { background: rgba(255, 170, 0, 0.15); border-color: var(--calib-accent); }
-        
+        .piece-item:hover { 
+            background: rgba(31, 52, 71, 0.9); 
+            border-color: var(--calib-accent); 
+        }
+
+        .piece-item.selected { 
+            background: rgba(255, 170, 0, 0.15); 
+            border-color: var(--calib-accent); 
+        }
+
         .piece-preview { 
             width: 100%; 
             height: 70px; 
@@ -500,7 +640,11 @@
             background-position: 0 0, 5px 5px; 
         }
 
-        .piece-preview img { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+        .piece-preview img { 
+            max-width: 100%; 
+            max-height: 100%; 
+            image-rendering: pixelated; 
+        }
         
         .slice-category { 
             font-size: 11px; 
@@ -532,13 +676,39 @@
             gap: 6px;
         }
 
-        .action-btn:hover { background: var(--warden-bone-dim); color: #000; }
-        .color-swatch { flex: 1; height: 28px; border: 1px solid #000; cursor: pointer; border-radius: 2px; transition: 0.1s; box-shadow: inset 0 0 5px rgba(0,0,0,0.5); }
-        .color-swatch:hover { transform: scale(1.1); border-color: #fff; }
+        .action-btn:hover { 
+            background: var(--warden-bone-dim); 
+            color: #000; 
+        }
 
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-thumb { background: var(--sculk-surface); border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--warden-bone-dim); }
+        .color-swatch { 
+            flex: 1; 
+            height: 28px; 
+            border: 1px solid #000; 
+            cursor: pointer; 
+            border-radius: 2px; 
+            transition: 0.1s; 
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5); 
+        }
+
+        .color-swatch:hover { 
+            transform: scale(1.1); 
+            border-color: #fff; 
+        }
+
+        ::-webkit-scrollbar { 
+            width: 8px; 
+            height: 8px; 
+        }
+
+        ::-webkit-scrollbar-thumb { 
+            background: var(--sculk-surface); 
+            border-radius: 4px; 
+        }
+
+        ::-webkit-scrollbar-thumb:hover { 
+            background: var(--warden-bone-dim); 
+        }
     </style>
 </head>
 <body oncontextmenu="return false;">
@@ -612,14 +782,18 @@
                     <input type="range" id="brush-size" min="1" max="20" value="2" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('brush-size-val').innerText = this.value;">
                 </label>
 
-                <div class="slice-category">OPÇÕES DE GRADE</div>
-                
-                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-top:8px;">
-                    <input type="checkbox" id="show-custom-grid" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Mostrar Grade (Píxeis)
+                <div class="slice-category" style="margin-top: 15px;">OPÇÕES DE GRADE</div>
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold;">
+                    <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
                 </label>
                 
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:#fff; font-weight:bold; margin-top:8px;">
-                    <input type="checkbox" id="snap-grid" checked style="accent-color: var(--calib-accent);"> 🧲 Snap Magnético
+                    <input type="checkbox" id="show-custom-grid" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> 📏 Mostrar Grade
+                </label>
+
+                <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
+                    Célula (Pixel): <span id="grid-px-val" style="color:var(--calib-accent); font-weight:bold; width:15px;">4</span>px
+                    <input type="range" id="grid-px" min="1" max="32" step="1" value="4" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-px-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
                 </label>
 
                 <label style="font-size:10px; color: var(--warden-bone-dim); display:flex; align-items:center; gap:5px; margin-top:8px;">
@@ -627,20 +801,24 @@
                     <input type="range" id="grid-size" min="0.5" max="3" step="0.5" value="1" style="flex:1; accent-color: var(--calib-accent);" oninput="document.getElementById('grid-size-val').innerText = this.value; StudioCanvas.drawGridAndMold();">
                 </label>
 
+                <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--sculk-core); font-weight:bold; margin-top:12px;">
+                    <input type="checkbox" id="show-matryoshka" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--sculk-core);"> 🪆 ZONAS MATRYOSHKA
+                </label>
+
                 <div class="slice-category" style="margin-top: 15px;">MOLDES DE EXPORTAÇÃO</div>
                 <label style="font-size:11px; display:flex; align-items:center; gap:8px; cursor:pointer; color:var(--calib-accent); font-weight:bold; margin-bottom:5px;">
-                    <input type="checkbox" id="show-export-zone" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> Molde Mestre
+                    <input type="checkbox" id="show-export-zone" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color: var(--calib-accent);"> Molde Mestre (1024x512)
                 </label>
                 
                 <div id="uv-toggles-l1" style="display:flex; flex-direction:column; gap:5px; margin-left:10px; border-left:2px solid var(--sculk-core); padding-left:5px;">
                     <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-helmet" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Capacete</label>
                     <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-chest" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Peitoral</label>
-                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-arms" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Braços (Dir & Esq)</label>
-                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-boots" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Botas (Dir & Esq)</label>
+                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-arms" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Braços</label>
+                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-boots" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Botas</label>
                 </div>
                 <div id="uv-toggles-l2" style="display:none; flex-direction:column; gap:5px; margin-left:10px; border-left:2px solid var(--sculk-core); padding-left:5px;">
                     <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-waist" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Cintura</label>
-                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-legs" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Pernas (Dir & Esq)</label>
+                    <label style="font-size:10px; cursor:pointer; color:var(--warden-bone-dim);"><input type="checkbox" id="uv-legs" checked onchange="StudioCanvas.drawGridAndMold()" style="accent-color:var(--calib-accent);"> Pernas</label>
                 </div>
             </div>
 
@@ -654,8 +832,20 @@
                     </div>
                 </div>
                 
-                <!-- FLOATING TOOLBAR E FERRAMENTAS -->
+                <!-- FLOATING TOOLBAR MATRYOSHKA E FERRAMENTAS -->
                 <div class="floating-toolbar">
+                    <div class="zones-container">
+                        <span style="font-size: 10px; color: var(--warden-bone-dim); font-weight: bold; margin-right: 4px; font-family: 'JetBrains Mono', monospace;">ZONAS:</span>
+                        <button class="zone-btn active" data-zone="1" data-tooltip="Z1 Mestre (1024x512)" onclick="StudioCanvas.switchZone(1)">Z1</button>
+                        <button class="zone-btn" data-zone="2" data-tooltip="Z2 (512x256)" onclick="StudioCanvas.switchZone(2)">Z2</button>
+                        <button class="zone-btn" data-zone="3" data-tooltip="Z3 (256x128)" onclick="StudioCanvas.switchZone(3)">Z3</button>
+                        <button class="zone-btn" data-zone="4" data-tooltip="Z4 (128x64)" onclick="StudioCanvas.switchZone(4)">Z4</button>
+                        <button class="zone-btn" data-zone="5" data-tooltip="Z5 (64x32)" onclick="StudioCanvas.switchZone(5)">Z5</button>
+                        <button class="zone-btn" data-zone="6" data-tooltip="Z6 (32x16)" onclick="StudioCanvas.switchZone(6)">Z6</button>
+                    </div>
+                    
+                    <div class="toolbar-divider"></div>
+                    
                     <button class="toolbar-btn" data-tooltip="Desfazer Ação" onclick="MemoryManager.desfazerEstado()">
                         <svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                     </button>
@@ -893,6 +1083,8 @@
     // A RESTRIÇÃO MATEMÁTICA PERFEITA (2:1 EXACT)
     const WORKBENCH_W = 1024; 
     const WORKBENCH_H = 512; 
+    const OFFSET_X = 0; 
+    const OFFSET_Y = 0; 
 
     const DOM = {
         wsCanvas: document.getElementById('workspace-canvas'),
@@ -908,7 +1100,7 @@
     let offscreenCtx = offscreenCanvas.getContext('2d', { willReadFrequently: true });
 
     /* =================================================================================
-       UI MANAGER (Protegido com Optional Chaining)
+       UI MANAGER (Protegido com Optional Chaining e Atualizado p/ SVG)
        ================================================================================= */
     const UIManager = {
         showNotification: function(message, type = 'success') {
@@ -1105,10 +1297,18 @@
             if(targetBase) {
                 const img = new Image(); 
                 img.onload = () => {
-                    // O UPSCALE MÁGICO: Estica a imagem de forma nativa e pixelada 
-                    // para ocupar os 1024x512, garantindo precisão matemática para o rato.
-                    offscreenCtx.imageSmoothingEnabled = false;
-                    offscreenCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, WORKBENCH_W, WORKBENCH_H);
+                    let targetZone = 1;
+                    
+                    // Deteta a zona perfeita sem esticar (Apenas Centraliza a Imagem Original)
+                    Object.keys(STATE.matryoshkaZones).forEach(key => {
+                        if (STATE.matryoshkaZones[key].w === img.width) targetZone = parseInt(key);
+                    });
+
+                    const zX = (1024 - img.width) / 2;
+                    const zY = (512 - img.height) / 2;
+
+                    // A imagem é desenhada NO SEU TAMANHO ORIGINAL, sem upscale, no centro da mesa
+                    offscreenCtx.drawImage(img, zX, zY, img.width, img.height);
                     
                     STATE.extractedPieces = []; 
                     STATE.activePieceIndex = -1; 
@@ -1116,7 +1316,7 @@
                     STATE.nextPieceId = 1;
                     
                     ToolManager.setTool('magic'); 
-                    this.switchZone(1); 
+                    this.switchZone(targetZone); 
                     MemoryManager.registrarEstadoMemoria(); 
                     this.updatePiecesList();
                 }; 
@@ -1171,18 +1371,18 @@
             UIManager.showNotification(`🎯 FOCO MATRYOSHKA: ZONA ${zIdx}`);
         },
 
-        // MOTOR VETORIAL SVG AVANÇADO (Mapeamento Completo com Assimetria)
+        // MOTOR VETORIAL SVG AVANÇADO (Impede crash VRAM e linhas desfocadas/grossas)
         drawGridAndMold: function() {
             if (!DOM.gridSvg) return;
             
             const z = STATE.currentZoom; 
-            const f = WORKBENCH_W / 64; // Sempre 16! Píxeis cravados de uma imagem 64x32
+            const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            let zX = (1024 - aZ.w) / 2; 
+            let zY = (512 - aZ.h) / 2;
+            const f = aZ.w / 64; 
             
             let gridThickness = parseFloat(document.getElementById('grid-size')?.value || 1);
-            
-            // O slider 'grid-px' representa o número de pixels reais do Minecraft por quadrado da grade
-            let cellPx = parseInt(document.getElementById('grid-px')?.value || 4); 
-            let cellSize = cellPx * f; // Converte Pixels do Minecraft em Pixels do Canvas
+            let cellSize = parseInt(document.getElementById('grid-px')?.value || 4); 
             
             let svgContent = '';
 
@@ -1195,13 +1395,13 @@
             };
             
             const addText = (text, x, y, color, size) => {
-                // Diminuí ligeiramente a fonte base de 9 para 8 para caber perfeitamente no detalhe
+                // ESCALA INVERSA DO TEXTO: Mantém sempre legível independentemente do Zoom no ecrã
                 const fontSize = Math.max(0.5, size / z);
                 svgContent += `<text x="${x}" y="${y}" fill="none" stroke="#000" stroke-width="${3/z}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
                 svgContent += `<text x="${x}" y="${y}" fill="${color}" font-size="${fontSize}px" font-family="'JetBrains Mono', monospace" font-weight="bold" text-anchor="middle" dominant-baseline="central">${text}</text>`;
             };
 
-            const hideText = z >= 4.0; // Desliga os textos pequenos se o zoom for enorme para limpeza visual
+            const hideText = z >= 4.0; // Desliga os textos "PEI.FRE" se o zoom for enorme
 
             // 1. ZONAS MATRYOSHKA GERAIS
             const cbMat = document.getElementById('show-matryoshka');
@@ -1220,13 +1420,15 @@
                 }
             }
 
-            // 2. A GRADE PROFISSIONAL AJUSTÁVEL (Cravada na Mesa de 1024x512)
+            // 2. A GRADE PROFISSIONAL AJUSTÁVEL
             if (document.getElementById('show-custom-grid')?.checked) {
-                for (let x = 0; x <= WORKBENCH_W; x += cellSize) { 
-                    addLine(x, 0, x, WORKBENCH_H, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
+                // Linhas Verticais
+                for (let x = 0; x <= aZ.w; x += cellSize) { 
+                    addLine(zX + x, zY, zX + x, zY + aZ.h, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
                 }
-                for (let y = 0; y <= WORKBENCH_H; y += cellSize) { 
-                    addLine(0, y, WORKBENCH_W, y, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
+                // Linhas Horizontais
+                for (let y = 0; y <= aZ.h; y += cellSize) { 
+                    addLine(zX, zY + y, zX + aZ.w, zY + y, 'rgba(255, 255, 255, 0.2)', gridThickness / z);
                 }
             }
 
@@ -1236,60 +1438,21 @@
                 if (!hideText) addText("MOLDE MESTRE (1024x512)", 150/z, 15/z, '#ffaa00', 16);
             }
             
-            // 4. CAIXAS E ETIQUETAS DO MINECRAFT (Mapeamento Completo com Assimetria)
+            // 4. CAIXAS E ETIQUETAS DO MINECRAFT (Proporcionais à Zona)
             const renderBox = (x, y, w, h, label) => {
-                let px = x * f; let py = y * f; let pw = w * f; let ph = h * f;
+                let px = zX + (x * f); let py = zY + (y * f); let pw = w * f; let ph = h * f;
                 addRect(px, py, pw, ph, '#b0279c', 'rgba(176, 39, 156, 0.1)', 2 / z, `${6/z},${4/z}`);
-                if (!hideText) addText(label, px + pw/2, py + ph/2, '#ffaa00', 8);
+                if (!hideText) addText(label, px + pw/2, py + ph/2, '#ffaa00', 9);
             };
 
             if (STATE.currentEditingLayer === 1) {
-                if (document.getElementById('uv-helmet')?.checked) { 
-                    renderBox(8, 0, 8, 8, "CAP.TOP"); renderBox(16, 0, 8, 8, "CAP.BAS"); 
-                    renderBox(0, 8, 8, 8, "C.DIR"); renderBox(8, 8, 8, 8, "CAP.FRE"); 
-                    renderBox(16, 8, 8, 8, "C.ESQ"); renderBox(24, 8, 8, 8, "CAP.TRA"); 
-                }
-                if (document.getElementById('uv-chest')?.checked) { 
-                    renderBox(20, 16, 8, 4, "PEI.TOP"); renderBox(28, 16, 8, 4, "PEI.BAS"); 
-                    renderBox(16, 20, 4, 12, "P.DIR"); renderBox(20, 20, 8, 12, "PEI.FRE"); 
-                    renderBox(28, 20, 4, 12, "P.ESQ"); renderBox(32, 20, 8, 12, "PEI.TRA"); 
-                }
-                if (document.getElementById('uv-arms')?.checked) { 
-                    // Braço Direito
-                    renderBox(44, 16, 4, 4, "BR.D.TOP"); renderBox(48, 16, 4, 4, "BR.D.BAS"); 
-                    renderBox(40, 20, 4, 12, "B.D.DIR"); renderBox(44, 20, 4, 12, "BR.D.FRE"); 
-                    renderBox(48, 20, 4, 12, "B.D.ESQ"); renderBox(52, 20, 4, 12, "BR.D.TRA"); 
-                    // Braço Esquerdo (Mapeamento Custom Vexanium X=32 Y=0)
-                    renderBox(36, 0, 4, 4, "BR.E.TOP"); renderBox(40, 0, 4, 4, "BR.E.BAS"); 
-                    renderBox(32, 4, 4, 12, "B.E.DIR"); renderBox(36, 4, 4, 12, "BR.E.FRE"); 
-                    renderBox(40, 4, 4, 12, "B.E.ESQ"); renderBox(44, 4, 4, 12, "BR.E.TRA"); 
-                }
-                if (document.getElementById('uv-boots')?.checked) { 
-                    // Bota Direita
-                    renderBox(4, 16, 4, 4, "BOT.D.TOP"); renderBox(8, 16, 4, 4, "BOT.D.BAS"); 
-                    renderBox(0, 20, 4, 12, "B.D.DIR"); renderBox(4, 20, 4, 12, "BOT.D.FRE"); 
-                    renderBox(8, 20, 4, 12, "B.D.ESQ"); renderBox(12, 20, 4, 12, "BOT.D.TRA"); 
-                    // Bota Esquerda (Mapeamento Custom Vexanium X=48 Y=16)
-                    renderBox(52, 16, 4, 4, "BOT.E.TOP"); renderBox(56, 16, 4, 4, "BOT.E.BAS"); 
-                    renderBox(48, 20, 4, 12, "B.E.DIR"); renderBox(52, 20, 4, 12, "BOT.E.FRE"); 
-                    renderBox(56, 20, 4, 12, "B.E.ESQ"); renderBox(60, 20, 4, 12, "BOT.E.TRA"); 
-                }
+                if (document.getElementById('uv-helmet')?.checked) { renderBox(8, 0, 8, 8, "CAP.TOP"); renderBox(16, 0, 8, 8, "CAP.BAS"); renderBox(8, 8, 8, 8, "CAP.FRE"); }
+                if (document.getElementById('uv-chest')?.checked) { renderBox(20, 16, 8, 4, "PEI.TOP"); renderBox(20, 20, 8, 12, "PEI.FRE"); }
+                if (document.getElementById('uv-arms')?.checked) { renderBox(44, 16, 4, 4, "ARM.TOP"); renderBox(44, 20, 4, 12, "ARM.FRE"); }
+                if (document.getElementById('uv-boots')?.checked) { renderBox(4, 16, 4, 4, "BOT.TOP"); renderBox(4, 20, 4, 12, "BOT.FRE"); }
             } else if (STATE.currentEditingLayer === 2) {
-                if (document.getElementById('uv-waist')?.checked) { 
-                    renderBox(20, 16, 8, 4, "CIN.TOP"); renderBox(28, 16, 8, 4, "CIN.BAS"); 
-                    renderBox(16, 20, 4, 12, "C.DIR"); renderBox(20, 20, 8, 12, "CIN.FRE"); 
-                    renderBox(28, 20, 4, 12, "C.ESQ"); renderBox(32, 20, 8, 12, "CIN.TRA"); 
-                }
-                if (document.getElementById('uv-legs')?.checked) { 
-                    // Perna Direita
-                    renderBox(4, 16, 4, 4, "PER.D.TOP"); renderBox(8, 16, 4, 4, "PER.D.BAS"); 
-                    renderBox(0, 20, 4, 12, "P.D.DIR"); renderBox(4, 20, 4, 12, "PER.D.FRE"); 
-                    renderBox(8, 20, 4, 12, "P.D.ESQ"); renderBox(12, 20, 4, 12, "PER.D.TRA"); 
-                    // Perna Esquerda (Mapeamento Custom Vexanium X=48 Y=16)
-                    renderBox(52, 16, 4, 4, "PER.E.TOP"); renderBox(56, 16, 4, 4, "PER.E.BAS"); 
-                    renderBox(48, 20, 4, 12, "P.E.DIR"); renderBox(52, 20, 4, 12, "PER.E.FRE"); 
-                    renderBox(56, 20, 4, 12, "P.E.ESQ"); renderBox(60, 20, 4, 12, "PER.E.TRA"); 
-                }
+                if (document.getElementById('uv-waist')?.checked) { renderBox(20, 16, 8, 4, "CIN.TOP"); renderBox(20, 20, 8, 12, "CIN.FRE"); }
+                if (document.getElementById('uv-legs')?.checked) { renderBox(4, 16, 4, 4, "PER.TOP"); renderBox(4, 20, 4, 12, "PER.FRE"); }
             }
 
             // 5. CAIXAS DE SELEÇÃO E PEÇAS ATIVAS (Ancoradas ao SVG para resolução perfeita)
@@ -1589,7 +1752,7 @@
         
         getMousePos: function(evt) {
             const rect = DOM.wsCanvas.getBoundingClientRect();
-            // A largura do rect reflete o zoom CSS. O cálculo devolve a coordenada pura da resolução matemática 1024x512
+            // A largura do rect reflete o zoom CSS. O cálculo devolve a coordenada pura da resolução 1024x512
             return { 
                 x: (evt.clientX - rect.left) * (WORKBENCH_W / rect.width), 
                 y: (evt.clientY - rect.top) * (WORKBENCH_H / rect.height) 
@@ -1598,7 +1761,7 @@
     };
 
     /* =================================================================================
-       EXPORT & MATRYOSHKA NATIVE MANAGER
+       EXPORT & MATRYOSHKA NATIVE MANAGER (Sem Upscale Destrutivo)
        ================================================================================= */
     const ExportManager = {
         triggerUpload: function(t) { 
@@ -1645,25 +1808,36 @@
         },
         
         aplicarMontagemUVLivre: function() {
-            // O Canvas Mestre final que será guardado
+            const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+            const zX = OFFSET_X + (1024 - aZ.w) / 2; 
+            const zY = OFFSET_Y + (512 - aZ.h) / 2;
+
+            // Recorta a zona ativa da mesa mestre NO SEU TAMANHO EXATO DA ZONA (EX: 64x32)
+            const zoneCanvas = document.createElement('canvas'); 
+            zoneCanvas.width = aZ.w; 
+            zoneCanvas.height = aZ.h;
+            
+            const zCtx = zoneCanvas.getContext('2d'); 
+            zCtx.imageSmoothingEnabled = false;
+            zCtx.drawImage(offscreenCanvas, zX, zY, aZ.w, aZ.h, 0, 0, aZ.w, aZ.h);
+            
+            // Pinta as peças por cima
+            STATE.extractedPieces.forEach(p => {
+                const pCanv = document.createElement('canvas'); 
+                pCanv.width = p.imgData.width; 
+                pCanv.height = p.imgData.height; 
+                pCanv.getContext('2d').putImageData(p.imgData, 0, 0);
+                zCtx.drawImage(pCanv, p.x - zX, p.y - zY, p.w, p.h);
+            });
+
+            // FAZ O UPSCALE PARA O MODELO 3D NÃO SE QUEBRAR
             const masterCanvas = document.createElement('canvas'); 
             masterCanvas.width = 1024; 
             masterCanvas.height = 512;
             
             const mCtx = masterCanvas.getContext('2d'); 
             mCtx.imageSmoothingEnabled = false; 
-            
-            // Pinta o fundo original da mesa inteira
-            mCtx.drawImage(offscreenCanvas, 0, 0);
-            
-            // Pinta as peças livres por cima nas suas coordenadas exatas
-            STATE.extractedPieces.forEach(p => {
-                const pCanv = document.createElement('canvas'); 
-                pCanv.width = p.imgData.width; 
-                pCanv.height = p.imgData.height; 
-                pCanv.getContext('2d').putImageData(p.imgData, 0, 0);
-                mCtx.drawImage(pCanv, p.x, p.y, p.w, p.h);
-            });
+            mCtx.drawImage(zoneCanvas, 0, 0, aZ.w, aZ.h, 0, 0, 1024, 512);
 
             const finalBase64 = masterCanvas.toDataURL('image/png');
             
@@ -1676,7 +1850,7 @@
             UIManager.updateDiagnosticPanel(); 
             this.atualizarPreview3D();
             
-            UIManager.showNotification(`✅ TEXTURA COMPILADA (1024x512) COM SUCESSO`);
+            UIManager.showNotification(`✅ TEXTURA COMPILADA (${aZ.w}x${aZ.h} -> 1024) COM SUCESSO`);
             UIManager.closeModal('slicer-modal');
         },
         
@@ -1693,7 +1867,7 @@
             Promise.all([loadImage(STATE.finalImageL1), loadImage(STATE.finalImageL2)]).then(([imgL1, imgL2]) => {
                 if (!imgL1 && !imgL2) return;
 
-                // Skinview3d ou modelos aceitam o formato exato da armadura.
+                // Skinview3d ou modelos aceitam o formato exato da armadura. Usamos a dimensão para calibrar
                 let baseW = imgL1 ? imgL1.width : imgL2.width;
                 let f = baseW / 64; 
                 
@@ -1708,24 +1882,27 @@
                     pCtx.drawImage(img, sx * f, sy * f, sw * f, sh * f, dx * f, dy * f, sw * f, sh * f); 
                 };
 
-                // Limpa o canvas para garantir transparência correta (Sem fundo preto)
-                pCtx.clearRect(0, 0, 64*f, 64*f);
-                
-                // === LAYER 2 (Pernas e Cintura) ===
+                pCtx.fillStyle = "#111111"; 
+                pCtx.fillRect(0, 0, 32*f, 16*f); 
+                pCtx.fillRect(16*f, 16*f, 24*f, 16*f); 
+                pCtx.fillRect(40*f, 16*f, 16*f, 16*f); 
+                pCtx.fillRect(32*f, 48*f, 16*f, 16*f); 
+                pCtx.fillRect(0, 16*f, 16*f, 16*f); 
+                pCtx.fillRect(16*f, 48*f, 16*f, 16*f);   
+
                 if (imgL2) { 
-                    copyRegion(imgL2, 16, 16, 24, 16, 16, 16); // Cintura -> Torso do Preview
-                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   // Perna Direita
-                    copyRegion(imgL2, 48, 16, 16, 16, 16, 48); // Perna Esquerda (Mapeamento Assimetria Vexanium)
+                    copyRegion(imgL2, 16, 16, 24, 16, 16, 16); 
+                    copyRegion(imgL2, 0, 16, 16, 16, 0, 16);   
+                    copyRegion(imgL2, 0, 16, 16, 16, 16, 48);  
                 }
                 
-                // === LAYER 1 (Capacete, Peitoral, Braços, Botas) ===
                 if (imgL1) { 
-                    copyRegion(imgL1, 0, 0, 32, 16, 0, 0);     // Capacete -> Cabeça
-                    copyRegion(imgL1, 16, 16, 24, 16, 16, 16); // Peitoral -> Torso (Sobrepõe Cintura)
-                    copyRegion(imgL1, 40, 16, 16, 16, 40, 16); // Braço Direito
-                    copyRegion(imgL1, 32, 0, 16, 16, 32, 48);  // Braço Esquerdo (Mapeamento Assimetria Vexanium)
-                    copyRegion(imgL1, 0, 16, 16, 16, 0, 16);   // Bota Direita (Sobrepõe Perna D)
-                    copyRegion(imgL1, 48, 16, 16, 16, 16, 48); // Bota Esquerda (Mapeamento Assimetria Vexanium)
+                    copyRegion(imgL1, 0, 0, 32, 16, 32, 0);    
+                    copyRegion(imgL1, 16, 16, 24, 16, 16, 32); 
+                    copyRegion(imgL1, 40, 16, 16, 16, 40, 32); 
+                    copyRegion(imgL1, 40, 16, 16, 16, 48, 48); 
+                    copyRegion(imgL1, 0, 16, 16, 16, 0, 32);   
+                    copyRegion(imgL1, 0, 16, 16, 16, 0, 48);   
                 }
                 
                 skinViewer.loadSkin(previewCanvas.toDataURL('image/png')).catch(err => console.warn("Erro WebGL:", err));
@@ -1811,8 +1988,7 @@
             
             img.onload = () => {
                 offscreenCtx.clearRect(0,0,WORKBENCH_W,WORKBENCH_H); 
-                offscreenCtx.imageSmoothingEnabled = false;
-                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, 0, 0, 1024, 512);
+                offscreenCtx.drawImage(img, 0, 0, img.width, img.height, OFFSET_X, OFFSET_Y, 1024, 512);
                 StudioCanvas.renderFatiador(); 
                 StudioCanvas.drawGridAndMold(); 
                 MemoryManager.registrarEstadoMemoria(); 
@@ -1823,6 +1999,7 @@
             if (STATE.currentEditingLayer === 1) STATE.baseImageL1 = imageUrl; 
             else STATE.baseImageL2 = imageUrl;
             
+            STATE.originalImageObj.src = imageUrl;
             UIManager.updateDiagnosticPanel(); 
             StudioCanvas.abrirFatiadorLivre(true);
         } else {
@@ -1983,14 +2160,16 @@
             
             const snapToggle = document.getElementById('snap-grid');
             if(STATE.currentTool === 'move' && snapToggle && snapToggle.checked && STATE.activePieceIndex !== -1) {
-                const f = WORKBENCH_W / 64; // Sempre 16 píxeis
+                const aZ = STATE.matryoshkaZones[STATE.currentMatryoshkaZone];
+                const zX = OFFSET_X + (1024 - aZ.w) / 2; 
+                const zY = OFFSET_Y + (512 - aZ.h) / 2;
                 
                 const cellSizeEl = document.getElementById('grid-px');
-                const snapF = cellSizeEl ? parseInt(cellSizeEl.value) * f : 4 * f; // Multiplica pela escala para ter os Canvas Pixels
+                const snapF = cellSizeEl ? parseInt(cellSizeEl.value) : 4;
                 
                 let p = STATE.extractedPieces[STATE.activePieceIndex];
-                p.x = Math.round(p.x / snapF) * snapF; 
-                p.y = Math.round(p.y / snapF) * snapF;
+                p.x = zX + Math.round((p.x - zX) / snapF) * snapF; 
+                p.y = zY + Math.round((p.y - zY) / snapF) * snapF;
             }
             StudioCanvas.renderFatiador(); 
             StudioCanvas.drawGridAndMold(); 
